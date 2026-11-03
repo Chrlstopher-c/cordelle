@@ -280,6 +280,7 @@ dependencies = [
  "futures-util",
  "identity",
  "reqwest",
+ "rest",
  "rsa",
  "serde",
  "serde_json",
