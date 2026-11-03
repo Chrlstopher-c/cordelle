@@ -3,6 +3,7 @@
 mod commands;
 mod engine;
 mod gpu;
+mod logging;
 
 use tauri_specta::{Builder, collect_commands, collect_events};
 
@@ -55,9 +56,7 @@ pub fn export_bindings() -> Result<(), String> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     gpu::configure_env();
-    let filter = tracing_subscriber::EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("info"));
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    logging::init();
 
     let builder = specta_builder();
     #[cfg(debug_assertions)]
@@ -87,6 +86,7 @@ pub fn run() {
             gpu::enable_acceleration(app);
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("échec du démarrage de Tauri");
+        .build(tauri::generate_context!())
+        .expect("échec du démarrage de Tauri")
+        .run(|_, event| logging::run_event(&event));
 }
