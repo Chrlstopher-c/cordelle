@@ -27,7 +27,7 @@ impl Engine {
         tauri::async_runtime::spawn(async move {
             forward_qr(events, &notify).await;
             let event = match outcome.await {
-                Ok(Ok((user, token))) => match self.save_account(user, &token) {
+                Ok(Ok((user, token))) => match self.save_account(user, &token).await {
                     Ok(account_id) => QrAuthEvent::Completed { account_id },
                     Err(e) => failed(&e),
                 },
@@ -71,7 +71,7 @@ impl Engine {
             Step::Token(token) => {
                 let user = self.fetch_user(&token).await?;
                 LoginOutcome::Success {
-                    account_id: self.save_account(user, &token)?,
+                    account_id: self.save_account(user, &token).await?,
                 }
             }
             Step::Mfa { ticket, methods } => LoginOutcome::MfaRequired { ticket, methods },
@@ -98,10 +98,11 @@ impl Engine {
         })
     }
 
-    fn save_account(&self, user: User, token: &str) -> Result<AccountId, EngineError> {
+    async fn save_account(&self, user: User, token: &str) -> Result<AccountId, EngineError> {
         let id = user.id.clone();
         self.accounts().add(user, token)?;
         tracing::info!(account = %id, "compte ajouté");
+        self.connect(&id).await?;
         Ok(id)
     }
 }

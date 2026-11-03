@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { commands, type AccountSummary } from "../contract/bindings";
 import { useGpuRenderer } from "./use-gpu-renderer";
 import { useQrLogin } from "./use-qr-login";
+import { Workbench } from "./Workbench";
 
 export function App(): React.JSX.Element {
   const [accounts, setAccounts] = useState<AccountSummary[]>([]);
@@ -22,6 +23,7 @@ export function App(): React.JSX.Element {
   useEffect(refresh, [refresh]);
   const gpu = useGpuRenderer();
   const qr = useQrLogin(refresh);
+  const active = accounts.find((a) => a.active);
 
   return (
     <main style={{ fontFamily: "system-ui", padding: 24, color: "#ddd", background: "#111", minHeight: "100vh" }}>
@@ -38,6 +40,7 @@ export function App(): React.JSX.Element {
       <button onClick={qr.start}>Connexion QR</button>
       <p>{qr.step}</p>
       {qr.image && <img src={qr.image} alt="QR de connexion" />}
+      {active && <Workbench key={active.id} accountId={active.id} />}
     </main>
   );
 }

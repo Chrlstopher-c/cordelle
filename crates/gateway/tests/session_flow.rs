@@ -120,9 +120,10 @@ async fn identify_heartbeat_puis_resume_apres_coupure() {
 
     let beat = peer.recv_json().await;
     assert_eq!(beat["op"], 1, "premier battement attendu");
-    assert_eq!(
-        beat["d"], 2,
-        "le battement porte le dernier numéro de séquence"
+    // Le battement peut partir avant le traitement du 2e dispatch : seq 1 ou 2, jamais null.
+    assert!(
+        matches!(beat["d"].as_u64(), Some(1 | 2)),
+        "le battement porte un numéro de séquence reçu"
     );
     peer.ws
         .send(Message::Text(json!({"op": 11}).to_string().into()))

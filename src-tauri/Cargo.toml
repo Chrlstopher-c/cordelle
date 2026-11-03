@@ -30,6 +30,7 @@ accounts.workspace = true
 auth.workspace = true
 rest.workspace = true
 gateway.workspace = true
+store.workspace = true
 dirs = "6"
 reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
 

@@ -739,6 +739,7 @@ dependencies = [
  "serde_json",
  "specta",
  "specta-typescript",
+ "store",
  "tauri",
  "tauri-build",
  "tauri-plugin-opener",

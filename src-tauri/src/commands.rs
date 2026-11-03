@@ -21,13 +21,6 @@ pub struct Engine(pub EngineEvent);
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type, tauri_specta::Event)]
 pub struct AuthQr(pub QrAuthEvent);
 
-fn todo<T>(command: &str) -> Res<T> {
-    tracing::warn!(command, "commande appelée mais pas encore implémentée");
-    Err(EngineError::NotImplemented {
-        command: command.into(),
-    })
-}
-
 #[tauri::command]
 #[specta::specta]
 pub async fn accounts_list(engine: Eng<'_>) -> Res<Vec<AccountSummary>> {
@@ -43,6 +36,7 @@ pub async fn account_switch(engine: Eng<'_>, account_id: AccountId) -> Res<()> {
 #[tauri::command]
 #[specta::specta]
 pub async fn account_remove(engine: Eng<'_>, account_id: AccountId) -> Res<()> {
+    engine.disconnect(&account_id);
     Ok(engine.accounts().remove(&account_id)?)
 }
 
@@ -86,45 +80,48 @@ pub async fn auth_mfa(
 
 #[tauri::command]
 #[specta::specta]
-pub async fn guilds_list(account_id: AccountId) -> Res<Vec<GuildSummary>> {
-    let _ = account_id;
-    todo("guilds_list")
+pub async fn guilds_list(engine: Eng<'_>, account_id: AccountId) -> Res<Vec<GuildSummary>> {
+    engine.guilds(&account_id)
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn channels_list(account_id: AccountId, guild_id: Snowflake) -> Res<Vec<ChannelSummary>> {
-    let _ = (account_id, guild_id);
-    todo("channels_list")
+pub async fn channels_list(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    guild_id: Snowflake,
+) -> Res<Vec<ChannelSummary>> {
+    engine.channels(&account_id, &guild_id)
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn dms_list(account_id: AccountId) -> Res<Vec<ChannelSummary>> {
-    let _ = account_id;
-    todo("dms_list")
+pub async fn dms_list(engine: Eng<'_>, account_id: AccountId) -> Res<Vec<ChannelSummary>> {
+    engine.dms(&account_id)
 }
 
 /// Page de messages, du plus récent au plus ancien ; `before` = id du plus ancien déjà affiché.
 #[tauri::command]
 #[specta::specta]
 pub async fn messages_get(
+    engine: Eng<'_>,
     account_id: AccountId,
     channel_id: Snowflake,
     before: Option<Snowflake>,
     limit: u8,
 ) -> Res<MessagePage> {
-    let _ = (account_id, channel_id, before, limit);
-    todo("messages_get")
+    engine
+        .messages(&account_id, &channel_id, before, limit)
+        .await
 }
 
 #[tauri::command]
 #[specta::specta]
 pub async fn message_send(
+    engine: Eng<'_>,
     account_id: AccountId,
     channel_id: Snowflake,
     message: OutgoingMessage,
 ) -> Res<Message> {
-    let _ = (account_id, channel_id, message);
-    todo("message_send")
+    engine.send(&account_id, &channel_id, &message).await
 }

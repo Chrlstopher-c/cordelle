@@ -51,10 +51,17 @@ pub fn run() {
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
+            let handle = app.handle().clone();
+            let emit: engine::Emitter = std::sync::Arc::new(move |event| {
+                if let Err(e) = tauri_specta::Event::emit(&commands::Engine(event), &handle) {
+                    tracing::error!("émission engine impossible : {e}");
+                }
+            });
             let engine: &'static engine::Engine = Box::leak(Box::new(
-                engine::Engine::open().map_err(|e| format!("moteur : {e:?}"))?,
+                engine::Engine::open(emit).map_err(|e| format!("moteur : {e:?}"))?,
             ));
             tauri::Manager::manage(app, engine);
+            tauri::async_runtime::spawn(engine.connect_all());
             gpu::enable_acceleration(app);
             Ok(())
         })
