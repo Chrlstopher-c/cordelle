@@ -5,6 +5,7 @@ mod data;
 mod login;
 mod member_list;
 mod profile;
+mod server;
 mod session;
 mod social;
 

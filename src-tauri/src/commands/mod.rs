@@ -13,6 +13,8 @@ use contract::{
     profile::UserProfile,
 };
 
+pub mod server;
+
 pub(crate) type Res<T> = Result<T, EngineError>;
 pub(crate) type Eng<'a> = tauri::State<'a, &'static Core>;
 
