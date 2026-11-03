@@ -1,5 +1,8 @@
 //! Commandes exposées à l'interface. Signatures = contrat (CONTRACT.md) ; corps branchés crate par crate.
 
+use tauri_specta::Event as _;
+
+use crate::engine::Engine as Core;
 use contract::{
     AccountId, EngineError, Snowflake,
     account::AccountSummary,
@@ -10,6 +13,7 @@ use contract::{
 };
 
 type Res<T> = Result<T, EngineError>;
+type Eng<'a> = tauri::State<'a, &'static Core>;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type, tauri_specta::Event)]
 pub struct Engine(pub EngineEvent);
@@ -26,49 +30,58 @@ fn todo<T>(command: &str) -> Res<T> {
 
 #[tauri::command]
 #[specta::specta]
-pub async fn accounts_list() -> Res<Vec<AccountSummary>> {
-    todo("accounts_list")
+pub async fn accounts_list(engine: Eng<'_>) -> Res<Vec<AccountSummary>> {
+    Ok(engine.account_summaries())
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn account_switch(account_id: AccountId) -> Res<()> {
-    let _ = account_id;
-    todo("account_switch")
+pub async fn account_switch(engine: Eng<'_>, account_id: AccountId) -> Res<()> {
+    Ok(engine.accounts().set_active(&account_id)?)
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn account_remove(account_id: AccountId) -> Res<()> {
-    let _ = account_id;
-    todo("account_remove")
+pub async fn account_remove(engine: Eng<'_>, account_id: AccountId) -> Res<()> {
+    Ok(engine.accounts().remove(&account_id)?)
 }
 
 /// Démarre une connexion QR ; la progression arrive par l'événement `AuthQr`.
 #[tauri::command]
 #[specta::specta]
-pub async fn auth_qr_start() -> Res<()> {
-    todo("auth_qr_start")
+pub async fn auth_qr_start(app: tauri::AppHandle, engine: Eng<'_>) -> Res<()> {
+    let engine: &'static Core = *engine;
+    engine
+        .start_qr(move |event| {
+            if let Err(e) = AuthQr(event).emit(&app) {
+                tracing::error!("émission auth-qr impossible : {e}");
+            }
+        })
+        .await
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn auth_qr_cancel() -> Res<()> {
-    todo("auth_qr_cancel")
+pub async fn auth_qr_cancel(engine: Eng<'_>) -> Res<()> {
+    engine.cancel_qr().await;
+    Ok(())
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn auth_password(login: PasswordLogin) -> Res<LoginOutcome> {
-    let _ = login;
-    todo("auth_password")
+pub async fn auth_password(engine: Eng<'_>, login: PasswordLogin) -> Res<LoginOutcome> {
+    engine.login_password(&login).await
 }
 
 #[tauri::command]
 #[specta::specta]
-pub async fn auth_mfa(ticket: String, method: MfaMethod, code: String) -> Res<LoginOutcome> {
-    let _ = (ticket, method, code);
-    todo("auth_mfa")
+pub async fn auth_mfa(
+    engine: Eng<'_>,
+    ticket: String,
+    method: MfaMethod,
+    code: String,
+) -> Res<LoginOutcome> {
+    engine.login_mfa(&ticket, method, &code).await
 }
 
 #[tauri::command]

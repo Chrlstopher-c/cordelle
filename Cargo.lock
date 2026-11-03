@@ -726,7 +726,14 @@ dependencies = [
 name = "cordelle"
 version = "0.1.0"
 dependencies = [
+ "accounts",
+ "auth",
  "contract",
+ "dirs 6.0.0",
+ "gateway",
+ "identity",
+ "reqwest",
+ "rest",
  "serde",
  "serde_json",
  "specta",
@@ -1048,6 +1055,15 @@ dependencies = [
  "const-oid 0.10.2",
  "crypto-common 0.2.2",
  "ctutils",
+]
+
+[[package]]
+name = "dirs"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3e8aa94d75141228480295a7d0e7feb620b1a5ad9f12bc40be62411e38cce4e"
+dependencies = [
+ "dirs-sys",
 ]
 
 [[package]]
@@ -4521,7 +4537,7 @@ dependencies = [
  "anyhow",
  "bytes",
  "cookie",
- "dirs",
+ "dirs 7.0.0",
  "dunce",
  "embed_plist",
  "getrandom 0.3.4",
@@ -4572,7 +4588,7 @@ checksum = "adddb0e648752aaac5da9c3c3c6a68e1e87cab55e3b757b18a9441ef8c3ac614"
 dependencies = [
  "anyhow",
  "cargo_toml",
- "dirs",
+ "dirs 7.0.0",
  "glob",
  "heck 0.5.0",
  "json-patch",
@@ -5194,7 +5210,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b2b9c52859a94554803ccd4a24b98f74148ebc73b90676d783f3490b1bff9d72"
 dependencies = [
  "crossbeam-channel",
- "dirs",
+ "dirs 7.0.0",
  "libappindicator",
  "muda",
  "objc2",
@@ -6003,7 +6019,7 @@ dependencies = [
  "block2",
  "cookie",
  "crossbeam-channel",
- "dirs",
+ "dirs 7.0.0",
  "dom_query",
  "dpi",
  "dunce",

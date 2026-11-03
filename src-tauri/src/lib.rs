@@ -1,6 +1,7 @@
 //! Coquille Tauri : branche le moteur (crates/*) sur l'interface via les commandes du contrat.
 
 mod commands;
+mod engine;
 mod gpu;
 
 use tauri_specta::{Builder, collect_commands, collect_events};
@@ -50,6 +51,10 @@ pub fn run() {
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);
+            let engine: &'static engine::Engine = Box::leak(Box::new(
+                engine::Engine::open().map_err(|e| format!("moteur : {e:?}"))?,
+            ));
+            tauri::Manager::manage(app, engine);
             gpu::enable_acceleration(app);
             Ok(())
         })

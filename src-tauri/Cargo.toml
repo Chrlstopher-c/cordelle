@@ -25,6 +25,13 @@ tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 contract.workspace = true
+identity.workspace = true
+accounts.workspace = true
+auth.workspace = true
+rest.workspace = true
+gateway.workspace = true
+dirs = "6"
+reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 webkit2gtk = { version = "2.0.2", features = ["v2_40"] }
