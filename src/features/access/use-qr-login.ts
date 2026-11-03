@@ -1,44 +1,86 @@
-// Connexion QR de l'écran de travail : suit l'événement authQr et rend le QR en data URL.
-import { useEffect, useState } from "react";
+// Connexion par QR code : suit l'événement authQr et expose l'état affiché (prêt, scanné, expiré, échec).
+import { useEffect, useRef, useState } from "react";
 import QRCode from "qrcode";
-import { commands, events, type QrAuthEvent } from "../../contract/bindings";
+import { commands, events, type QrAuthEvent, type User } from "../../contract/bindings";
+import { engineErrorText } from "./engine-error";
 
-export interface QrLogin {
-  image: string | null;
-  step: string;
-  start: () => void;
+export type QrView =
+  | { kind: "loading" }
+  | { kind: "ready"; image: string }
+  | { kind: "scanned"; user: User }
+  | { kind: "expired" }
+  | { kind: "cancelled" }
+  | { kind: "failed"; message: string };
+
+export interface QrLoginState {
+  view: QrView;
+  restart: () => void;
 }
 
-export function useQrLogin(onDone: () => void): QrLogin {
-  const [image, setImage] = useState<string | null>(null);
-  const [step, setStep] = useState("");
+type SetView = (v: QrView) => void;
+
+const QR_WIDTH_PX = 156;
+
+function viewFromEvent(ev: QrAuthEvent): QrView | null {
+  switch (ev.step) {
+    case "scanned":
+      return { kind: "scanned", user: ev.user };
+    case "expired":
+      return { kind: "expired" };
+    case "cancelled":
+      return { kind: "cancelled" };
+    case "failed":
+      return { kind: "failed", message: ev.message };
+    default:
+      return null;
+  }
+}
+
+function showReadyCode(url: string, setView: SetView): void {
+  QRCode.toDataURL(url, { margin: 2, width: QR_WIDTH_PX })
+    .then((image) => setView({ kind: "ready", image }))
+    .catch((err: unknown) => {
+      console.error("[access] génération du QR", err);
+      setView({ kind: "failed", message: "Code illisible, réessaie." });
+    });
+}
+
+function applyEvent(ev: QrAuthEvent, setView: SetView, done: (accountId: string) => void): void {
+  if (ev.step === "ready") {
+    showReadyCode(ev.url, setView);
+    return;
+  }
+  if (ev.step === "completed") {
+    done(ev.account_id);
+    return;
+  }
+  const next = viewFromEvent(ev);
+  if (next) setView(next);
+}
+
+function startQr(setView: SetView): void {
+  setView({ kind: "loading" });
+  void commands.authQrStart().then((r) => {
+    if (r.status === "error") setView({ kind: "failed", message: engineErrorText(r.error) });
+  });
+}
+
+export function useQrLogin(onDone: (accountId: string) => void): QrLoginState {
+  const [view, setView] = useState<QrView>({ kind: "loading" });
+  const doneRef = useRef(onDone);
 
   useEffect(() => {
-    const unlisten = events.authQr.listen((e) => {
-      const ev = e.payload as QrAuthEvent;
-      setStep(ev.step);
-      if (ev.step === "ready") {
-        void QRCode.toDataURL(ev.url, { margin: 2, width: 260 }).then(setImage);
-      } else if (ev.step === "scanned") {
-        setImage(null);
-        setStep(`scanné par ${ev.user.username}, valide sur le téléphone`);
-      } else if (ev.step === "completed") {
-        onDone();
-      } else if (ev.step === "failed") {
-        setStep(`échec : ${ev.message}`);
-      }
-    });
-    return () => {
-      void unlisten.then((f) => f());
-    };
+    doneRef.current = onDone;
   }, [onDone]);
 
-  const start = (): void => {
-    setStep("démarrage…");
-    void commands.authQrStart().then((r) => {
-      if (r.status === "error") setStep(`erreur : ${JSON.stringify(r.error)}`);
-    });
-  };
+  useEffect(() => {
+    const unlisten = events.authQr.listen((e) => applyEvent(e.payload, setView, (id) => doneRef.current(id)));
+    startQr(setView);
+    return () => {
+      void unlisten.then((f) => f());
+      void commands.authQrCancel();
+    };
+  }, []);
 
-  return { image, step, start };
+  return { view, restart: () => startQr(setView) };
 }
