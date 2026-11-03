@@ -6,7 +6,12 @@ use contract::events::EngineEvent;
 
 fn main() {
     let emit: voice::Emit = Arc::new(|ev| {
-        if let EngineEvent::VoiceLevel { level_db, threshold_db, gate_open } = ev {
+        if let EngineEvent::VoiceLevel {
+            level_db,
+            threshold_db,
+            gate_open,
+        } = ev
+        {
             println!("niveau {level_db:6.1} dB  seuil {threshold_db:6.1} dB  voix {gate_open}");
         }
     });
@@ -15,5 +20,8 @@ fn main() {
         Err(e) => println!("échec : {e}"),
     }
     voice::mic_test_stop();
-    println!("périphériques : {:?}", voice::list_devices().map(|d| (d.inputs.len(), d.outputs.len())));
+    println!(
+        "périphériques : {:?}",
+        voice::list_devices().map(|d| (d.inputs.len(), d.outputs.len()))
+    );
 }
