@@ -29,6 +29,10 @@ export const commands = {
 	messageDelete: (accountId: string, channelId: string, messageId: string) => typedError<null, EngineError>(__TAURI_INVOKE("message_delete", { accountId, channelId, messageId })),
 	/**  Ajoute (`add`) ou retire sa réaction. `emoji` : caractère unicode, ou `nom:id` pour un emoji personnalisé. */
 	reactionSet: (accountId: string, channelId: string, messageId: string, emoji: string, add: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("reaction_set", { accountId, channelId, messageId, emoji, add })),
+	relationshipsList: (accountId: string) => typedError<Relationship_Serialize[], EngineError>(__TAURI_INVOKE("relationships_list", { accountId })),
+	relationshipSet: (accountId: string, userId: string, action: RelationshipAction) => typedError<null, EngineError>(__TAURI_INVOKE("relationship_set", { accountId, userId, action })),
+	friendRequest: (accountId: string, username: string) => typedError<null, EngineError>(__TAURI_INVOKE("friend_request", { accountId, username })),
+	mentionsRecent: (accountId: string) => typedError<Mention_Serialize[], EngineError>(__TAURI_INVOKE("mentions_recent", { accountId })),
 };
 
 /** Events */
@@ -215,6 +219,21 @@ export type LoginOutcome_Deserialize = { outcome: "success"; account_id: string 
 
 export type LoginOutcome_Serialize = { outcome: "success"; account_id: string } | { outcome: "mfa_required"; ticket: string; methods: MfaMethod[] } | { outcome: "captcha_required"; challenge: CaptchaChallenge_Serialize } | { outcome: "invalid_credentials" };
 
+/**  Mention récente (onglet Activité), avec où elle a eu lieu. */
+export type Mention = Mention_Serialize | Mention_Deserialize;
+
+/**  Mention récente (onglet Activité), avec où elle a eu lieu. */
+export type Mention_Deserialize = {
+	message: Message_Deserialize,
+	guild_id?: string | null,
+};
+
+/**  Mention récente (onglet Activité), avec où elle a eu lieu. */
+export type Mention_Serialize = {
+	message: Message_Serialize,
+	guild_id: string | null,
+};
+
 export type Message = Message_Serialize | Message_Deserialize;
 
 export type MessagePage = MessagePage_Serialize | MessagePage_Deserialize;
@@ -337,6 +356,28 @@ export type Reaction = {
 	emoji: string,
 	count: number,
 	me: boolean,
+};
+
+export type Relationship = Relationship_Serialize | Relationship_Deserialize;
+
+export type RelationshipAction = 
+/**  Accepter une demande reçue. */
+"accept" | 
+/**  Retirer un ami, refuser ou annuler une demande, débloquer. */
+"remove" | "block";
+
+export type RelationshipKind = "friend" | "blocked" | "incoming" | "outgoing";
+
+export type Relationship_Deserialize = {
+	user: User_Deserialize,
+	kind: RelationshipKind,
+	nickname?: string | null,
+};
+
+export type Relationship_Serialize = {
+	user: User_Serialize,
+	kind: RelationshipKind,
+	nickname: string | null,
 };
 
 export type User = User_Serialize | User_Deserialize;

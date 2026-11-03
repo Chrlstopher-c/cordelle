@@ -84,3 +84,10 @@
   outline: none; color: var(--text); font-size: var(--fs-message); line-height: 1.45; padding: 10px 12px; user-select: text; }
 .edit-hint { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
 .edit-hint b { color: var(--accent-text); font-weight: 500; }
+.mention-pop { position: absolute; left: 16px; right: 16px; bottom: calc(100% - 4px); max-height: 320px; overflow-y: auto; padding: 6px;
+  border-radius: var(--r-lg); background: var(--surface-menu); box-shadow: 0 -8px 28px rgba(0,0,0,.45); z-index: 20;
+  animation: menu-up var(--t-popover) var(--ease) both; }
+.mention-head { font-size: var(--fs-caps); font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-faint); padding: 6px 8px; }
+.mention-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 40px; padding: 0 8px; border-radius: var(--r-sm); text-align: left; }
+.mention-item.on, .mention-item:hover { background: var(--surface-selected); }
+.mention-item .u { margin-left: auto; font-size: 12.5px; color: var(--text-faint); }

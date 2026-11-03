@@ -202,3 +202,38 @@ pub async fn reaction_set(
         .react(&account_id, &channel_id, &message_id, &emoji, add)
         .await
 }
+
+#[tauri::command]
+#[specta::specta]
+pub async fn relationships_list(
+    engine: Eng<'_>,
+    account_id: AccountId,
+) -> Res<Vec<contract::social::Relationship>> {
+    engine.relationships(&account_id).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn relationship_set(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    user_id: Snowflake,
+    action: contract::social::RelationshipAction,
+) -> Res<()> {
+    engine.relationship_set(&account_id, &user_id, action).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn friend_request(engine: Eng<'_>, account_id: AccountId, username: String) -> Res<()> {
+    engine.friend_request(&account_id, &username).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn mentions_recent(
+    engine: Eng<'_>,
+    account_id: AccountId,
+) -> Res<Vec<contract::social::Mention>> {
+    engine.mentions(&account_id).await
+}

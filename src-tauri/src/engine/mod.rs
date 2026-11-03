@@ -5,6 +5,7 @@ mod data;
 mod login;
 mod profile;
 mod session;
+mod social;
 
 use std::{
     collections::HashMap,

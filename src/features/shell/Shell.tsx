@@ -2,7 +2,7 @@
 import { lazy, Suspense } from "react";
 import { useNav, type MainView } from "../../shared/data/nav-store";
 import { ConversationView } from "../chat";
-import { ActivityView, ExploreView, FriendsView } from "../home";
+import { ActivityView, CommandPalette, ExploreView, FriendsView, usePaletteShortcut } from "../home";
 import { ProfileLayer } from "../profile";
 import { CallView } from "../voice";
 import { ChannelList } from "./ChannelList";
@@ -48,6 +48,7 @@ export function Shell(): React.JSX.Element {
   const view = useNav((s) => s.view);
   const overlay = useNav((s) => s.overlay);
   const close = useNav((s) => s.closeOverlay);
+  usePaletteShortcut();
 
   if (overlay.kind === "settings" || overlay.kind === "server-settings") {
     return (
@@ -72,6 +73,7 @@ export function Shell(): React.JSX.Element {
       </div>
       {overlay.kind === "accounts" && <Suspense fallback={null}><AccountsOverlay onClose={close} /></Suspense>}
       <ProfileLayer />
+      {overlay.kind === "palette" && <CommandPalette onClose={close} />}
     </div>
   );
 }

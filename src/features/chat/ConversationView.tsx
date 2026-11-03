@@ -52,8 +52,11 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
   const typingNames = useTypingNames(channelId, messages);
 
   useEffect(() => {
-    setMentionNames(Object.fromEntries(messages.map((m) => [m.author.id, m.author.global_name ?? m.author.username])));
-  }, [messages]);
+    const names = Object.fromEntries(messages.map((m) => [m.author.id, m.author.global_name ?? m.author.username]));
+    for (const u of channel?.recipients ?? []) names[u.id] = u.global_name ?? u.username;
+    if (account) names[account.user.id] = account.user.global_name ?? account.user.username;
+    setMentionNames(names);
+  }, [messages, channel, account]);
   useEffect(() => setReplyTo(null), [channelId]);
 
   const title = channel?.name || channel?.recipients.map((r) => r.global_name ?? r.username).join(", ") || "";
@@ -89,7 +92,8 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
       </div>
       {account && (
         <Composer accountId={account.id} channelId={channelId} replyTo={replyTo} onCancelReply={() => setReplyTo(null)}
-          placeholder={isDm ? `Envoyer un message à @${title}` : `Envoyer un message dans #${title}`} typingNames={typingNames} onEditLast={editLast} />
+          placeholder={isDm ? `Envoyer un message à @${title}` : `Envoyer un message dans #${title}`} typingNames={typingNames} onEditLast={editLast}
+          messages={messages} recipients={channel?.recipients ?? []} isGuild={!isDm} />
       )}
       {image && <div className="viewer" onClick={() => setImage(null)}><img src={image} alt="" /></div>}
     </div>
