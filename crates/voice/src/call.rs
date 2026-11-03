@@ -264,14 +264,16 @@ pub fn fail(shared: &SharedVoice, emit: &Emit, generation: u64, error: &VoiceErr
 /// Quitte le salon : libère driver et audio, publie `disconnected`.
 /// Renvoie l'opcode 4 à envoyer, si un salon était pris.
 pub fn leave(shared: &SharedVoice, emit: &Emit) -> Option<VoiceOp> {
-    let (op, dropped, snapshot) = {
+    let (op, dropped, snapshot, was_in_call) = {
         let mut state = shared.lock().ok()?;
         state.generation += 1;
         let dropped = state.call.take();
         let session = state.session.as_mut()?;
+        let was_in_call = session.channel_id.is_some();
+        // Quitter = opcode 4 avec `channel_id` nul ; renvoyer le salon reviendrait à y rester.
         let op = VoiceOp {
             guild_id: session.guild_id.clone(),
-            channel_id: session.channel_id.clone(),
+            channel_id: None,
             self_mute: session.self_mute,
             self_deaf: session.self_deaf,
         };
@@ -280,13 +282,13 @@ pub fn leave(shared: &SharedVoice, emit: &Emit) -> Option<VoiceOp> {
         session.channel_id = None;
         session.speaking.clear();
         session.error = None;
-        (op, dropped, session.clone())
+        (op, dropped, session.clone(), was_in_call)
     };
     if let Some(mut call) = dropped {
         call.driver.leave();
     }
     publish(shared, emit, snapshot);
-    op.channel_id.is_some().then_some(op)
+    was_in_call.then_some(op)
 }
 
 /// Micro coupé : le driver n'envoie plus d'audio. Renvoie l'opcode 4 à envoyer.
@@ -360,4 +362,28 @@ pub fn reopen_audio(shared: &SharedVoice, emit: &Emit) -> Result<(), VoiceError>
         emit,
     ))?);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::shared::new_shared;
+
+    #[test]
+    fn leave_sends_null_channel_and_rejoin_is_possible() {
+        let shared = new_shared("1".into());
+        let emit: Emit = Arc::new(|_| {});
+        let plan = JoinPlan {
+            account_id: "1".into(),
+            guild_id: Some("10".into()),
+            channel_id: "20".into(),
+            self_mute: false,
+            self_deaf: false,
+        };
+        begin(&shared, &emit, &plan).expect("début d'appel");
+        let op = leave(&shared, &emit).expect("opcode de départ");
+        assert_eq!(op.channel_id, None);
+        assert_eq!(op.guild_id.as_deref(), Some("10"));
+        assert!(leave(&shared, &emit).is_none(), "second départ sans effet");
+    }
 }

@@ -8,12 +8,13 @@ use contract::{
     voice::{AudioDevices, AudioSettings},
 };
 use serde_json::json;
-use voice::{JoinPlan, JoinRequest, VoiceError, VoiceOp};
+use voice::{Handshake, JoinPlan, JoinRequest, VoiceError, VoiceOp};
 
 use super::session::Session;
 use super::{Engine, internal};
 
-const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(10);
+const HANDSHAKE_TIMEOUT: Duration = Duration::from_secs(8);
+const REJOIN_PAUSE: Duration = Duration::from_millis(600);
 
 fn voice_error(error: VoiceError) -> EngineError {
     match error {
@@ -36,6 +37,28 @@ async fn send_voice_state(session: &Session, op: &VoiceOp) -> Result<(), EngineE
     session.send_op(4, d).await
 }
 
+fn op_of(plan: &JoinPlan) -> VoiceOp {
+    VoiceOp {
+        guild_id: plan.guild_id.clone(),
+        channel_id: Some(plan.channel_id.clone()),
+        self_mute: plan.self_mute,
+        self_deaf: plan.self_deaf,
+    }
+}
+
+/// Envoie l'opcode 4 de connexion et attend VOICE_STATE_UPDATE + VOICE_SERVER_UPDATE.
+async fn handshake_once(session: &Session, plan: &JoinPlan) -> Result<Handshake, VoiceError> {
+    match send_voice_state(session, &op_of(plan)).await {
+        Ok(()) => voice::await_handshake(&session.voice, &plan.channel_id, HANDSHAKE_TIMEOUT).await,
+        Err(error) => {
+            tracing::error!("opcode 4 impossible : {error:?}");
+            Err(VoiceError::Connect(
+                "envoi de l'état vocal impossible".into(),
+            ))
+        }
+    }
+}
+
 impl Engine {
     /// Rejoint un salon vocal (`guild_id` absent = appel MP). Renvoie quand la connexion audio est établie.
     pub async fn voice_join(
@@ -53,22 +76,23 @@ impl Engine {
             self_mute,
             self_deaf,
         };
-        let generation = voice::begin(&session.voice, &self.emit, &plan).map_err(voice_error)?;
-        let op = VoiceOp {
-            guild_id,
-            channel_id: Some(channel_id.clone()),
-            self_mute,
-            self_deaf,
-        };
-        let handshake = match send_voice_state(&session, &op).await {
-            Ok(()) => voice::await_handshake(&session.voice, &channel_id, HANDSHAKE_TIMEOUT).await,
-            Err(error) => {
-                tracing::error!("opcode 4 impossible : {error:?}");
-                Err(VoiceError::Connect(
-                    "envoi de l'état vocal impossible".into(),
-                ))
+        let mut generation =
+            voice::begin(&session.voice, &self.emit, &plan).map_err(voice_error)?;
+        let mut handshake = handshake_once(&session, &plan).await;
+        if matches!(handshake, Err(VoiceError::Timeout)) {
+            // Discord nous croit encore dans le salon (départ perdu, plantage) : départ propre puis nouvel essai.
+            tracing::warn!("poignée de main vocale sans réponse, départ puis nouvel essai");
+            let leave = VoiceOp {
+                channel_id: None,
+                ..op_of(&plan)
+            };
+            if let Err(error) = send_voice_state(&session, &leave).await {
+                tracing::error!("opcode 4 de départ impossible : {error:?}");
             }
-        };
+            tokio::time::sleep(REJOIN_PAUSE).await;
+            generation = voice::begin(&session.voice, &self.emit, &plan).map_err(voice_error)?;
+            handshake = handshake_once(&session, &plan).await;
+        }
         let handshake = match handshake {
             Ok(handshake) => handshake,
             Err(error) => {
