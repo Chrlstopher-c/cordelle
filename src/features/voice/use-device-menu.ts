@@ -15,7 +15,7 @@ function listOf(devs: AudioDevices | null, kind: DeviceKind): AudioDevice[] {
   return kind === "input" ? devs.inputs : devs.outputs;
 }
 
-function useCloseOnOutside(open: boolean, ref: RefObject<HTMLDivElement | null>, close: () => void): void {
+export function useCloseOnOutside(open: boolean, ref: RefObject<HTMLDivElement | null>, close: () => void): void {
   useEffect(() => {
     if (!open) return;
     const onEvent = (e: MouseEvent | KeyboardEvent): void => {

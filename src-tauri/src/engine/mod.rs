@@ -12,6 +12,7 @@ mod server;
 mod session;
 mod settings;
 mod social;
+mod stream;
 mod voice;
 
 use std::{

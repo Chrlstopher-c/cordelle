@@ -5,8 +5,9 @@ import { useActiveAccount } from "../../shared/data/use-active-account";
 import { voice } from "./api";
 import { CallControls } from "./CallControls";
 import { CallHeader } from "./CallHeader";
-import { CallStage, type CallLayout } from "./CallStage";
+import { CallStage, type CallLayout, type ShareInfo } from "./CallStage";
 import { useVoiceChannel } from "./voice-lookup";
+import { stopShare, useStreamStore } from "./stream-store";
 import { membersIn, useVoiceStore, voiceKey } from "./voice-store";
 
 export function CallView({ guildId, channelId }: { guildId: string | null; channelId: string }): React.JSX.Element {
@@ -15,6 +16,7 @@ export function CallView({ guildId, channelId }: { guildId: string | null; chann
   const startedAt = useVoiceStore((s) => s.startedAt);
   const states = useVoiceStore((s) => s.statesByGuild[voiceKey(guildId)]);
   const channel = useVoiceChannel(guildId, channelId);
+  const streaming = useStreamStore((s) => s.state?.streaming ?? false);
   const [layout, setLayout] = useState<CallLayout>("focus");
   const [joinError, setJoinError] = useState<string | null>(null);
   const name = channel?.name ?? channelId;
@@ -23,6 +25,7 @@ export function CallView({ guildId, channelId }: { guildId: string | null; chann
   if (!account) return <section className="call" aria-label={`Appel ${name}`} />;
   const here = session !== null && session.account_id === account.id && session.channel_id === channelId;
   const inCall = here && session?.connection === "connected";
+  const share: ShareInfo | null = streaming ? { selfId: account.id, onStop: () => void stopShare(account.id) } : null;
 
   return (
     <section className="call" aria-label={`Appel ${name}`}>
@@ -30,7 +33,8 @@ export function CallView({ guildId, channelId }: { guildId: string | null; chann
         since={inCall ? startedAt : null} layout={layout} onLayout={setLayout} />
       {inCall && session ? (
         <>
-          <CallStage key={layout} guildId={guildId} members={members} speaking={session.speaking} layout={layout} />
+          <CallStage key={layout} guildId={guildId} members={members} speaking={session.speaking} layout={layout}
+            share={share} />
           <CallControls accountId={account.id} session={session} />
         </>
       ) : (

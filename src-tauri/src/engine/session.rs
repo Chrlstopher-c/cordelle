@@ -151,6 +151,7 @@ impl Pump {
     fn on_dispatch(&self, name: &str, data: &serde_json::Value) {
         self.track_members(name, data);
         self.track_voice(name, data);
+        super::stream::track(name, data);
         let produced = match self.store.lock() {
             Ok(mut store) => store.apply(name, data),
             Err(_) => {

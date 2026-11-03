@@ -71,3 +71,12 @@ export function ChevronIcon({ size = 12 }: SizeProps): React.JSX.Element {
 export function CheckIcon({ size = 15 }: SizeProps): React.JSX.Element {
   return <Glyph size={size} stroke={2.4}><path d="m5 12 5 5 9-10" /></Glyph>;
 }
+
+export function ScreenIcon({ size = 19 }: SizeProps): React.JSX.Element {
+  return (
+    <Glyph size={size}>
+      <rect x="3" y="4" width="18" height="12" rx="2" />
+      <path d="M9 20h6M12 16v4" />
+    </Glyph>
+  );
+}
