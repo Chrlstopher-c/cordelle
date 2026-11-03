@@ -41,5 +41,9 @@ export const useNav = create<NavState>((set, get) => ({
     set((s) => ({ view: { kind: "guild", guildId, channelId }, lastChannel: { ...s.lastChannel, [guildId]: channelId } })),
   openOverlay: (overlay) => set({ overlay }),
   closeOverlay: () => set({ overlay: { kind: "none" } }),
-  toggleMembers: (channelId) => set((s) => ({ membersOpen: { ...s.membersOpen, [channelId]: !s.membersOpen[channelId] } })),
+  toggleMembers: (channelId) => set((s) => {
+    const v = s.view;
+    const current = s.membersOpen[channelId] ?? (v.kind === "dms");
+    return { membersOpen: { ...s.membersOpen, [channelId]: !current } };
+  }),
 }));

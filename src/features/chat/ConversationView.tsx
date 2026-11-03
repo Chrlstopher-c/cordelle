@@ -4,10 +4,12 @@ import { commands, type Message } from "../../contract/bindings";
 import { useEngine } from "../../shared/data/engine-store";
 import { useNav } from "../../shared/data/nav-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
+import { usePresence } from "../../shared/data/use-presence";
 import { useProfiles } from "../profile";
 import { ChannelIcon } from "../shell/ChannelIcon";
 import { Composer } from "./Composer";
 import { setMentionNames } from "./markdown";
+import { DmPanel } from "./DmPanel";
 import { MembersPanel, useMemberColors } from "./MembersPanel";
 import { MessageItem } from "./MessageItem";
 import { useMessageActions } from "./use-message-actions";
@@ -15,6 +17,9 @@ import { useMessageList } from "./use-message-list";
 import "./chat.css";
 
 const TYPING_TTL_MS = 9000;
+const STATUS_TEXT: Record<string, string> = {
+  online: "En ligne", idle: "Inactif", dnd: "Ne pas déranger", offline: "Hors ligne", invisible: "Hors ligne",
+};
 const EMPTY: Message[] = [];
 
 function useChannel(guildId: string | null, channelId: string) {
@@ -33,7 +38,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
   const account = useActiveAccount();
   const channel = useChannel(guildId, channelId);
   const messages = useEngine((s) => s.messages[channelId] ?? EMPTY);
-  const membersOpen = useNav((s) => !!s.membersOpen[channelId]);
+  const membersOpen = useNav((s) => s.membersOpen[channelId] ?? !guildId);
   const toggleMembers = useNav((s) => s.toggleMembers);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [image, setImage] = useState<string | null>(null);
@@ -64,6 +69,8 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
     if (account && guildId) void commands.membersSubscribe(account.id, guildId, channelId);
   }, [account, guildId, channelId]);
 
+  const dmUser = channel?.kind === "dm" ? channel.recipients[0] : undefined;
+  const dmStatus = usePresence(dmUser?.id ?? null);
   const title = channel?.name || channel?.recipients.map((r) => r.global_name ?? r.username).join(", ") || "";
   const isDm = !guildId;
 
@@ -74,9 +81,10 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
         <span className="title">{isDm ? "@" : channel && <ChannelIcon kind={channel.kind} />}{title}</span>
         {channel?.topic && <span className="topic">{channel.topic}</span>}
         <span style={{ flex: channel?.topic ? 0 : 1 }} />
-        {!isDm && (
-          <button className="cv-tool" aria-pressed={membersOpen} onClick={() => toggleMembers(channelId)}>Membres</button>
-        )}
+        {dmStatus && <span className="topic" style={{ flex: 0, whiteSpace: "nowrap" }}>{STATUS_TEXT[dmStatus]}</span>}
+        <button className="cv-tool" aria-pressed={membersOpen} onClick={() => toggleMembers(channelId)}>
+          {isDm ? (dmUser ? "Profil" : "Participants") : "Membres"}
+        </button>
       </header>
       <div className="cv-scroll" ref={list.scrollRef} onScroll={list.onScroll} onClick={onMentionClick}>
         <div style={{ height: list.virtualizer.getTotalSize(), position: "relative" }}>
@@ -104,6 +112,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
       {image && <div className="viewer" onClick={() => setImage(null)}><img src={image} alt="" /></div>}
     </div>
     {guildId && membersOpen && <MembersPanel guildId={guildId} channelId={channelId} />}
+    {!guildId && membersOpen && channel && <DmPanel channel={channel} />}
     </div>
   );
 }

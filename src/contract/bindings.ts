@@ -37,6 +37,8 @@ export const commands = {
 	membersSubscribe: (accountId: string, guildId: string, channelId: string) => typedError<null, EngineError>(__TAURI_INVOKE("members_subscribe", { accountId, guildId, channelId })),
 	statusSet: (accountId: string, status: PresenceStatus) => typedError<null, EngineError>(__TAURI_INVOKE("status_set", { accountId, status })),
 	profileUpdate: (accountId: string, edit: ProfileEdit_Deserialize) => typedError<null, EngineError>(__TAURI_INVOKE("profile_update", { accountId, edit })),
+	/**  Statuts connus (amis et présences reçues), par id d'utilisateur. */
+	presencesGet: (accountId: string) => typedError<{ [key in string]: PresenceStatus }, EngineError>(__TAURI_INVOKE("presences_get", { accountId })),
 };
 
 /** Events */

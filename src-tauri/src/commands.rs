@@ -271,3 +271,13 @@ pub async fn profile_update(
 ) -> Res<()> {
     engine.update_profile(&account_id, &edit).await
 }
+
+/// Statuts connus (amis et présences reçues), par id d'utilisateur.
+#[tauri::command]
+#[specta::specta]
+pub async fn presences_get(
+    engine: Eng<'_>,
+    account_id: AccountId,
+) -> Res<std::collections::HashMap<String, contract::user::PresenceStatus>> {
+    engine.presences(&account_id)
+}

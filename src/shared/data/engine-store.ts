@@ -27,6 +27,8 @@ export interface EngineState {
   memberLists: Record<string, MemberGroup[]>;
   /** Statut choisi pour soi dans la barre de profil. */
   myStatus: PresenceStatus;
+  /** Statuts connus par utilisateur (amis, présences reçues). */
+  presences: Record<string, PresenceStatus>;
   setMyStatus: (s: PresenceStatus) => void;
   refreshAccounts: () => Promise<void>;
   loadGuilds: (accountId: string) => Promise<void>;
@@ -57,6 +59,7 @@ export const useEngine = create<EngineState>((set, get) => ({
   typing: {},
   memberLists: {},
   myStatus: "online",
+  presences: {},
   setMyStatus: (myStatus) => {
     set({ myStatus });
     const me = get().accounts.find((a) => a.active);
@@ -139,6 +142,9 @@ export const useEngine = create<EngineState>((set, get) => ({
           if (!list) return {};
           return { messages: { ...s.messages, [ev.channel_id]: list.filter((m) => m.id !== ev.message_id) } };
         });
+        break;
+      case "presence":
+        set((s) => ({ presences: { ...s.presences, [ev.user_id]: ev.status } }));
         break;
       case "member_list":
         set((s) => ({ memberLists: { ...s.memberLists, [ev.guild_id]: ev.groups } }));

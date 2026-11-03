@@ -23,6 +23,8 @@ pub struct Session {
     pub state: Arc<Mutex<ConnectionState>>,
     /// Salons dont l'historique récent a déjà été chargé par l'API pendant cette session.
     pub fetched: Mutex<HashSet<String>>,
+    /// Dernier statut connu par utilisateur (amis au démarrage, puis PRESENCE_UPDATE).
+    pub presences: Arc<Mutex<std::collections::HashMap<String, contract::user::PresenceStatus>>>,
     gateway: GatewayHandle,
 }
 
@@ -41,12 +43,14 @@ impl Session {
         let (gateway, events) =
             Gateway::spawn(token, identity.clone(), identity::GATEWAY_URL.into());
         let state = Arc::new(Mutex::new(ConnectionState::Connecting));
+        let presences = Arc::new(Mutex::new(std::collections::HashMap::new()));
         let pump = Pump {
             account_id: account_id.clone(),
             store: store.clone(),
             state: state.clone(),
             emit,
             members: Mutex::new(MemberLists::default()),
+            presences: presences.clone(),
         };
         tauri::async_runtime::spawn(pump.run(events));
         Ok(Self {
@@ -54,6 +58,7 @@ impl Session {
             store,
             state,
             fetched: Mutex::new(HashSet::new()),
+            presences,
             gateway,
         })
     }
@@ -104,6 +109,7 @@ struct Pump {
     state: Arc<Mutex<ConnectionState>>,
     emit: Emitter,
     members: Mutex<MemberLists>,
+    presences: Arc<Mutex<std::collections::HashMap<String, contract::user::PresenceStatus>>>,
 }
 
 impl Pump {
@@ -137,12 +143,52 @@ impl Pump {
             }
         };
         for event in produced {
+            self.remember(&event);
             (self.emit)(event);
         }
     }
 }
 
 impl Pump {
+    /// Statuts initiaux des amis (READY_SUPPLEMENTAL.merged_presences.friends).
+    fn friend_presences(&self, data: &serde_json::Value) {
+        use serde_json::Value;
+        let friends = data
+            .pointer("/merged_presences/friends")
+            .and_then(Value::as_array);
+        for p in friends.into_iter().flatten() {
+            let (Some(user_id), Some(status)) = (
+                p.get("user_id").and_then(Value::as_str),
+                p.get("status").and_then(Value::as_str),
+            ) else {
+                continue;
+            };
+            let status = match status {
+                "online" => contract::user::PresenceStatus::Online,
+                "idle" => contract::user::PresenceStatus::Idle,
+                "dnd" => contract::user::PresenceStatus::Dnd,
+                _ => contract::user::PresenceStatus::Offline,
+            };
+            let event = EngineEvent::Presence {
+                account_id: self.account_id.clone(),
+                user_id: user_id.to_owned(),
+                status,
+            };
+            self.remember(&event);
+            (self.emit)(event);
+        }
+    }
+
+    fn remember(&self, event: &EngineEvent) {
+        if let EngineEvent::Presence {
+            user_id, status, ..
+        } = event
+            && let Ok(mut map) = self.presences.lock()
+        {
+            map.insert(user_id.clone(), *status);
+        }
+    }
+
     fn track_members(&self, name: &str, data: &serde_json::Value) {
         let Ok(mut lists) = self.members.lock() else {
             return;
@@ -159,6 +205,7 @@ impl Pump {
                 }
             }
             "GUILD_CREATE" => lists.ingest_guild(data),
+            "READY_SUPPLEMENTAL" => self.friend_presences(data),
             "GUILD_MEMBER_LIST_UPDATE" => {
                 if let Some((guild_id, groups)) = lists.apply(data) {
                     (self.emit)(EngineEvent::MemberList {

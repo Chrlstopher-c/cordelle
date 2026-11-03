@@ -147,6 +147,19 @@ impl Engine {
         self.session(account_id)?.set_status(code).await
     }
 
+    pub fn presences(
+        &self,
+        account_id: &AccountId,
+    ) -> Result<std::collections::HashMap<String, contract::user::PresenceStatus>, EngineError>
+    {
+        let session = self.session(account_id)?;
+        let map = session
+            .presences
+            .lock()
+            .map_err(|_| internal("présences verrouillées"))?;
+        Ok(map.clone())
+    }
+
     fn session(&self, account_id: &AccountId) -> Result<Arc<Session>, EngineError> {
         self.lock_sessions()?
             .get(account_id)

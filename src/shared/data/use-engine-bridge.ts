@@ -1,6 +1,6 @@
 // Branche les événements du moteur sur le store, une seule fois à la racine de l'app.
 import { useEffect } from "react";
-import { events, type EngineEvent } from "../../contract/bindings";
+import { commands, events, type EngineEvent } from "../../contract/bindings";
 import { useEngine } from "./engine-store";
 import { useActiveAccount } from "./use-active-account";
 
@@ -14,6 +14,14 @@ export function useEngineBridge(): void {
     if (!accountId) return;
     void loadGuilds(accountId);
     void loadDms(accountId);
+    const sync = (): void => {
+      void commands.presencesGet(accountId).then((r) => {
+        if (r.status === "ok") useEngine.setState((s) => ({ presences: { ...r.data, ...s.presences } }));
+      });
+    };
+    sync();
+    const t = setTimeout(sync, 4000);
+    return () => clearTimeout(t);
   }, [accountId, loadGuilds, loadDms]);
 
   useEffect(() => {

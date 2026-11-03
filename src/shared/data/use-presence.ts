@@ -8,6 +8,7 @@ export function usePresence(userId: string | null): PresenceStatus | null {
   return useEngine((s) => {
     if (!userId) return null;
     if (userId === me) return s.myStatus;
+    if (s.presences[userId]) return s.presences[userId];
     for (const groups of Object.values(s.memberLists)) {
       for (const g of groups) {
         const m = g.members.find((x) => x.user.id === userId);

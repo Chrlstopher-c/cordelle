@@ -2,7 +2,9 @@
 import type { ChannelSummary } from "../../contract/bindings";
 import { useEngine } from "../../shared/data/engine-store";
 import { useNav } from "../../shared/data/nav-store";
+import { usePresence } from "../../shared/data/use-presence";
 import { Avatar } from "../../shared/ui/Avatar";
+import { StatusAvatar } from "../../shared/ui/StatusAvatar";
 
 const title = (c: ChannelSummary): string =>
   c.name || c.recipients.map((r) => r.global_name ?? r.username).join(", ") || "Conversation";
@@ -24,7 +26,8 @@ export function DmList({ channelId }: { channelId: string | null }): React.JSX.E
         return (
           <button key={c.id} onClick={() => go({ kind: "dms", channelId: c.id })}
             className={`dm${c.id === channelId ? " on" : c.unread ? " unread" : ""}`}>
-            <Avatar id={who?.id ?? c.id} name={title(c)} url={c.kind === "dm" ? who?.avatar_url : null} size={32} />
+            {c.kind === "dm" && who ? <DmAvatar id={who.id} name={title(c)} url={who.avatar_url} />
+              : <Avatar id={c.id} name={title(c)} size={32} />}
             <span className="label" style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title(c)}</span>
             {c.mention_count > 0 && <span className="mention">{c.mention_count}</span>}
           </button>
@@ -32,4 +35,9 @@ export function DmList({ channelId }: { channelId: string | null }): React.JSX.E
       })}
     </div>
   );
+}
+
+function DmAvatar({ id, name, url }: { id: string; name: string; url?: string | null }): React.JSX.Element {
+  const status = usePresence(id);
+  return <StatusAvatar id={id} name={name} url={url} size={32} status={status ?? "offline"} />;
 }
