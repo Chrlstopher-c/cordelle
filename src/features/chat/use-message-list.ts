@@ -15,11 +15,11 @@ export interface MessageList {
   onScroll: () => void;
 }
 
-export function useMessageList(accountId: string, channelId: string): MessageList {
+export function useMessageList(accountId: string, channelId: string, lastReadId: string | null = null): MessageList {
   const messages = useEngine((s) => s.messages[channelId] ?? EMPTY);
   const hasMore = useEngine((s) => s.hasMore[channelId] ?? true);
   const loadMessages = useEngine((s) => s.loadMessages);
-  const rows = useMemo(() => buildRows(messages), [messages]);
+  const rows = useMemo(() => buildRows(messages, lastReadId), [messages, lastReadId]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const atBottom = useRef(true);
   const loadingOlder = useRef(false);
@@ -28,7 +28,7 @@ export function useMessageList(accountId: string, channelId: string): MessageLis
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: (i) => (rows[i]?.kind === "date" ? 40 : rows[i]?.kind === "message" && rows[i].grouped ? 26 : 64),
+    estimateSize: (i) => (rows[i]?.kind === "date" || rows[i]?.kind === "new" ? 40 : rows[i]?.kind === "message" && rows[i].grouped ? 26 : 64),
     getItemKey: (i) => rows[i]?.key ?? i,
     overscan: 12,
   });

@@ -18,12 +18,12 @@ export const GUILDS: GuildSummary[] = [
 ];
 
 const ch = (id: string, guild_id: string | null, kind: ChannelSummary["kind"], name: string, extra?: Partial<ChannelSummary>): ChannelSummary =>
-  ({ id, guild_id, parent_id: null, kind, name, topic: null, position: 0, nsfw: false, unread: false, mention_count: 0, last_message_id: null, recipients: [], ...extra });
+  ({ id, guild_id, parent_id: null, kind, name, topic: null, position: 0, nsfw: false, unread: false, mention_count: 0, last_message_id: null, last_read_id: null, recipients: [], ...extra });
 
 export const CHANNELS: Record<string, ChannelSummary[]> = {
   "200": [
     ch("300", "200", "category", "Discussions", { position: 0 }),
-    ch("301", "200", "text", "général", { parent_id: "300", topic: "Le salon de démonstration", unread: true, mention_count: 1 }),
+    ch("301", "200", "text", "général", { parent_id: "300", topic: "Le salon de démonstration", unread: true, mention_count: 1, last_message_id: "1999", last_read_id: "1998" }),
     ch("302", "200", "text", "annonces", { parent_id: "300", position: 1 }),
     ch("303", "200", "voice", "vocal-1", { parent_id: "300", position: 2 }),
   ],
@@ -35,9 +35,9 @@ export const DMS: ChannelSummary[] = [
   ch("401", null, "group_dm", "", { recipients: [BOB, CLARA] }),
 ];
 
-let seq = 1000;
+let seq = 1999;
 const msg = (channel_id: string, author: User, content: string, minutesAgo: number): Message => ({
-  id: String(seq++), channel_id, author, content, timestamp: new Date(Date.now() - minutesAgo * 60000).toISOString(),
+  id: String(seq--), channel_id, author, content, timestamp: new Date(Date.now() - minutesAgo * 60000).toISOString(),
   edited_timestamp: null, reply_to: null, attachments: [], reactions: [], embeds_json: null, pinned: false,
 });
 

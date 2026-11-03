@@ -100,6 +100,7 @@ pub fn channel(value: &Value, guild_id: Option<&str>) -> Option<ChannelInput> {
         unread: false,
         mention_count: 0,
         last_message_id: None,
+        last_read_id: None,
         recipients,
     };
     let last_message_id = str_field(value, "last_message_id").map(str::to_owned);

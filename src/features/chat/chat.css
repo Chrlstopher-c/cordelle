@@ -106,3 +106,7 @@
 :root[data-density="compact"] .msg { padding-top: 2px; }
 :root[data-density="compact"] .msg .body { flex-direction: row; flex-wrap: wrap; gap: 0 8px; align-items: baseline; }
 .cv-head .cv-status { color: var(--text-faint); font-size: var(--fs-small); white-space: nowrap; padding-left: 10px; border-left: 1px solid var(--border); }
+.cv-new { display: flex; align-items: center; margin: 8px 20px 4px; height: 1px; background: var(--danger-text); position: relative; }
+.cv-new span { position: absolute; right: 0; top: -9px; height: 18px; padding: 0 6px; border-radius: 4px 0 0 4px;
+  background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em;
+  display: flex; align-items: center; }

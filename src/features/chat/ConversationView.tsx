@@ -54,7 +54,8 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
     const mine = messages.find((m) => m.author.id === account?.user.id);
     if (mine) setEditingId(mine.id);
   };
-  const list = useMessageList(account?.id ?? "", channelId);
+  const readMark = useReadMark(channelId, channel?.last_read_id ?? null);
+  const list = useMessageList(account?.id ?? "", channelId, readMark);
   const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
   const typingNames = useTypingNames(channelId, messages);
   const colors = useMemberColors(guildId);
@@ -95,7 +96,9 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
             return (
               <div key={v.key} data-index={v.index} ref={list.virtualizer.measureElement}
                 style={{ position: "absolute", top: 0, left: 0, right: 0, transform: `translateY(${v.start}px)` }}>
-                {row.kind === "date" ? <div className="cv-date">{row.label}</div> : (
+                {row.kind === "date" ? <div className="cv-date">{row.label}</div> : row.kind === "new" ? (
+                  <div className="cv-new"><span>Nouveaux messages</span></div>
+                ) : (
                   <MessageItem message={row.message} guildId={guildId} color={colors.get(row.message.author.id) ?? null} grouped={row.grouped} meId={account?.user.id ?? null}
                     replyText={row.message.reply_to ? replySnippet(byId.get(row.message.reply_to)) : null}
                     onReply={setReplyTo} onImage={setImage} actions={actions}
@@ -117,6 +120,15 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
     {!guildId && membersOpen && channel && <DmPanel channel={channel} />}
     </div>
   );
+}
+
+/** Dernier lu figé à l'ouverture du salon : le séparateur reste tant qu'on ne change pas de salon. */
+function useReadMark(channelId: string, lastRead: string | null): string | null {
+  const [mark, setMark] = useState<{ channel: string; id: string | null } | null>(null);
+  useEffect(() => {
+    if (!mark || mark.channel !== channelId) setMark({ channel: channelId, id: lastRead });
+  }, [channelId, lastRead, mark]);
+  return mark?.channel === channelId ? mark.id : null;
 }
 
 function replySnippet(m: Message | undefined): string {

@@ -45,6 +45,7 @@ impl ChannelEntry {
         summary.unread = self.is_unread();
         summary.mention_count = self.mention_count;
         summary.last_message_id = self.last_message_id.clone();
+        summary.last_read_id = self.last_read_id.clone();
         summary
     }
 }

@@ -146,6 +146,8 @@ export type ChannelSummary_Deserialize = {
 	mention_count: number,
 	/**  Dernier message connu (pour marquer comme lu sans ouvrir le salon). */
 	last_message_id?: string | null,
+	/**  Dernier message lu (séparateur « Nouveaux messages »). */
+	last_read_id?: string | null,
 	/**  Destinataires pour les MP et groupes, vide sinon. */
 	recipients: User_Deserialize[],
 };
@@ -163,6 +165,8 @@ export type ChannelSummary_Serialize = {
 	mention_count: number,
 	/**  Dernier message connu (pour marquer comme lu sans ouvrir le salon). */
 	last_message_id: string | null,
+	/**  Dernier message lu (séparateur « Nouveaux messages »). */
+	last_read_id: string | null,
 	/**  Destinataires pour les MP et groupes, vide sinon. */
 	recipients: User_Serialize[],
 };
@@ -197,12 +201,24 @@ export type EngineEvent = EngineEvent_Serialize | EngineEvent_Deserialize;
 /**  Tout ce que le moteur pousse vers l'interface, sur l'événement Tauri `engine`. */
 export type EngineEvent_Deserialize = { type: "connection"; account_id: string; state: ConnectionState } | { type: "guild_upsert"; account_id: string; guild: GuildSummary_Deserialize } | { type: "guild_remove"; account_id: string; guild_id: string } | { type: "channel_upsert"; account_id: string; channel: ChannelSummary_Deserialize } | { type: "channel_remove"; account_id: string; channel_id: string } | { type: "message_create"; account_id: string; message: Message_Deserialize; nonce?: string | null } | { type: "message_update"; account_id: string; message: Message_Deserialize } | { type: "message_delete"; account_id: string; channel_id: string; message_id: string } | { type: "typing"; account_id: string; channel_id: string; user_id: string } | { type: "presence"; account_id: string; user_id: string; status: PresenceStatus } | { type: "unread"; account_id: string; channel_id: string; unread: boolean; mention_count: number } | 
 /**  Liste des membres d'un salon (100 premiers), remplacée en entier à chaque mise à jour. */
-{ type: "member_list"; account_id: string; guild_id: string; groups: MemberGroup_Deserialize[] };
+{ type: "member_list"; account_id: string; guild_id: string; groups: MemberGroup_Deserialize[] } | 
+/**  États vocaux d'un serveur (ou d'un appel MP) : remplace la liste entière de ce périmètre. */
+{ type: "voice_states"; account_id: string; 
+/**  `None` pour un appel en MP. */
+guild_id?: string | null; states: VoiceMember[] } | 
+/**  Sa propre session vocale (connexion, micro, qui parle). */
+{ type: "voice_session"; session: VoiceSession_Deserialize };
 
 /**  Tout ce que le moteur pousse vers l'interface, sur l'événement Tauri `engine`. */
 export type EngineEvent_Serialize = { type: "connection"; account_id: string; state: ConnectionState } | { type: "guild_upsert"; account_id: string; guild: GuildSummary_Serialize } | { type: "guild_remove"; account_id: string; guild_id: string } | { type: "channel_upsert"; account_id: string; channel: ChannelSummary_Serialize } | { type: "channel_remove"; account_id: string; channel_id: string } | { type: "message_create"; account_id: string; message: Message_Serialize; nonce: string | null } | { type: "message_update"; account_id: string; message: Message_Serialize } | { type: "message_delete"; account_id: string; channel_id: string; message_id: string } | { type: "typing"; account_id: string; channel_id: string; user_id: string } | { type: "presence"; account_id: string; user_id: string; status: PresenceStatus } | { type: "unread"; account_id: string; channel_id: string; unread: boolean; mention_count: number } | 
 /**  Liste des membres d'un salon (100 premiers), remplacée en entier à chaque mise à jour. */
-{ type: "member_list"; account_id: string; guild_id: string; groups: MemberGroup_Serialize[] };
+{ type: "member_list"; account_id: string; guild_id: string; groups: MemberGroup_Serialize[] } | 
+/**  États vocaux d'un serveur (ou d'un appel MP) : remplace la liste entière de ce périmètre. */
+{ type: "voice_states"; account_id: string; 
+/**  `None` pour un appel en MP. */
+guild_id: string | null; states: VoiceMember[] } | 
+/**  Sa propre session vocale (connexion, micro, qui parle). */
+{ type: "voice_session"; session: VoiceSession_Serialize };
 
 export type Engine_Deserialize = EngineEvent_Deserialize;
 
@@ -522,6 +538,52 @@ export type User_Serialize = {
 	global_name: string | null,
 	avatar_url: string | null,
 	bot: boolean,
+};
+
+export type VoiceConnection = "disconnected" | "connecting" | "connected" | "failed";
+
+/**  État vocal d'une personne dans un salon (VOICE_STATE_UPDATE). */
+export type VoiceMember = {
+	user_id: string,
+	channel_id: string,
+	mute: boolean,
+	deaf: boolean,
+	/**  Partage d'écran (Go Live) en cours. */
+	streaming: boolean,
+	video: boolean,
+};
+
+/**  Sa propre session vocale. */
+export type VoiceSession = VoiceSession_Serialize | VoiceSession_Deserialize;
+
+/**  Sa propre session vocale. */
+export type VoiceSession_Deserialize = {
+	account_id: string,
+	guild_id?: string | null,
+	channel_id?: string | null,
+	connection: VoiceConnection,
+	self_mute: boolean,
+	self_deaf: boolean,
+	ping_ms?: number | null,
+	/**  Utilisateurs qui parlent en ce moment (indicateur vert). */
+	speaking: string[],
+	/**  Message lisible en cas d'échec. */
+	error?: string | null,
+};
+
+/**  Sa propre session vocale. */
+export type VoiceSession_Serialize = {
+	account_id: string,
+	guild_id: string | null,
+	channel_id: string | null,
+	connection: VoiceConnection,
+	self_mute: boolean,
+	self_deaf: boolean,
+	ping_ms: number | null,
+	/**  Utilisateurs qui parlent en ce moment (indicateur vert). */
+	speaking: string[],
+	/**  Message lisible en cas d'échec. */
+	error: string | null,
 };
 
 /* Tauri Specta runtime */
