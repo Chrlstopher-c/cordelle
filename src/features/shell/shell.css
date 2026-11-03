@@ -77,3 +77,10 @@
   text-align: left; font-size: var(--fs-small); color: var(--text); }
 .menu-item:hover { background: #2e2f35; }
 .menu-sep { height: 1px; background: #2f3035; margin: 4px; }
+/* Info-bulle du rail : nom à droite de l'icône, comme Discord. */
+.rail { overflow-x: visible; }
+.rail-item[data-tip]::after { content: attr(data-tip); position: fixed; margin-left: 52px; margin-top: 6px; white-space: nowrap;
+  padding: 7px 12px; border-radius: var(--r-md); background: #0d0e10; color: #f1f2f4; font-size: 14px; font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0,0,0,.5); opacity: 0; transform: translateX(-4px) scale(.98); pointer-events: none; z-index: 90;
+  transition: opacity var(--t-hover) var(--ease), transform var(--t-hover) var(--ease); }
+.rail-item[data-tip]:hover::after { opacity: 1; transform: none; }

@@ -27,7 +27,7 @@ export function Rail(): React.JSX.Element {
 
   return (
     <nav className="rail" aria-label="Serveurs">
-      <div className="rail-item">
+      <div className="rail-item" data-tip="Messages privés">
         <Pill on={view.kind === "dms"} />
         <button className={`sv${view.kind === "dms" ? " on" : ""}`} style={accent(view.kind === "dms")}
           aria-label="Messages privés" onClick={() => go({ kind: "dms", channelId: null })}>
@@ -35,7 +35,7 @@ export function Rail(): React.JSX.Element {
           <Badge n={dmMentions} />
         </button>
       </div>
-      <div className="rail-item">
+      <div className="rail-item" data-tip="Activité">
         <Pill on={view.kind === "activity"} />
         <button className={`sv${view.kind === "activity" ? " on" : ""}`} style={accent(view.kind === "activity")}
           aria-label="Activité" onClick={() => go({ kind: "activity" })}>
@@ -46,9 +46,9 @@ export function Rail(): React.JSX.Element {
       {sorted.map((g) => {
         const on = view.kind === "guild" && view.guildId === g.id;
         return (
-          <div className="rail-item" key={g.id}>
+          <div className="rail-item" key={g.id} data-tip={g.name}>
             <Pill on={on} unread={g.unread} />
-            <button className={`sv${on ? " on" : ""}`} aria-label={g.name} title={g.name} onClick={() => openGuild(g.id)}
+            <button className={`sv${on ? " on" : ""}`} aria-label={g.name} onClick={() => openGuild(g.id)}
               onContextMenu={(e) => openMenu(e, menus.guild(g))}>
               {g.icon_url ? <img src={g.icon_url} alt="" draggable={false} /> : initials(g.name)}
               <Badge n={g.mention_count} />
