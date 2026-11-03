@@ -1,6 +1,6 @@
 // Sélecteur d'emojis (maquette Emoji-picker) : recherche, catégories, emojis du serveur, récents.
 // Un clic insère le texte à la position du curseur ; un emoji personnalisé s'insère sous sa forme `<:nom:id>`.
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { GuildEmoji } from "./api";
 import { ALL_EMOJIS, EMOJI_CATEGORIES, RECENT_ICON, type EmojiEntry } from "./emoji-data";
 import { pushRecent, readRecent } from "./recent-emojis";
@@ -62,6 +62,11 @@ const jumpTo = (id: string): void => {
 };
 
 export function EmojiPicker({ guildEmojis, onPick, onClose }: Props): React.JSX.Element {
+  useEffect(() => {
+    const k = (e: KeyboardEvent): void => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", k);
+    return () => window.removeEventListener("keydown", k);
+  }, [onClose]);
   const [query, setQuery] = useState("");
   const [recents, setRecents] = useState<string[]>(readRecent);
   const [hover, setHover] = useState<Cell | null>(null);

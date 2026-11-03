@@ -29,7 +29,7 @@ const INVITES = [
 ];
 
 const EMOJIS = [
-  { id: "500", name: "molky", animated: false, user: { username: "demo_moi" } },
+  { id: "500", name: "tasse", animated: false, user: { username: "demo_moi" } },
   { id: "501", name: "bravo", animated: true, user: { username: "demo_alice" } },
 ];
 

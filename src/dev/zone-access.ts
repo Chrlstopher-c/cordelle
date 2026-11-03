@@ -16,7 +16,8 @@ function account(id: string, name: string, active: boolean): Record<string, unkn
 const startEmpty = new URLSearchParams(location.search).get("acces") === "vide";
 let accounts: Record<string, unknown>[] = startEmpty
   ? []
-  : [account("1001", "demo_un", true), account("1002", "demo_deux", false)];
+  : [{ ...account("100", "demo_moi", true), user: { ...user("100", "demo_moi"), global_name: "Moi" } },
+    account("1002", "demo_deux", false)];
 
 const str = (v: unknown): string => (typeof v === "string" ? v : "");
 

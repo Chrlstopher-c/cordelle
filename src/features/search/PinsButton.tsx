@@ -1,4 +1,5 @@
 // Bouton « Épinglés » de l'en-tête et son popover : messages épinglés du salon, avec « Aller au message ».
+import { Markdown } from "../chat/markdown";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Message } from "../../contract/bindings";
 import { Avatar } from "../../shared/ui/Avatar";
@@ -22,7 +23,7 @@ function PinRow({ message, onOpen }: { message: Message; onOpen: () => void }): 
         <div className="sx-result-body">
           <div className="sx-result-meta"><span className="sx-result-name">{name}</span>
             <span className="sx-result-date">{formatStamp(snowflakeTime(message.id))}</span></div>
-          <p className="sx-result-text">{message.content || "Pièce jointe"}</p>
+          <p className="sx-result-text">{message.content ? <Markdown text={message.content} /> : "Pièce jointe"}</p>
         </div>
       </div>
       <button className="sx-go" onClick={onOpen}>Aller au message</button>

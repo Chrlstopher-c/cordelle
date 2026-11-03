@@ -24,7 +24,7 @@ export const handlers: Record<string, Handler> = {
     };
   },
   guild_emojis: () => [
-    { id: "900", name: "molky_gg", animated: false },
-    { id: "901", name: "molky_port", animated: true },
+    { id: "900", name: "demo_gg", animated: false },
+    { id: "901", name: "demo_port", animated: true },
   ],
 };
