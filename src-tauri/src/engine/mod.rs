@@ -11,7 +11,7 @@ use std::{
     sync::{Arc, Mutex as SyncMutex},
 };
 
-use accounts::{Accounts, KeyringStore};
+use accounts::{Accounts, FallbackStore, KeyringStore};
 use contract::{AccountId, EngineError, account::AccountSummary, account::ConnectionState};
 use identity::ClientIdentity;
 use tokio::sync::{Mutex, OnceCell};
@@ -43,10 +43,7 @@ impl Engine {
             internal("création du cache impossible")
         })?;
         Ok(Self {
-            accounts: {
-                accounts::ensure_secret_service();
-                Accounts::open(&dir, Arc::new(KeyringStore))?
-            },
+            accounts: { Accounts::open(&dir, Arc::new(FallbackStore::new(KeyringStore, &dir)))? },
             identity: OnceCell::new(),
             qr: Mutex::new(None),
             locale: "fr".into(),
