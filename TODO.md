@@ -16,3 +16,4 @@
 - (fait 03/11) GPU vérifié : WebKitWebProcess ouvre /dev/nvidia0, EGL NVIDIA → `scripts/gpu-check.sh`.
 - sway headless tué au lancement sur la tour : trouver la cause pour les captures automatiques.
 - Ordre et dossiers des serveurs (user_settings_proto), présences de READY_SUPPLEMENTAL.
+- Adaptateurs `api.ts` des zones (invoke direct) : passer aux `commands.*` maintenant que bindings.ts contient toutes les commandes.

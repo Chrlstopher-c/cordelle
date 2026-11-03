@@ -31,7 +31,7 @@ pub async fn pins_list(engine: Eng<'_>, account_id: AccountId, channel_id: Snowf
 }
 ```
   (`use super::{Eng, Res};` — les alias `Eng`/`Res` sont `pub(crate)` dans `commands/mod.rs`.)
-- Après ajout de commandes : `pnpm bindings` régénère `src/contract/bindings.ts` (ne jamais l'éditer à la main) ; l'interface
+- Après ajout de commandes : `pnpm bindings` (vérifier son code de sortie : deux types du même nom font échouer l'export) régénère `src/contract/bindings.ts` (ne jamais l'éditer à la main) ; l'interface
   appelle `commands.pinsList(...)` qui renvoie `{ status: "ok", data } | { status: "error", error }`.
 
 ## Interface
