@@ -4,6 +4,7 @@ import { useNav, type MainView } from "../../shared/data/nav-store";
 import { ConversationView } from "../chat";
 import { ActivityView, CommandPalette, ExploreView, FriendsView, usePaletteShortcut } from "../home";
 import { ProfileLayer } from "../profile";
+import { ConnectionBanner, Toasts } from "../access";
 import { ConfirmLayer } from "../../shared/ui/confirm";
 import { ContextMenuLayer } from "../../shared/ui/context-menu";
 import { CallView, VoiceStrip } from "../voice";
@@ -16,7 +17,7 @@ import "./shell.css";
 
 const SettingsScreen = lazy(() => import("../settings").then((m) => ({ default: m.SettingsScreen })));
 const ServerSettingsScreen = lazy(() => import("../server-settings").then((m) => ({ default: m.ServerSettingsScreen })));
-const AccountsOverlay = lazy(() => import("../access").then((m) => ({ default: m.AccountsOverlay })));
+const AccountsOverlay = lazy(() => import("../access/AccountsOverlay").then((m) => ({ default: m.AccountsOverlay })));
 
 function Sidebar({ view }: { view: MainView }): React.JSX.Element {
   const guildId = view.kind === "guild" ? view.guildId : view.kind === "call" ? view.guildId : null;
@@ -69,6 +70,7 @@ export function Shell(): React.JSX.Element {
   return (
     <div className="app">
       <Titlebar />
+      <ConnectionBanner />
       <div className="app-body">
         <Rail />
         <Sidebar view={view} />
@@ -78,6 +80,7 @@ export function Shell(): React.JSX.Element {
       <ProfileLayer />
       <ContextMenuLayer />
       <ConfirmLayer />
+      <Toasts />
       {overlay.kind === "palette" && <CommandPalette onClose={close} />}
     </div>
   );
