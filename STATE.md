@@ -36,3 +36,7 @@
   thémable, info-bulles du rail, frappe animée, compteurs du serveur.
 - Mode démo `pnpm demo` : faux moteurs par zone (`src/dev/zone-*.ts`) pour vérifier sans compte.
 - CI : ALSA (libasound2-dev) requis par cpal.
+- Partage d'écran : base fusionnée (crate `stream` : paquetisation RTP H264, opcodes Go Live 18/19/22, 18 tests),
+  transport vidéo NON écrit (connexion au serveur de stream, UDP chiffré, DAVE vidéo, capture portail + H264) →
+  bouton masqué (`SHARE_READY = false` dans CallControls). discord-stream-rs 0.1.3 inutilisable (ébauche).
+- Réglages voix : bloc « En appel » branché sur les périphériques du moteur (cpal).
