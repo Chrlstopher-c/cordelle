@@ -43,21 +43,21 @@ Windows/macOS · design final (instance dédiée) · automatisation / self-bot �
 
 ## Plan
 ### E1 — Squelette qui tourne
-- [ ] E1.S1 — App Tauri 2 + React + pnpm, accélération GPU forcée — VERIFY: `pnpm tauri build --debug` OK et `scripts/gpu-check.sh` affiche « accelerated »
-- [ ] E1.S2 — Structure projet (start/stop/restart, docs, logs, .env.example) — VERIFY: `./start.sh && ./stop.sh` sans erreur
-- [ ] E1.S3 — CI GitHub (cargo fmt/clippy/test, pnpm lint/typecheck/test/build) — VERIFY: `gh run watch --exit-status`
-- [ ] E1.S4 — CONTRACT.md + types TS générés depuis Rust (`specta`) — VERIFY: `pnpm typecheck` sur les types générés
+- [x] E1.S1 — App Tauri 2 + React + pnpm, accélération GPU forcée — VERIFY: `pnpm tauri build --debug` OK et `scripts/gpu-check.sh` affiche « accelerated »
+- [x] E1.S2 — Structure projet (start/stop/restart, docs, logs, .env.example) — VERIFY: `./start.sh && ./stop.sh` sans erreur
+- [x] E1.S3 — CI GitHub (cargo fmt/clippy/test, pnpm lint/typecheck/test/build) — VERIFY: `gh run watch --exit-status`
+- [x] E1.S4 — CONTRACT.md + types TS générés depuis Rust (`specta`) — VERIFY: `pnpm typecheck` sur les types générés
 - [ ] E1.S5 — Bancs de mesure RAM/latence (Cordelle et client officiel) — VERIFY: `scripts/bench.sh` sort un JSON
 
 ### E2 — Comptes et connexion
-- [ ] E2.S1 — Connexion QR (remote auth) — VERIFY: test d'intégration sur le compte de test → jeton obtenu
-- [ ] E2.S2 — Email + mot de passe + 2FA + captcha dans l'app — VERIFY: test manuel guidé sur le compte de test
-- [ ] E2.S3 — Trousseau multi-comptes (ajout, retrait, bascule) — VERIFY: `cargo test -p accounts`
-- [ ] E2.S4 — Gateway (identify, resume, heartbeat, compression zstd) par compte — VERIFY: `cargo test -p gateway` + 1 h connecté sans coupure
+- [~] E2.S1 — Connexion QR (remote auth) — VERIFY: test d'intégration sur le compte de test → jeton obtenu
+- [~] E2.S2 — Email + mot de passe + 2FA + captcha dans l'app — VERIFY: test manuel guidé sur le compte de test
+- [x] E2.S3 — Trousseau multi-comptes (ajout, retrait, bascule) — VERIFY: `cargo test -p accounts`
+- [x] E2.S4 — Gateway (identify, resume, heartbeat, compression zstd) par compte — VERIFY: `cargo test -p gateway` + 1 h connecté sans coupure
 
 ### E3 — Messagerie complète
-- [ ] E3.S1 — Serveurs, salons, catégories, MP, permissions, non-lus — VERIFY: `cargo test -p state`
-- [ ] E3.S2 — Messages virtualisés + cache SQLite (historique instantané) — VERIFY: bench changement de salon < 50 ms
+- [x] E3.S1 — Serveurs, salons, catégories, MP, permissions, non-lus — VERIFY: `cargo test -p state`
+- [~] E3.S2 — Messages virtualisés + cache SQLite (historique instantané) — VERIFY: bench changement de salon < 50 ms
 - [ ] E3.S3 — Envoi, édition, suppression, réponses, réactions, pièces jointes, emojis/stickers — VERIFY: tests e2e sur serveur de test
 - [ ] E3.S4 — Rendu markdown, embeds, mentions, liens — VERIFY: tests de rendu sur corpus de messages réels
 - [ ] E3.S5 — Fils, forums, annonces, recherche, épingles — VERIFY: tests e2e
