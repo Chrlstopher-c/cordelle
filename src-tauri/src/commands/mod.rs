@@ -5,6 +5,7 @@ pub mod home;
 pub mod settings;
 pub use compose::*;
 pub mod search;
+pub mod voice;
 
 use tauri_specta::Event as _;
 

@@ -2,7 +2,10 @@
 import { lazy, Suspense } from "react";
 import { useNav, type MainView } from "../../shared/data/nav-store";
 import { ConversationView } from "../chat";
-import { ActivityView, CommandPalette, ExploreView, FriendsView, usePaletteShortcut } from "../home";
+import { ActivityView, AddServerDialog, CommandPalette, EventsPanel, ExploreView, FriendsView, usePaletteShortcut } from "../home";
+import { ChannelSettingsScreen } from "../server-settings";
+import { ForumView } from "../search";
+import { useEngine } from "../../shared/data/engine-store";
 import { ProfileLayer } from "../profile";
 import { ConnectionBanner, Toasts } from "../access";
 import { ConfirmLayer } from "../../shared/ui/confirm";
@@ -31,10 +34,18 @@ function Sidebar({ view }: { view: MainView }): React.JSX.Element {
   );
 }
 
+/** Salon de serveur : forum (liste de publications) ou conversation. */
+function GuildChannel({ guildId, channelId }: { guildId: string; channelId: string }): React.JSX.Element {
+  const kind = useEngine((s) => s.channelsByGuild[guildId]?.find((c) => c.id === channelId)?.kind);
+  return kind === "forum" || kind === "media"
+    ? <ForumView guildId={guildId} channelId={channelId} />
+    : <ConversationView guildId={guildId} channelId={channelId} />;
+}
+
 function Main({ view }: { view: MainView }): React.JSX.Element {
   switch (view.kind) {
     case "guild":
-      return view.channelId ? <ConversationView guildId={view.guildId} channelId={view.channelId} /> : <div />;
+      return view.channelId ? <GuildChannel guildId={view.guildId} channelId={view.channelId} /> : <div />;
     case "dms":
       return view.channelId ? <ConversationView guildId={null} channelId={view.channelId} /> : <FriendsView />;
     case "friends":
@@ -82,6 +93,15 @@ export function Shell(): React.JSX.Element {
       <ConfirmLayer />
       <Toasts />
       {overlay.kind === "palette" && <CommandPalette onClose={close} />}
+      {overlay.kind === "add-server" && <AddServerDialog onClose={close} />}
+      {overlay.kind === "events" && (
+        <div className="ov-veil" onMouseDown={(e) => { if (e.target === e.currentTarget) close(); }}>
+          <div className="ov-box"><EventsPanel guildId={overlay.guildId} /></div>
+        </div>
+      )}
+      {overlay.kind === "channel-settings" && (
+        <div className="ov-full"><ChannelSettingsScreen guildId={overlay.guildId} channelId={overlay.channelId} onClose={close} /></div>
+      )}
     </div>
   );
 }

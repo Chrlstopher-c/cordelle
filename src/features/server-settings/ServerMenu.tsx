@@ -78,6 +78,7 @@ export function ServerMenu({ guildId, onClose }: Props): React.JSX.Element {
               <MenuItem label="Inviter des gens" accent onClick={() => setDialog("invite")} />
             )}
             <MenuItem label="Réglages du serveur" onClick={openSettings} />
+            <MenuItem label="Événements" onClick={() => { onClose(); openOverlay({ kind: "events", guildId }); }} />
             <div className="ss-sep" />
             {can(guild.permissions, PERM.MANAGE_CHANNELS) && (
               <MenuItem label="Créer un salon" onClick={() => setDialog("channel")} />

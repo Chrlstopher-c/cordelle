@@ -7,6 +7,7 @@ import { useContextMenu } from "../../shared/ui/context-menu";
 import { useMenus } from "../menus";
 import { Markdown } from "./markdown";
 import { MessageTools } from "./MessageTools";
+import { useMessagePrefs } from "../settings/local-prefs";
 import type { MessageActions } from "./use-message-actions";
 import { timeOf } from "./rows";
 
@@ -107,6 +108,7 @@ function MessageItemInner(props: Props): React.JSX.Element {
     if ((e.target as HTMLElement).closest("a, img.md-emoji")) return;
     openMenu(e, menus.message(m, guildId, { reply: () => onReply(m), edit: () => onEditing(m.id), react: (x) => actions.react(m.id, x, true) }));
   };
+  const prefs = useMessagePrefs();
   const name = m.author.global_name ?? m.author.username;
   const mentionsMe = !!meId && m.content.includes(`<@${meId}>`);
   const body = (
@@ -116,9 +118,11 @@ function MessageItemInner(props: Props): React.JSX.Element {
           onSave={(t) => { actions.edit(m.id, t); onEditing(null); }} />
       ) : m.content && <div className="text"><Markdown text={m.content} />
         {m.edited_timestamp && <span className="edited">(modifié)</span>}</div>}
-      {m.attachments.length > 0 && <Attachments items={m.attachments} onImage={onImage} />}
-      <Embeds json={m.embeds_json ?? null} />
-      <Reactions message={m} onToggle={(e, add) => actions.react(m.id, e, add)} />
+      {m.attachments.length > 0 && (prefs.imagePreviews
+        ? <Attachments items={m.attachments} onImage={onImage} />
+        : <Attachments items={m.attachments.map((a) => ({ ...a, content_type: null }))} onImage={onImage} />)}
+      {prefs.embeds && <Embeds json={m.embeds_json ?? null} />}
+      {prefs.reactions && <Reactions message={m} onToggle={(e, add) => actions.react(m.id, e, add)} />}
     </>
   );
   return (

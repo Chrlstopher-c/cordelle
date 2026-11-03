@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { AccessScreen } from "../features/access";
 import { useApplySettings } from "../features/settings/use-apply-settings";
 import { useVoiceBridge } from "../features/voice";
+import { useDesktopNotifications } from "../features/settings/desktop-notifications";
 import { Shell } from "../features/shell/Shell";
 import { useEngine } from "../shared/data/engine-store";
 import { useEngineBridge } from "../shared/data/use-engine-bridge";
@@ -19,6 +20,7 @@ export function App(): React.JSX.Element | null {
   }, [refreshAccounts]);
   useEngineBridge();
   useVoiceBridge();
+  useDesktopNotifications();
   useApplySettings();
 
   if (!loaded) return null;

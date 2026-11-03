@@ -14,7 +14,10 @@ export type Overlay =
   | { kind: "settings"; page: string }
   | { kind: "server-settings"; guildId: string; page: string }
   | { kind: "palette" }
-  | { kind: "accounts" };
+  | { kind: "accounts" }
+  | { kind: "events"; guildId: string }
+  | { kind: "channel-settings"; guildId: string; channelId: string }
+  | { kind: "add-server" };
 
 interface NavState {
   view: MainView;

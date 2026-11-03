@@ -8,6 +8,7 @@ import { ChannelIcon } from "./ChannelIcon";
 import { useContextMenu } from "../../shared/ui/context-menu";
 import { useMenus } from "../menus";
 import { VoiceParticipants } from "../voice";
+import { ServerMenu } from "../server-settings";
 
 interface Group { category: ChannelSummary | null; channels: ChannelSummary[] }
 
@@ -27,7 +28,6 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
   const loadChannels = useEngine((s) => s.loadChannels);
   const openChannel = useNav((s) => s.openChannel);
   const go = useNav((s) => s.go);
-  const openOverlay = useNav((s) => s.openOverlay);
   const menus = useMenus();
   const openMenu = useContextMenu((s) => s.open);
   const memberGroups = useEngine((s) => s.memberLists[guildId]);
@@ -37,6 +37,7 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
     const total = memberGroups.reduce((n, g) => n + g.count, 0);
     return { online: total - offline, total };
   }, [memberGroups]);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [closed, setClosed] = useState<Record<string, boolean>>({});
   const groups = useMemo(() => group(channels ?? []), [channels]);
 
@@ -57,7 +58,7 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
 
   return (
     <>
-      <button className="side-head" onClick={() => openOverlay({ kind: "server-settings", guildId, page: "vue" })}
+      <button className="side-head" aria-expanded={menuOpen} onClick={() => setMenuOpen((o) => !o)}
         style={guild?.icon_url ? { backgroundImage: `linear-gradient(transparent, rgba(0,0,0,.55)), url(${guild.icon_url})` } : undefined}>
         <span className="name">
           {guild?.name ?? "…"}
@@ -69,6 +70,7 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
           </span>
         )}
       </button>
+      {menuOpen && <ServerMenu guildId={guildId} onClose={() => setMenuOpen(false)} />}
       <div className="side-list">
         {groups.map((g) => {
           const id = g.category?.id ?? "_";

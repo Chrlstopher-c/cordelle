@@ -85,3 +85,12 @@
   transition: opacity var(--t-hover) var(--ease), transform var(--t-hover) var(--ease); }
 .rail-item[data-tip]:hover::after { opacity: 1; transform: none; }
 .side-head .sub .online-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--success); margin-right: 5px; }
+
+/* Surcouches génériques : modale centrée et écran plein. */
+.ov-veil { position: fixed; inset: 0; z-index: 75; background: rgba(0,0,0,.6); display: flex; align-items: center;
+  justify-content: center; animation: ov-in 180ms ease both; }
+.ov-box { width: min(640px, 92vw); max-height: 86vh; overflow-y: auto; border-radius: var(--r-xl); background: var(--surface-menu);
+  box-shadow: 0 20px 50px rgba(0,0,0,.55); animation: ov-box 200ms var(--ease) both; }
+.ov-full { position: fixed; inset: var(--titlebar-h) 0 0 0; z-index: 75; background: var(--surface-chat); }
+@keyframes ov-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ov-box { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }

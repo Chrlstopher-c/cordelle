@@ -12,6 +12,7 @@ mod server;
 mod session;
 mod settings;
 mod social;
+mod voice;
 
 use std::{
     collections::HashMap,

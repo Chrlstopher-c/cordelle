@@ -7,6 +7,7 @@ import { useConfirm } from "../../shared/ui/confirm";
 import { item, sep, type MenuItem } from "../../shared/ui/context-menu";
 import { useProfiles } from "../profile";
 import { useOpenDm } from "../profile/use-profile-actions";
+import { useDevMode } from "../settings/local-prefs";
 import { markRead as readNow } from "../chat/use-auto-read";
 
 const copy = (text: string) => (): void => { void navigator.clipboard.writeText(text); };
@@ -21,6 +22,8 @@ export function useMenus() {
   const me = account?.user.id;
   const acc = account?.id ?? "";
   const confirm = useConfirm((s) => s.confirm);
+  const dev = useDevMode();
+  const devItem = (label: string, id: string): MenuItem[] => (dev ? [item(label, copy(id))] : []);
   const openPopout = useProfiles((s) => s.openPopout);
   const openModal = useProfiles((s) => s.openModal);
   const openDm = useOpenDm();
@@ -42,7 +45,7 @@ export function useMenus() {
       sep,
       ...(m.content ? [item("Copier le texte", copy(m.content))] : []),
       item("Copier le lien du message", copy(link(guildId, m.channel_id, m.id))),
-      item("Copier l'identifiant du message", copy(m.id)),
+      ...devItem("Copier l'identifiant du message", m.id),
       ...(mine ? [sep, item("Supprimer le message", () => confirm({
         title: "Supprimer le message", body: "Ce message sera supprimé pour tout le monde.", action: "Supprimer",
         run: () => void commands.messageDelete(acc, m.channel_id, m.id),
@@ -82,16 +85,19 @@ export function useMenus() {
       }), { danger: true })]),
       sep,
       item("Copier le nom d'utilisateur", copy(u.username)),
-      item("Copier l'identifiant", copy(u.id)),
+      ...devItem("Copier l'identifiant", u.id),
     ];
   };
 
   const channel = (c: ChannelSummary): MenuItem[] => [
     ...markRead(c.id, c.last_message_id),
     ...(c.guild_id ? [item("Ouvrir", () => nav().openChannel(c.guild_id ?? "", c.id))] : []),
+    ...(c.guild_id && c.kind !== "category" ? [item("Modifier le salon", () => nav().openOverlay({
+      kind: "channel-settings", guildId: c.guild_id ?? "", channelId: c.id,
+    }))] : []),
     sep,
     item("Copier le lien du salon", copy(link(c.guild_id ?? null, c.id))),
-    item("Copier l'identifiant du salon", copy(c.id)),
+    ...devItem("Copier l'identifiant du salon", c.id),
   ];
 
   const guild = (g: GuildSummary): MenuItem[] => [
@@ -104,7 +110,7 @@ export function useMenus() {
       void commands.guildAck(acc, g.id);
     }),
     sep,
-    item("Copier l'identifiant du serveur", copy(g.id)),
+    ...devItem("Copier l'identifiant du serveur", g.id),
     sep,
     item("Quitter le serveur", () => confirm({
       title: `Quitter ${g.name}`, body: "Tu ne pourras pas revenir sans nouvelle invitation.", action: "Quitter le serveur",
@@ -118,7 +124,7 @@ export function useMenus() {
       ...(other ? [item("Profil", () => openPopout(other.id, null, at))] : []),
       ...markRead(c.id, c.last_message_id),
       sep,
-      item("Copier l'identifiant", copy(c.id)),
+      ...devItem("Copier l'identifiant", c.id),
       sep,
       item(other ? "Fermer le MP" : "Quitter le groupe", () => {
         const run = (): void => {

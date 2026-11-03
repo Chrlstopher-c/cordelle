@@ -1,0 +1,17 @@
+[package]
+name = "voice"
+description = "Moteur vocal : états vocaux du gateway, audio local (cpal) et pont songbird (DAVE inclus)"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+contract.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
+async-trait = "0.1"
+cpal = "0.18"
+songbird = { version = "0.6", default-features = false, features = ["driver", "gateway", "rustls", "receive", "tungstenite"] }
+symphonia-core = "0.5"
