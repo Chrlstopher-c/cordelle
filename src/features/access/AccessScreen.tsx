@@ -1,45 +1,91 @@
-// Écran de connexion (version minimale fonctionnelle) : QR généré au chargement, état du scan, nouvel essai.
-import { useEffect } from "react";
+// Écran de connexion : onglets QR code et mot de passe, sur la carte des maquettes Connexion.
+import { useState } from "react";
+import { openUrl } from "@tauri-apps/plugin-opener";
 import { useEngine } from "../../shared/data/engine-store";
-import { useQrLogin } from "./use-qr-login";
+import { CARD_STYLE, LINK_STYLE, MUTED_STYLE, TITLE_STYLE } from "./access-styles";
+import { PasswordTab } from "./PasswordTab";
+import { QrLogin } from "./QrLogin";
 
-const STEP_TEXT: Record<string, string> = {
-  "": "Préparation du code…",
-  "démarrage…": "Préparation du code…",
-  ready: "Scanne ce code avec l'app Discord de ton téléphone (Paramètres → Scanner le QR code).",
-  expired: "Le code a expiré.",
-  cancelled: "Connexion annulée.",
-};
+const REGISTER_URL = "https://discord.com/register";
 
-export function AccessScreen(): React.JSX.Element {
-  const refreshAccounts = useEngine((s) => s.refreshAccounts);
-  const qr = useQrLogin(() => void refreshAccounts());
+export interface AccessScreenProps {
+  /** Dans une modale (ajout de compte) : carte seule, sans plein écran. */
+  embedded?: boolean;
+  /** Connexion réussie : le compte est déjà enregistré côté moteur. */
+  onDone?: (accountId: string) => void;
+  onCancel?: () => void;
+}
 
-  useEffect(() => {
-    qr.start();
-    // Démarrage unique au montage ; un nouvel essai passe par le bouton.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+type Tab = "qr" | "password";
 
-  const retry = qr.step === "expired" || qr.step === "cancelled" || qr.step.startsWith("échec") || qr.step.startsWith("erreur");
+async function openRegister(): Promise<void> {
+  try {
+    await openUrl(REGISTER_URL);
+  } catch (err: unknown) {
+    console.error("[access] ouverture de la page d'inscription", err);
+  }
+}
 
+export function AccessScreen({ embedded = false, onDone, onCancel }: AccessScreenProps): React.JSX.Element {
+  const finish = (accountId: string): void => {
+    void useEngine.getState().refreshAccounts();
+    onDone?.(accountId);
+  };
+  const card = <AccessCard onDone={finish} onCancel={onCancel} />;
+  if (embedded) return card;
   return (
-    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--surface-chat)" }}>
-      <div style={{ width: 420, padding: 32, borderRadius: "var(--r-xl)", background: "var(--surface-raised)", textAlign: "center" }}>
-        <h1 style={{ margin: "0 0 6px", fontSize: 22 }}>Connexion à Discord</h1>
-        <p style={{ margin: "0 0 20px", color: "var(--text-muted)", fontSize: "var(--fs-small)" }}>
-          {STEP_TEXT[qr.step] ?? qr.step}
-        </p>
-        <div style={{ width: 220, height: 220, margin: "0 auto", borderRadius: "var(--r-lg)", background: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center" }}>
-          {qr.image ? <img src={qr.image} alt="QR de connexion" width={220} height={220} style={{ borderRadius: "var(--r-lg)" }} />
-            : <span style={{ color: "#888", fontSize: 13 }}>…</span>}
-        </div>
-        {retry && (
-          <button onClick={qr.start} style={{ marginTop: 20, height: 36, padding: "0 16px", borderRadius: "var(--r-md)",
-            background: "var(--accent)", color: "#fff", fontWeight: 600 }}>Nouveau code</button>
-        )}
+    <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+      background: "var(--surface-chat)" }}>
+      {card}
+    </div>
+  );
+}
+
+interface AccessCardProps {
+  onDone: (accountId: string) => void;
+  onCancel?: () => void;
+}
+
+function AccessCard({ onDone, onCancel }: AccessCardProps): React.JSX.Element {
+  const [tab, setTab] = useState<Tab>("qr");
+  return (
+    <div style={CARD_STYLE}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <h1 style={TITLE_STYLE}>Content de te revoir</h1>
+        <p style={MUTED_STYLE}>Connecte-toi pour retrouver tes serveurs.</p>
       </div>
+      <TabBar tab={tab} onChange={setTab} />
+      {tab === "qr" ? <QrLogin onDone={onDone} /> : <PasswordTab onDone={onDone} />}
+      <div style={{ display: "flex", justifyContent: "center", gap: 6, fontSize: "var(--fs-small)",
+        color: "var(--text-muted)" }}>
+        <span>Besoin d'un compte ?</span>
+        <button type="button" onClick={() => void openRegister()} style={LINK_STYLE}>Créer un compte</button>
+      </div>
+      {onCancel && (
+        <button type="button" onClick={onCancel} style={{ ...LINK_STYLE, alignSelf: "center" }}>Annuler</button>
+      )}
+    </div>
+  );
+}
+
+const TABS: { id: Tab; label: string }[] = [
+  { id: "qr", label: "QR code" },
+  { id: "password", label: "Mot de passe" },
+];
+
+function TabBar({ tab, onChange }: { tab: Tab; onChange: (t: Tab) => void }): React.JSX.Element {
+  return (
+    <div role="tablist" aria-label="Méthode de connexion"
+      style={{ display: "flex", gap: 4, padding: 4, borderRadius: "var(--r-md)", background: "var(--surface-frame)" }}>
+      {TABS.map((t) => (
+        <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => onChange(t.id)}
+          style={{ flex: 1, height: 34, borderRadius: "var(--r-sm)", border: 0, cursor: "pointer",
+            fontFamily: "inherit", fontSize: "var(--fs-small)", fontWeight: 600,
+            background: tab === t.id ? "var(--surface-selected)" : "none",
+            color: tab === t.id ? "var(--text-strong)" : "var(--text-muted)" }}>
+          {t.label}
+        </button>
+      ))}
     </div>
   );
 }
