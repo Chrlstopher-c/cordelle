@@ -14,6 +14,7 @@ export function useEngineBridge(): void {
     if (!accountId) return;
     void loadGuilds(accountId);
     void loadDms(accountId);
+    void useEngine.getState().loadRelationships(accountId);
     const sync = (): void => {
       void commands.presencesGet(accountId).then((r) => {
         if (r.status === "ok") useEngine.setState((s) => ({ presences: { ...r.data, ...s.presences } }));

@@ -39,6 +39,11 @@ export const commands = {
 	profileUpdate: (accountId: string, edit: ProfileEdit_Deserialize) => typedError<null, EngineError>(__TAURI_INVOKE("profile_update", { accountId, edit })),
 	/**  Statuts connus (amis et présences reçues), par id d'utilisateur. */
 	presencesGet: (accountId: string) => typedError<{ [key in string]: PresenceStatus }, EngineError>(__TAURI_INVOKE("presences_get", { accountId })),
+	channelAck: (accountId: string, channelId: string, messageId: string) => typedError<null, EngineError>(__TAURI_INVOKE("channel_ack", { accountId, channelId, messageId })),
+	guildAck: (accountId: string, guildId: string) => typedError<null, EngineError>(__TAURI_INVOKE("guild_ack", { accountId, guildId })),
+	messagePin: (accountId: string, channelId: string, messageId: string, pinned: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("message_pin", { accountId, channelId, messageId, pinned })),
+	guildLeave: (accountId: string, guildId: string) => typedError<null, EngineError>(__TAURI_INVOKE("guild_leave", { accountId, guildId })),
+	dmClose: (accountId: string, channelId: string) => typedError<null, EngineError>(__TAURI_INVOKE("dm_close", { accountId, channelId })),
 };
 
 /** Events */

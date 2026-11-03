@@ -10,6 +10,7 @@ import {
   type MemberGroup,
   type Message,
   type PresenceStatus,
+  type RelationshipKind,
 } from "../../contract/bindings";
 
 export interface EngineState {
@@ -29,6 +30,9 @@ export interface EngineState {
   myStatus: PresenceStatus;
   /** Statuts connus par utilisateur (amis, présences reçues). */
   presences: Record<string, PresenceStatus>;
+  /** Relation avec chaque utilisateur (ami, bloqué, demande reçue/envoyée). */
+  relationships: Record<string, RelationshipKind>;
+  loadRelationships: (accountId: string) => Promise<void>;
   setMyStatus: (s: PresenceStatus) => void;
   refreshAccounts: () => Promise<void>;
   loadGuilds: (accountId: string) => Promise<void>;
@@ -60,6 +64,11 @@ export const useEngine = create<EngineState>((set, get) => ({
   memberLists: {},
   myStatus: "online",
   presences: {},
+  relationships: {},
+  loadRelationships: async (accountId) => {
+    const r = await commands.relationshipsList(accountId);
+    if (r.status === "ok") set({ relationships: Object.fromEntries(r.data.map((x) => [x.user.id, x.kind])) });
+  },
   setMyStatus: (myStatus) => {
     set({ myStatus });
     const me = get().accounts.find((a) => a.active);

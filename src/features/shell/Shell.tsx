@@ -4,6 +4,8 @@ import { useNav, type MainView } from "../../shared/data/nav-store";
 import { ConversationView } from "../chat";
 import { ActivityView, CommandPalette, ExploreView, FriendsView, usePaletteShortcut } from "../home";
 import { ProfileLayer } from "../profile";
+import { ConfirmLayer } from "../../shared/ui/confirm";
+import { ContextMenuLayer } from "../../shared/ui/context-menu";
 import { CallView } from "../voice";
 import { ChannelList } from "./ChannelList";
 import { DmList } from "./DmList";
@@ -73,6 +75,8 @@ export function Shell(): React.JSX.Element {
       </div>
       {overlay.kind === "accounts" && <Suspense fallback={null}><AccountsOverlay onClose={close} /></Suspense>}
       <ProfileLayer />
+      <ContextMenuLayer />
+      <ConfirmLayer />
       {overlay.kind === "palette" && <CommandPalette onClose={close} />}
     </div>
   );

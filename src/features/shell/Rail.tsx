@@ -2,6 +2,8 @@
 import { useEngine } from "../../shared/data/engine-store";
 import { useNav } from "../../shared/data/nav-store";
 import { initials } from "../../shared/ui/Avatar";
+import { useContextMenu } from "../../shared/ui/context-menu";
+import { useMenus } from "../menus";
 
 function Pill({ on, unread }: { on: boolean; unread?: boolean }): React.JSX.Element {
   return <span className={`pill${on ? " on" : unread ? " unread" : ""}`} />;
@@ -19,6 +21,8 @@ export function Rail(): React.JSX.Element {
   const openGuild = useNav((s) => s.openGuild);
   const dmMentions = dms.reduce((n, c) => n + c.mention_count, 0);
   const sorted = [...guilds].sort((a, b) => a.position - b.position);
+  const menus = useMenus();
+  const openMenu = useContextMenu((s) => s.open);
   const accent = (on: boolean): React.CSSProperties => (on ? { background: "var(--accent)" } : {});
 
   return (
@@ -44,7 +48,8 @@ export function Rail(): React.JSX.Element {
         return (
           <div className="rail-item" key={g.id}>
             <Pill on={on} unread={g.unread} />
-            <button className={`sv${on ? " on" : ""}`} aria-label={g.name} title={g.name} onClick={() => openGuild(g.id)}>
+            <button className={`sv${on ? " on" : ""}`} aria-label={g.name} title={g.name} onClick={() => openGuild(g.id)}
+              onContextMenu={(e) => openMenu(e, menus.guild(g))}>
               {g.icon_url ? <img src={g.icon_url} alt="" draggable={false} /> : initials(g.name)}
               <Badge n={g.mention_count} />
             </button>

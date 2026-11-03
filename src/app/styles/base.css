@@ -22,3 +22,28 @@ input, textarea { font: inherit; color: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* Menu contextuel (maquette Menus-contextuels) */
+.ctx-menu { position: fixed; z-index: 100; min-width: 220px; max-width: 300px; padding: 6px; border-radius: var(--r-lg);
+  background: var(--surface-menu); box-shadow: 0 12px 32px rgba(0,0,0,.55); outline: none;
+  animation: ctx-in var(--t-popover) var(--ease) both; }
+@keyframes ctx-in { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: none; } }
+.ctx-item { display: flex; align-items: center; gap: 10px; width: 100%; height: 34px; padding: 0 10px; border-radius: var(--r-sm);
+  text-align: left; font-size: 13.5px; color: var(--text-body); }
+.ctx-item span:first-child { flex: 1; }
+.ctx-item.on { background: var(--accent); color: #fff; }
+.ctx-item.danger { color: var(--danger-text); }
+.ctx-item.danger.on { background: var(--danger); color: #fff; }
+.ctx-item:active { transform: none; }
+.ctx-hint { font-size: 12px; opacity: .7; }
+.ctx-sep { height: 1px; background: var(--border); margin: 4px 6px; }
+.cf-veil { position: fixed; inset: 0; z-index: 110; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center;
+  animation: ctx-in 180ms ease both; }
+.cf-box { width: 440px; border-radius: var(--r-xl); background: var(--surface-menu); padding: 20px 20px 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.55); animation: ctx-in 200ms var(--ease) both; }
+.cf-box h2 { margin: 0 0 8px; font-size: 18px; }
+.cf-box p { margin: 0 0 18px; color: var(--text-secondary); font-size: 14px; line-height: 1.45; }
+.cf-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.cf-cancel { height: 36px; padding: 0 16px; border-radius: var(--r-sm); color: var(--text); }
+.cf-cancel:hover { text-decoration: underline; }
+.cf-ok { height: 36px; padding: 0 16px; border-radius: var(--r-sm); background: var(--danger); color: #fff; font-weight: 600; }

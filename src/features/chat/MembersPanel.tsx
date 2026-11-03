@@ -6,16 +6,20 @@ import { useEngine } from "../../shared/data/engine-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
 import { StatusAvatar } from "../../shared/ui/StatusAvatar";
 import { useProfiles } from "../profile";
+import { useContextMenu } from "../../shared/ui/context-menu";
+import { useMenus } from "../menus";
 
 const EMPTY: MemberGroup[] = [];
 const hex = (c: number): string => `#${c.toString(16).padStart(6, "0")}`;
 
 function Row({ m, guildId }: { m: MemberEntry; guildId: string }): React.JSX.Element {
   const openPopout = useProfiles((s) => s.openPopout);
+  const menus = useMenus();
+  const openMenu = useContextMenu((s) => s.open);
   const name = m.nick ?? m.user.global_name ?? m.user.username;
   const offline = m.status === "offline" || m.status === "invisible";
   return (
-    <button className="mem-row" style={offline ? { opacity: 0.45 } : undefined}
+    <button className="mem-row" onContextMenu={(e) => openMenu(e, menus.user(m.user, guildId, { x: e.clientX - 360, y: e.clientY }))} style={offline ? { opacity: 0.45 } : undefined}
       onClick={(e) => openPopout(m.user.id, guildId, { x: e.clientX - 360, y: e.clientY })}>
       <StatusAvatar id={m.user.id} name={name} url={m.user.avatar_url} size={32} status={m.status} />
       <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>

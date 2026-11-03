@@ -10,7 +10,8 @@
     "lint": "oxlint src",
     "test": "vitest run --passWithNoTests",
     "bindings": "cargo run -q -p cordelle --bin export-bindings",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "demo": "VITE_MOCK=1 vite --port 1421"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.25",

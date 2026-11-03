@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { commands, type Relationship, type RelationshipAction } from "../../contract/bindings";
 import { useActiveAccount } from "../../shared/data/use-active-account";
+import { useEngine } from "../../shared/data/engine-store";
 
 export interface Friends {
   list: Relationship[];
@@ -18,7 +19,10 @@ export function useFriends(): Friends {
   const reload = useCallback(async () => {
     if (!account) return;
     const r = await commands.relationshipsList(account.id);
-    if (r.status === "ok") setList(r.data);
+    if (r.status === "ok") {
+      setList(r.data);
+      useEngine.setState({ relationships: Object.fromEntries(r.data.map((x) => [x.user.id, x.kind])) });
+    }
     setLoading(false);
   }, [account]);
 

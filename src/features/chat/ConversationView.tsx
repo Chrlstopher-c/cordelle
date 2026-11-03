@@ -81,7 +81,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
         <span className="title">{isDm ? "@" : channel && <ChannelIcon kind={channel.kind} />}{title}</span>
         {channel?.topic && <span className="topic">{channel.topic}</span>}
         <span style={{ flex: channel?.topic ? 0 : 1 }} />
-        {dmStatus && <span className="topic" style={{ flex: 0, whiteSpace: "nowrap" }}>{STATUS_TEXT[dmStatus]}</span>}
+        {dmStatus && <span className="cv-status">{STATUS_TEXT[dmStatus]}</span>}
         <button className="cv-tool" aria-pressed={membersOpen} onClick={() => toggleMembers(channelId)}>
           {isDm ? (dmUser ? "Profil" : "Participants") : "Membres"}
         </button>

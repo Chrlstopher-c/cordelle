@@ -105,3 +105,4 @@
 
 :root[data-density="compact"] .msg { padding-top: 2px; }
 :root[data-density="compact"] .msg .body { flex-direction: row; flex-wrap: wrap; gap: 0 8px; align-items: baseline; }
+.cv-head .cv-status { color: var(--text-faint); font-size: var(--fs-small); white-space: nowrap; padding-left: 10px; border-left: 1px solid var(--border); }

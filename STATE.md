@@ -19,3 +19,7 @@
 - Interface v1 : passation design dans docs/design/ (HANDOFF + tokens versionnés, maquettes locales non versionnées :
   vrais pseudos). Coque faite. 6 agents Opus lancés puis annulés (coût) : tout le reste se fait en direct, sans agents.
 - Connexion QR validée par Chris sur son compte secondaire le 03/11.
+- Clic droit complet (messages, personnes, salons, serveurs, MP, amis) : uniquement des actions réelles ; confirmations
+  pour supprimer / quitter / bloquer / retirer. Menu personne selon la relation réelle.
+- Mode démo `pnpm demo` (http://localhost:1421) : faux moteur `src/dev/` + données fictives, pour vérifier l'interface
+  dans le navigateur intégré sans compte. Absent du bundle de production (vérifié).

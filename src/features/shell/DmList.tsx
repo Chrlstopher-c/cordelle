@@ -5,6 +5,8 @@ import { useNav } from "../../shared/data/nav-store";
 import { usePresence } from "../../shared/data/use-presence";
 import { Avatar } from "../../shared/ui/Avatar";
 import { StatusAvatar } from "../../shared/ui/StatusAvatar";
+import { useContextMenu } from "../../shared/ui/context-menu";
+import { useMenus } from "../menus";
 
 const title = (c: ChannelSummary): string =>
   c.name || c.recipients.map((r) => r.global_name ?? r.username).join(", ") || "Conversation";
@@ -13,6 +15,8 @@ export function DmList({ channelId }: { channelId: string | null }): React.JSX.E
   const dms = useEngine((s) => s.dms);
   const view = useNav((s) => s.view);
   const go = useNav((s) => s.go);
+  const menus = useMenus();
+  const openMenu = useContextMenu((s) => s.open);
 
   return (
     <div className="side-list" style={{ paddingTop: 8 }}>
@@ -25,6 +29,7 @@ export function DmList({ channelId }: { channelId: string | null }): React.JSX.E
         const who = c.recipients[0];
         return (
           <button key={c.id} onClick={() => go({ kind: "dms", channelId: c.id })}
+            onContextMenu={(e) => openMenu(e, menus.dm(c, { x: e.clientX, y: e.clientY }))}
             className={`dm${c.id === channelId ? " on" : c.unread ? " unread" : ""}`}>
             {c.kind === "dm" && who ? <DmAvatar id={who.id} name={title(c)} url={who.avatar_url} />
               : <Avatar id={c.id} name={title(c)} size={32} />}

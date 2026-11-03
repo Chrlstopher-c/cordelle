@@ -89,3 +89,78 @@ impl Engine {
             .collect()
     }
 }
+
+impl Engine {
+    /// Marque un salon comme lu jusqu'au message donné.
+    pub async fn ack_channel(
+        &self,
+        account_id: &AccountId,
+        channel_id: &Snowflake,
+        message_id: &Snowflake,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        let path = format!("/channels/{channel_id}/messages/{message_id}/ack");
+        let _: Value = session
+            .rest
+            .post_json(&path, &json!({ "token": Value::Null }))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn ack_guild(
+        &self,
+        account_id: &AccountId,
+        guild_id: &Snowflake,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        session
+            .rest
+            .post(&format!("/guilds/{guild_id}/ack"), &json!({}))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn pin(
+        &self,
+        account_id: &AccountId,
+        channel_id: &Snowflake,
+        message_id: &Snowflake,
+        pinned: bool,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        let path = format!("/channels/{channel_id}/pins/{message_id}");
+        if pinned {
+            session.rest.put(&path, &json!({})).await?;
+        } else {
+            session.rest.delete(&path).await?;
+        }
+        Ok(())
+    }
+
+    pub async fn leave_guild(
+        &self,
+        account_id: &AccountId,
+        guild_id: &Snowflake,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        session
+            .rest
+            .delete(&format!("/users/@me/guilds/{guild_id}"))
+            .await?;
+        Ok(())
+    }
+
+    /// Ferme un MP (ou quitte un groupe).
+    pub async fn close_dm(
+        &self,
+        account_id: &AccountId,
+        channel_id: &Snowflake,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        session
+            .rest
+            .delete(&format!("/channels/{channel_id}"))
+            .await?;
+        Ok(())
+    }
+}

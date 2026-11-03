@@ -3,6 +3,8 @@ import { memo, useState } from "react";
 import type { Attachment, Message } from "../../contract/bindings";
 import { Avatar } from "../../shared/ui/Avatar";
 import { useProfiles } from "../profile";
+import { useContextMenu } from "../../shared/ui/context-menu";
+import { useMenus } from "../menus";
 import { Markdown } from "./markdown";
 import { MessageTools } from "./MessageTools";
 import type { MessageActions } from "./use-message-actions";
@@ -98,6 +100,13 @@ function MessageItemInner(props: Props): React.JSX.Element {
   const { message: m, guildId, color, grouped, meId, replyText, onReply, onImage, actions, editing, onEditing } = props;
   const openPopout = useProfiles((s) => s.openPopout);
   const showProfile = (e: React.MouseEvent): void => openPopout(m.author.id, guildId, { x: e.clientX, y: e.clientY });
+  const menus = useMenus();
+  const openMenu = useContextMenu((s) => s.open);
+  const userMenu = (e: React.MouseEvent): void => openMenu(e, menus.user(m.author, guildId, { x: e.clientX, y: e.clientY }));
+  const msgMenu = (e: React.MouseEvent): void => {
+    if ((e.target as HTMLElement).closest("a, img.md-emoji")) return;
+    openMenu(e, menus.message(m, guildId, { reply: () => onReply(m), edit: () => onEditing(m.id), react: (x) => actions.react(m.id, x, true) }));
+  };
   const name = m.author.global_name ?? m.author.username;
   const mentionsMe = !!meId && m.content.includes(`<@${meId}>`);
   const body = (
@@ -115,7 +124,7 @@ function MessageItemInner(props: Props): React.JSX.Element {
   return (
     <>
       {replyText !== null && <div className="msg-reply-wrap"><div className="reply" style={{ paddingTop: 6 }}>↱ {replyText}</div></div>}
-      <div className={`msg${grouped ? " grouped" : ""}${mentionsMe ? " mentions-me" : ""}`}>
+      <div className={`msg${grouped ? " grouped" : ""}${mentionsMe ? " mentions-me" : ""}`} onContextMenu={msgMenu}>
         {!editing && (
           <MessageTools mine={m.author.id === meId} onReact={(e) => actions.react(m.id, e, true)} onReply={() => onReply(m)}
             onEdit={() => onEditing(m.id)} onDelete={() => actions.remove(m.id)} />
@@ -124,11 +133,11 @@ function MessageItemInner(props: Props): React.JSX.Element {
           <><span className="gutter-time">{timeOf(m.timestamp)}</span><div className="body">{body}</div></>
         ) : (
           <>
-            <span className="pf-clickable" onClick={showProfile} style={{ height: 38 }}>
+            <span className="pf-clickable" onClick={showProfile} onContextMenu={userMenu} style={{ height: 38 }}>
               <Avatar id={m.author.id} name={name} url={m.author.avatar_url} size={38} />
             </span>
             <div className="body">
-              <div className="meta"><span className="author pf-clickable" style={color ? { color } : undefined} onClick={showProfile}>{name}</span><span className="time">{timeOf(m.timestamp)}</span></div>
+              <div className="meta"><span className="author pf-clickable" style={color ? { color } : undefined} onClick={showProfile} onContextMenu={userMenu}>{name}</span><span className="time">{timeOf(m.timestamp)}</span></div>
               {body}
             </div>
           </>

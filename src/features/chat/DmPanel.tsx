@@ -5,6 +5,8 @@ import { usePresence } from "../../shared/data/use-presence";
 import { Avatar } from "../../shared/ui/Avatar";
 import { StatusAvatar } from "../../shared/ui/StatusAvatar";
 import { useProfiles } from "../profile";
+import { useContextMenu } from "../../shared/ui/context-menu";
+import { useMenus } from "../menus";
 import { About, Banner, Identity, Note, ProfileAvatar } from "../profile/ProfileParts";
 import { useLoadedProfile } from "../profile/use-profile-actions";
 import "../profile/profile.css";
@@ -12,8 +14,10 @@ import "../profile/profile.css";
 function Participant({ u }: { u: User }): React.JSX.Element {
   const status = usePresence(u.id);
   const openPopout = useProfiles((s) => s.openPopout);
+  const menus = useMenus();
+  const openMenu = useContextMenu((s) => s.open);
   return (
-    <button className="mem-row" onClick={(e) => openPopout(u.id, null, { x: e.clientX - 360, y: e.clientY })}>
+    <button className="mem-row" onContextMenu={(e) => openMenu(e, menus.user(u, null, { x: e.clientX - 360, y: e.clientY }))} onClick={(e) => openPopout(u.id, null, { x: e.clientX - 360, y: e.clientY })}>
       <StatusAvatar id={u.id} name={u.global_name ?? u.username} url={u.avatar_url} size={32} status={status} />
       <span className="mem-name">{u.global_name ?? u.username}</span>
     </button>

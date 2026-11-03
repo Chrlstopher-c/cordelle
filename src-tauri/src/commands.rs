@@ -281,3 +281,48 @@ pub async fn presences_get(
 ) -> Res<std::collections::HashMap<String, contract::user::PresenceStatus>> {
     engine.presences(&account_id)
 }
+
+#[tauri::command]
+#[specta::specta]
+pub async fn channel_ack(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    channel_id: Snowflake,
+    message_id: Snowflake,
+) -> Res<()> {
+    engine
+        .ack_channel(&account_id, &channel_id, &message_id)
+        .await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn guild_ack(engine: Eng<'_>, account_id: AccountId, guild_id: Snowflake) -> Res<()> {
+    engine.ack_guild(&account_id, &guild_id).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn message_pin(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    channel_id: Snowflake,
+    message_id: Snowflake,
+    pinned: bool,
+) -> Res<()> {
+    engine
+        .pin(&account_id, &channel_id, &message_id, pinned)
+        .await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn guild_leave(engine: Eng<'_>, account_id: AccountId, guild_id: Snowflake) -> Res<()> {
+    engine.leave_guild(&account_id, &guild_id).await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn dm_close(engine: Eng<'_>, account_id: AccountId, channel_id: Snowflake) -> Res<()> {
+    engine.close_dm(&account_id, &channel_id).await
+}

@@ -4,6 +4,8 @@ import type { Relationship } from "../../contract/bindings";
 import { Avatar } from "../../shared/ui/Avatar";
 import { useProfiles } from "../profile";
 import { useOpenDm } from "../profile/use-profile-actions";
+import { useContextMenu } from "../../shared/ui/context-menu";
+import { useMenus } from "../menus";
 import { useFriends } from "./use-friends";
 import "./home.css";
 
@@ -46,8 +48,10 @@ function Row({ r, act }: { r: Relationship; act: (id: string, a: "accept" | "rem
   const openPopout = useProfiles((s) => s.openPopout);
   const openDm = useOpenDm();
   const show = (e: React.MouseEvent): void => openPopout(r.user.id, null, { x: e.clientX, y: e.clientY });
+  const menus = useMenus();
+  const openMenu = useContextMenu((s) => s.open);
   return (
-    <div className="fr-row">
+    <div className="fr-row" onContextMenu={(e) => openMenu(e, menus.user(r.user, null, { x: e.clientX, y: e.clientY }))}>
       <span onClick={show} style={{ cursor: "pointer" }}><Avatar id={r.user.id} name={name(r)} url={r.user.avatar_url} size={36} /></span>
       <div className="who" onClick={show}><span className="n">{name(r)}</span><span className="s">{r.user.username} · {STATUS[r.kind]}</span></div>
       {r.kind === "friend" && <button className="round" aria-label="Message" onClick={() => void openDm(r.user.id)}><Icon d="M4 5h16v11H9l-5 4z" /></button>}

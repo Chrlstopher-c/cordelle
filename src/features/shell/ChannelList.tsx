@@ -5,6 +5,8 @@ import { useEngine } from "../../shared/data/engine-store";
 import { useNav } from "../../shared/data/nav-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
 import { ChannelIcon } from "./ChannelIcon";
+import { useContextMenu } from "../../shared/ui/context-menu";
+import { useMenus } from "../menus";
 
 interface Group { category: ChannelSummary | null; channels: ChannelSummary[] }
 
@@ -25,6 +27,8 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
   const openChannel = useNav((s) => s.openChannel);
   const go = useNav((s) => s.go);
   const openOverlay = useNav((s) => s.openOverlay);
+  const menus = useMenus();
+  const openMenu = useContextMenu((s) => s.open);
   const [closed, setClosed] = useState<Record<string, boolean>>({});
   const groups = useMemo(() => group(channels ?? []), [channels]);
 
@@ -68,7 +72,7 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
               {g.channels
                 .filter((c) => !isClosed || c.id === channelId || c.mention_count > 0)
                 .map((c) => (
-                  <button key={c.id} onClick={() => open(c)}
+                  <button key={c.id} onClick={() => open(c)} onContextMenu={(e) => openMenu(e, menus.channel(c))}
                     className={`ch${c.id === channelId ? " on" : c.unread ? " unread" : ""}`}>
                     <ChannelIcon kind={c.kind} />
                     <span className="label">{c.name}</span>
