@@ -67,4 +67,13 @@ pub enum EngineEvent {
         guild_id: Snowflake,
         groups: Vec<MemberGroup>,
     },
+    /// États vocaux d'un serveur (ou d'un appel MP) : remplace la liste entière de ce périmètre.
+    VoiceStates {
+        account_id: AccountId,
+        /// `None` pour un appel en MP.
+        guild_id: Option<Snowflake>,
+        states: Vec<crate::voice::VoiceMember>,
+    },
+    /// Sa propre session vocale (connexion, micro, qui parle).
+    VoiceSession { session: crate::voice::VoiceSession },
 }

@@ -9,6 +9,7 @@ pub mod message;
 pub mod profile;
 pub mod social;
 pub mod user;
+pub mod voice;
 
 pub type Snowflake = String;
 pub type AccountId = Snowflake;

@@ -39,3 +39,9 @@ Ne jamais éditer `bindings.ts` à la main. Toute évolution du contrat passe pa
 1. `authQrStart()` → afficher le QR de `ready.url` ; à `scanned`, montrer l'avatar ; à `completed`, ouvrir le compte.
 2. Repli `authPassword` : `captcha_required` → afficher le captcha (hCaptcha, `sitekey`, `rqdata`) puis rappeler
    `authPassword` avec `captcha_key` ; `mfa_required` → demander le code puis `authMfa`.
+
+## Vocal (contrat fixé, implémentation en cours)
+Commandes : `voiceJoin(account, guildId|null, channelId)`, `voiceLeave(account)`, `voiceSetMute(account, bool)`,
+`voiceSetDeaf(account, bool)`, `voiceDevices()` → `AudioDevices`, `voiceSetDevices(inputId|null, outputId|null)`.
+Événements `engine` : `voice_states` (qui est dans quel salon vocal, par serveur) et `voice_session` (sa connexion,
+micro, sourdine, ping, qui parle).
