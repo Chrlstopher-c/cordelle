@@ -58,6 +58,8 @@ impl VoiceRoster {
     pub fn ingest(&mut self, name: &str, data: &Value) -> Vec<EngineEvent> {
         match name {
             "READY" => self.on_ready(data),
+            // Comptes utilisateurs : les états vocaux de chaque serveur arrivent ici, pas dans READY.
+            "READY_SUPPLEMENTAL" => self.on_supplemental(data),
             "GUILD_CREATE" => match str_field(data, "id") {
                 Some(guild_id) => self.replace_scope(Some(guild_id), data),
                 None => Vec::new(),
@@ -87,6 +89,17 @@ impl VoiceRoster {
     }
 
     /// Remplace la liste d'un serveur par son `voice_states` ; ne renvoie un événement qu'en cas de changement.
+    fn on_supplemental(&mut self, data: &Value) -> Vec<EngineEvent> {
+        let guilds = data.get("guilds").and_then(Value::as_array);
+        let mut events = Vec::new();
+        for guild in guilds.into_iter().flatten() {
+            if let (Some(guild_id), Some(_)) = (str_field(guild, "id"), guild.get("voice_states")) {
+                events.extend(self.replace_scope(Some(guild_id), guild));
+            }
+        }
+        events
+    }
+
     fn replace_scope(&mut self, scope: Scope, guild: &Value) -> Vec<EngineEvent> {
         let mut next = BTreeMap::new();
         for state in guild
@@ -309,6 +322,22 @@ mod tests {
         let first = &roster.states(&Some(GUILD.into()))[0];
         assert!(first.mute && first.streaming && !first.deaf);
         assert_eq!(roster.own_user().map(String::as_str), Some(ME));
+    }
+
+    #[test]
+    fn ready_supplemental_brings_user_account_voice_states() {
+        let mut roster = roster();
+        roster.ingest(
+            "READY",
+            &json!({ "user": { "id": ME }, "guilds": [{ "id": GUILD }] }),
+        );
+        let supplemental = json!({ "guilds": [
+            { "id": GUILD, "voice_states": [{ "user_id": "222", "channel_id": "500" }] },
+            { "id": OTHER_GUILD }
+        ]});
+        let events = roster.ingest("READY_SUPPLEMENTAL", &supplemental);
+        assert_eq!(events.len(), 1);
+        assert_eq!(states_of(&events[0]).1, vec![("222".into(), "500".into())]);
     }
 
     #[test]

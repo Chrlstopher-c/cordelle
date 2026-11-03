@@ -1,7 +1,7 @@
 // Décode les événements vocaux reçus sur `engine` (voice_states / voice_session / voice_level) et les range dans le store.
 import type { VoiceConnection, VoiceMember, VoiceSession } from "./types";
 import { useAudio } from "./audio-settings";
-import { useVoiceStore } from "./voice-store";
+import { useVoiceStore, voiceKey } from "./voice-store";
 
 type Raw = Record<string, unknown>;
 
@@ -34,6 +34,16 @@ function parseSession(v: unknown): VoiceSession | null {
   };
 }
 
+/** Derniers états vocaux reçus par compte puis par serveur, gardés même si le compte n'est pas (encore) actif. */
+const statesCache = new Map<string, Map<string, { guildId: string | null; states: VoiceMember[] }>>();
+
+/** Rejoue les états connus du compte devenu actif (ceux reçus au démarrage arrivent avant qu'il soit connu). */
+export function replayVoiceStates(accountId: string | null): void {
+  const byGuild = accountId ? statesCache.get(accountId) : undefined;
+  useVoiceStore.setState({ statesByGuild: {} });
+  for (const { guildId, states } of byGuild?.values() ?? []) useVoiceStore.getState().setStates(guildId, states);
+}
+
 /** Applique un événement vocal brut ; ignore ce qui ne concerne pas le compte actif. */
 export function applyVoiceEvent(raw: unknown, activeAccount: string | null): void {
   if (!isRaw(raw)) return;
@@ -45,9 +55,13 @@ export function applyVoiceEvent(raw: unknown, activeAccount: string | null): voi
     return;
   }
   if (raw.type === "voice_states") {
-    if (raw.account_id !== activeAccount || !isNullableStr(raw.guild_id) || !Array.isArray(raw.states)) return;
+    const { account_id, guild_id } = raw;
+    if (typeof account_id !== "string" || !isNullableStr(guild_id) || !Array.isArray(raw.states)) return;
     const states = raw.states.map(parseMember).filter((m): m is VoiceMember => m !== null);
-    useVoiceStore.getState().setStates(raw.guild_id, states);
+    const byGuild = statesCache.get(account_id) ?? new Map();
+    byGuild.set(voiceKey(guild_id), { guildId: guild_id, states });
+    statesCache.set(account_id, byGuild);
+    if (account_id === activeAccount) useVoiceStore.getState().setStates(guild_id, states);
     return;
   }
   if (raw.type === "voice_session") {

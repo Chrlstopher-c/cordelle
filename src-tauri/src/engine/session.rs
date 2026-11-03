@@ -167,11 +167,15 @@ impl Pump {
 }
 
 impl Pump {
-    /// États vocaux : READY, GUILD_CREATE, VOICE_STATE_UPDATE, VOICE_SERVER_UPDATE.
+    /// États vocaux : READY, READY_SUPPLEMENTAL, GUILD_CREATE, VOICE_STATE_UPDATE, VOICE_SERVER_UPDATE.
     fn track_voice(&self, name: &str, data: &serde_json::Value) {
         if !matches!(
             name,
-            "READY" | "GUILD_CREATE" | "VOICE_STATE_UPDATE" | "VOICE_SERVER_UPDATE"
+            "READY"
+                | "READY_SUPPLEMENTAL"
+                | "GUILD_CREATE"
+                | "VOICE_STATE_UPDATE"
+                | "VOICE_SERVER_UPDATE"
         ) {
             return;
         }
