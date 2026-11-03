@@ -1,6 +1,7 @@
 // Racine : relie le moteur, puis montre l'accès (aucun compte) ou la fenêtre principale.
 import { useEffect } from "react";
 import { AccessScreen } from "../features/access";
+import { useApplySettings } from "../features/settings/use-apply-settings";
 import { Shell } from "../features/shell/Shell";
 import { useEngine } from "../shared/data/engine-store";
 import { useEngineBridge } from "../shared/data/use-engine-bridge";
@@ -16,6 +17,7 @@ export function App(): React.JSX.Element | null {
     void refreshAccounts();
   }, [refreshAccounts]);
   useEngineBridge();
+  useApplySettings();
 
   if (!loaded) return null;
   return hasAccount ? <Shell /> : <AccessScreen />;

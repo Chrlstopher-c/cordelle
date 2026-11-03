@@ -47,3 +47,11 @@ pub struct UserProfile {
     pub mutual_friends: Vec<User>,
     pub note: Option<String>,
 }
+
+/// Modification de son propre profil ; `None` = champ inchangé.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
+pub struct ProfileEdit {
+    pub global_name: Option<String>,
+    pub bio: Option<String>,
+    pub pronouns: Option<String>,
+}

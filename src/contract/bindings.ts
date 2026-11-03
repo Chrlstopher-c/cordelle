@@ -36,6 +36,7 @@ export const commands = {
 	/**  Abonne au panneau Membres d'un salon ; la liste arrive par l'événement `member_list`. */
 	membersSubscribe: (accountId: string, guildId: string, channelId: string) => typedError<null, EngineError>(__TAURI_INVOKE("members_subscribe", { accountId, guildId, channelId })),
 	statusSet: (accountId: string, status: PresenceStatus) => typedError<null, EngineError>(__TAURI_INVOKE("status_set", { accountId, status })),
+	profileUpdate: (accountId: string, edit: ProfileEdit_Deserialize) => typedError<null, EngineError>(__TAURI_INVOKE("profile_update", { accountId, edit })),
 };
 
 /** Events */
@@ -388,6 +389,23 @@ export type PasswordLogin_Serialize = {
 };
 
 export type PresenceStatus = "online" | "idle" | "dnd" | "invisible" | "offline";
+
+/**  Modification de son propre profil ; `None` = champ inchangé. */
+export type ProfileEdit = ProfileEdit_Serialize | ProfileEdit_Deserialize;
+
+/**  Modification de son propre profil ; `None` = champ inchangé. */
+export type ProfileEdit_Deserialize = {
+	global_name?: string | null,
+	bio?: string | null,
+	pronouns?: string | null,
+};
+
+/**  Modification de son propre profil ; `None` = champ inchangé. */
+export type ProfileEdit_Serialize = {
+	global_name: string | null,
+	bio: string | null,
+	pronouns: string | null,
+};
 
 /**  Étapes de la connexion par QR code (remote auth), poussées par l'événement `auth_qr`. */
 export type QrAuthEvent = QrAuthEvent_Serialize | QrAuthEvent_Deserialize;

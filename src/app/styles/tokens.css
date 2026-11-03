@@ -71,3 +71,31 @@
 @media (prefers-reduced-motion: reduce) {
   :root { --t-hover: 0ms; --t-popover: 0ms; --t-panel: 0ms; --t-swap: 0ms; }
 }
+
+/* Thème clair (maquette Theme-clair) : seules les surfaces et le texte changent, le sens des couleurs reste. */
+:root[data-theme="light"] {
+  --surface-frame: #E3E5E8;
+  --surface-sidebar: #F2F3F5;
+  --surface-chat: #FFFFFF;
+  --surface-call: #F2F3F5;
+  --surface-raised: #F2F3F5;
+  --surface-input: #EBEDEF;
+  --surface-hover: #E8EAED;
+  --surface-selected: #DDE0E4;
+  --surface-menu: #FFFFFF;
+  --border: #D6D9DD;
+  --border-subtle: #E3E5E8;
+  --text-strong: #060607;
+  --text: #2E3035;
+  --text-body: #2E3035;
+  --text-secondary: #4E5058;
+  --text-muted: #5C5F66;
+  --text-faint: #6D7078;
+  --mention-row-bg: #FDF6E3;
+  --mention-pill-text: #3A45C2;
+  --voice-strip-bg: #E3F4EA;
+}
+:root[data-motion="reduce"] { --t-hover: 0ms; --t-popover: 0ms; --t-panel: 0ms; --t-swap: 0ms; }
+:root[data-motion="reduce"] *, :root[data-motion="reduce"] *::before, :root[data-motion="reduce"] *::after {
+  animation: none !important; transition: none !important;
+}

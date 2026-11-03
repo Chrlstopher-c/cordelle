@@ -261,3 +261,13 @@ pub async fn status_set(
 ) -> Res<()> {
     engine.set_status(&account_id, status).await
 }
+
+#[tauri::command]
+#[specta::specta]
+pub async fn profile_update(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    edit: contract::profile::ProfileEdit,
+) -> Res<()> {
+    engine.update_profile(&account_id, &edit).await
+}

@@ -200,3 +200,33 @@ impl Engine {
         Ok(())
     }
 }
+
+impl Engine {
+    pub async fn update_profile(
+        &self,
+        account_id: &AccountId,
+        edit: &contract::profile::ProfileEdit,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        if let Some(name) = &edit.global_name {
+            let _: Value = session
+                .rest
+                .patch_json("/users/@me", &serde_json::json!({ "global_name": name }))
+                .await?;
+        }
+        let mut body = serde_json::Map::new();
+        if let Some(bio) = &edit.bio {
+            body.insert("bio".into(), Value::String(bio.clone()));
+        }
+        if let Some(p) = &edit.pronouns {
+            body.insert("pronouns".into(), Value::String(p.clone()));
+        }
+        if !body.is_empty() {
+            let _: Value = session
+                .rest
+                .patch_json("/users/@me/profile", &Value::Object(body))
+                .await?;
+        }
+        Ok(())
+    }
+}
