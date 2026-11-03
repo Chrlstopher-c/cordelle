@@ -5,6 +5,8 @@
 - Interface v1 : coque faite (rail, salons, MP, profil, connexion QR minimale). Conversation faite. À faire par moi seul, sans sous-agents : accès complet, accueil/MP, réglages, réglages serveur, vocal.
 
 ## Ensuite
+- Partage d'écran / caméra (agent en cours), regarder le stream des autres.
+- Tester sur compte réel : appel vocal, envoi de fichiers, réglages serveur (permissions).
 - E3.S3+ : édition, suppression, réactions, pièces jointes ; markdown/embeds (côté interface, instance design).
 - E4 : voix (songbird 0.6 + davey), partage d'écran (évaluer discord-stream-rs).
 - E5.S1 : analyse REA du bundle web Discord → catalogue des écrans rares.

@@ -23,3 +23,16 @@
   pour supprimer / quitter / bloquer / retirer. Menu personne selon la relation réelle.
 - Mode démo `pnpm demo` (http://localhost:1421) : faux moteur `src/dev/` + données fictives, pour vérifier l'interface
   dans le navigateur intégré sans compte. Absent du bundle de production (vérifié).
+
+## 2026-11-03 nuit
+- Vague 1 fusionnée (agents Haiku) : connexion complète (QR, mot de passe, captcha, 2FA) + comptes + bandeau/toasts ;
+  fichiers, emojis, saisie assistée ; recherche, épinglés, fils, forums ; menu serveur, invitations, 9 pages de
+  réglages serveur + réglages de salon ; 9 pages de réglages utilisateur de plus (sessions, comptes liés, voix,
+  notifications de bureau, raccourcis, messages, CSS perso, mode dev, abonnement) ; rejoindre/créer un serveur,
+  explorer, événements.
+- Vocal : moteur songbird + DAVE + cpal (rejoindre, quitter, micro, sourdine, qui parle, périphériques) + interface
+  d'appel. NON testé sur un vrai appel.
+- Finitions : début de salon, chargement, séparateur « Nouveaux messages », petite fenêtre (tiroir), thème clair
+  thémable, info-bulles du rail, frappe animée, compteurs du serveur.
+- Mode démo `pnpm demo` : faux moteurs par zone (`src/dev/zone-*.ts`) pour vérifier sans compte.
+- CI : ALSA (libasound2-dev) requis par cpal.
