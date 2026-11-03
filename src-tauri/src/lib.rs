@@ -48,6 +48,11 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::settings::connections_list,
             commands::settings::connection_remove,
             commands::settings::subscriptions_list,
+            commands::home::invite_resolve,
+            commands::home::invite_accept,
+            commands::home::guild_create,
+            commands::home::scheduled_events,
+            commands::home::discoverable_guilds,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }

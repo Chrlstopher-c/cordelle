@@ -5,6 +5,7 @@ pub mod account;
 pub mod auth;
 pub mod events;
 pub mod guild;
+pub mod home;
 pub mod message;
 pub mod profile;
 pub mod settings;

@@ -1,6 +1,7 @@
 //! Commandes exposées à l'interface. Signatures = contrat (CONTRACT.md) ; corps branchés crate par crate.
 
 pub mod settings;
+pub mod home;
 
 use tauri_specta::Event as _;
 
