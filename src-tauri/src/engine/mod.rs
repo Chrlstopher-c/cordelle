@@ -3,6 +3,7 @@
 mod build_cache;
 mod data;
 mod login;
+mod profile;
 mod session;
 
 use std::{

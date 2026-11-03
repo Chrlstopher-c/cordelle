@@ -6,6 +6,7 @@ pub mod auth;
 pub mod events;
 pub mod guild;
 pub mod message;
+pub mod profile;
 pub mod user;
 
 pub type Snowflake = String;

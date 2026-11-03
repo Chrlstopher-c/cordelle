@@ -19,6 +19,8 @@ export const commands = {
 	/**  Page de messages, du plus récent au plus ancien ; `before` = id du plus ancien déjà affiché. */
 	messagesGet: (accountId: string, channelId: string, before: string | null, limit: number) => typedError<MessagePage_Serialize, EngineError>(__TAURI_INVOKE("messages_get", { accountId, channelId, before, limit })),
 	messageSend: (accountId: string, channelId: string, message: OutgoingMessage_Deserialize) => typedError<Message_Serialize, EngineError>(__TAURI_INVOKE("message_send", { accountId, channelId, message })),
+	/**  Profil complet : bannière, bio, badges, connexions, serveurs et amis en commun, note. */
+	userProfile: (accountId: string, userId: string, guildId: string | null) => typedError<UserProfile_Serialize, EngineError>(__TAURI_INVOKE("user_profile", { accountId, userId, guildId })),
 };
 
 /** Events */
@@ -72,6 +74,22 @@ export type AuthQr_Deserialize = QrAuthEvent_Deserialize;
 
 export type AuthQr_Serialize = QrAuthEvent_Serialize;
 
+export type Badge = Badge_Serialize | Badge_Deserialize;
+
+export type Badge_Deserialize = {
+	id: string,
+	description: string,
+	icon_url: string,
+	link?: string | null,
+};
+
+export type Badge_Serialize = {
+	id: string,
+	description: string,
+	icon_url: string,
+	link: string | null,
+};
+
 export type CaptchaChallenge = CaptchaChallenge_Serialize | CaptchaChallenge_Deserialize;
 
 export type CaptchaChallenge_Deserialize = {
@@ -120,6 +138,24 @@ export type ChannelSummary_Serialize = {
 	mention_count: number,
 	/**  Destinataires pour les MP et groupes, vide sinon. */
 	recipients: User_Serialize[],
+};
+
+export type ConnectedAccount = ConnectedAccount_Serialize | ConnectedAccount_Deserialize;
+
+export type ConnectedAccount_Deserialize = {
+	/**  Type Discord : github, steam, twitch, spotify… */
+	kind: string,
+	name: string,
+	verified: boolean,
+	url?: string | null,
+};
+
+export type ConnectedAccount_Serialize = {
+	/**  Type Discord : github, steam, twitch, spotify… */
+	kind: string,
+	name: string,
+	verified: boolean,
+	url: string | null,
 };
 
 export type ConnectionState = "disconnected" | "connecting" | "ready" | "resuming" | "failed";
@@ -223,6 +259,22 @@ export type Message_Serialize = {
 
 export type MfaMethod = "totp" | "sms" | "backup" | "webauthn";
 
+export type MutualGuild = MutualGuild_Serialize | MutualGuild_Deserialize;
+
+export type MutualGuild_Deserialize = {
+	id: string,
+	name: string,
+	icon_url?: string | null,
+	nick?: string | null,
+};
+
+export type MutualGuild_Serialize = {
+	id: string,
+	name: string,
+	icon_url: string | null,
+	nick: string | null,
+};
+
 export type OutgoingMessage = OutgoingMessage_Serialize | OutgoingMessage_Deserialize;
 
 export type OutgoingMessage_Deserialize = {
@@ -280,6 +332,52 @@ export type Reaction = {
 };
 
 export type User = User_Serialize | User_Deserialize;
+
+export type UserProfile = UserProfile_Serialize | UserProfile_Deserialize;
+
+export type UserProfile_Deserialize = {
+	user: User_Deserialize,
+	banner_url?: string | null,
+	/**  Couleur d'accent (0xRRGGBB) quand il n'y a pas de bannière. */
+	accent_color?: number | null,
+	/**  Couleurs du thème de profil (Nitro), haut puis bas. */
+	theme_colors?: number[] | null,
+	avatar_decoration_url?: string | null,
+	bio?: string | null,
+	pronouns?: string | null,
+	badges: Badge_Deserialize[],
+	connected_accounts: ConnectedAccount_Deserialize[],
+	/**  Création du compte en millisecondes depuis l'époque Unix (déduite de l'id). */
+	created_at_ms: number | null,
+	/**  Arrivée sur le serveur demandé, si `guild_id` fourni. */
+	joined_guild_at?: string | null,
+	guild_nick?: string | null,
+	mutual_guilds: MutualGuild_Deserialize[],
+	mutual_friends: User_Deserialize[],
+	note?: string | null,
+};
+
+export type UserProfile_Serialize = {
+	user: User_Serialize,
+	banner_url: string | null,
+	/**  Couleur d'accent (0xRRGGBB) quand il n'y a pas de bannière. */
+	accent_color: number | null,
+	/**  Couleurs du thème de profil (Nitro), haut puis bas. */
+	theme_colors: number[] | null,
+	avatar_decoration_url: string | null,
+	bio: string | null,
+	pronouns: string | null,
+	badges: Badge_Serialize[],
+	connected_accounts: ConnectedAccount_Serialize[],
+	/**  Création du compte en millisecondes depuis l'époque Unix (déduite de l'id). */
+	created_at_ms: number | null,
+	/**  Arrivée sur le serveur demandé, si `guild_id` fourni. */
+	joined_guild_at: string | null,
+	guild_nick: string | null,
+	mutual_guilds: MutualGuild_Serialize[],
+	mutual_friends: User_Serialize[],
+	note: string | null,
+};
 
 export type User_Deserialize = {
 	id: string,

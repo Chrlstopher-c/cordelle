@@ -64,7 +64,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
               <div key={v.key} data-index={v.index} ref={list.virtualizer.measureElement}
                 style={{ position: "absolute", top: 0, left: 0, right: 0, transform: `translateY(${v.start}px)` }}>
                 {row.kind === "date" ? <div className="cv-date">{row.label}</div> : (
-                  <MessageItem message={row.message} grouped={row.grouped} meId={account?.user.id ?? null}
+                  <MessageItem message={row.message} guildId={guildId} grouped={row.grouped} meId={account?.user.id ?? null}
                     replyText={row.message.reply_to ? replySnippet(byId.get(row.message.reply_to)) : null}
                     onReply={setReplyTo} onImage={setImage} />
                 )}

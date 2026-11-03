@@ -10,6 +10,7 @@ use contract::{
     events::EngineEvent,
     guild::{ChannelSummary, GuildSummary},
     message::{Message, MessagePage, OutgoingMessage},
+    profile::UserProfile,
 };
 
 type Res<T> = Result<T, EngineError>;
@@ -124,4 +125,16 @@ pub async fn message_send(
     message: OutgoingMessage,
 ) -> Res<Message> {
     engine.send(&account_id, &channel_id, &message).await
+}
+
+/// Profil complet : bannière, bio, badges, connexions, serveurs et amis en commun, note.
+#[tauri::command]
+#[specta::specta]
+pub async fn user_profile(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    user_id: Snowflake,
+    guild_id: Option<Snowflake>,
+) -> Res<UserProfile> {
+    engine.profile(&account_id, &user_id, guild_id).await
 }

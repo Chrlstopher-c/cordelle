@@ -3,6 +3,7 @@ import { lazy, Suspense } from "react";
 import { useNav, type MainView } from "../../shared/data/nav-store";
 import { ConversationView } from "../chat";
 import { ActivityView, ExploreView, FriendsView } from "../home";
+import { ProfileLayer } from "../profile";
 import { CallView } from "../voice";
 import { ChannelList } from "./ChannelList";
 import { DmList } from "./DmList";
@@ -70,6 +71,7 @@ export function Shell(): React.JSX.Element {
         <main className="app-main"><Main view={view} /></main>
       </div>
       {overlay.kind === "accounts" && <Suspense fallback={null}><AccountsOverlay onClose={close} /></Suspense>}
+      <ProfileLayer />
     </div>
   );
 }

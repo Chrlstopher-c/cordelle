@@ -2,11 +2,13 @@
 import { memo } from "react";
 import type { Attachment, Message } from "../../contract/bindings";
 import { Avatar } from "../../shared/ui/Avatar";
+import { useProfiles } from "../profile";
 import { Markdown } from "./markdown";
 import { timeOf } from "./rows";
 
 interface Props {
   message: Message;
+  guildId: string | null;
   grouped: boolean;
   meId: string | null;
   replyText: string | null;
@@ -71,7 +73,9 @@ function Reactions({ message }: { message: Message }): React.JSX.Element | null 
   );
 }
 
-function MessageItemInner({ message: m, grouped, meId, replyText, onReply, onImage }: Props): React.JSX.Element {
+function MessageItemInner({ message: m, guildId, grouped, meId, replyText, onReply, onImage }: Props): React.JSX.Element {
+  const openPopout = useProfiles((s) => s.openPopout);
+  const showProfile = (e: React.MouseEvent): void => openPopout(m.author.id, guildId, { x: e.clientX, y: e.clientY });
   const name = m.author.global_name ?? m.author.username;
   const mentionsMe = !!meId && m.content.includes(`<@${meId}>`);
   const body = (
@@ -96,9 +100,11 @@ function MessageItemInner({ message: m, grouped, meId, replyText, onReply, onIma
           <><span className="gutter-time">{timeOf(m.timestamp)}</span><div className="body">{body}</div></>
         ) : (
           <>
-            <Avatar id={m.author.id} name={name} url={m.author.avatar_url} size={38} />
+            <span className="pf-clickable" onClick={showProfile} style={{ height: 38 }}>
+              <Avatar id={m.author.id} name={name} url={m.author.avatar_url} size={38} />
+            </span>
             <div className="body">
-              <div className="meta"><span className="author">{name}</span><span className="time">{timeOf(m.timestamp)}</span></div>
+              <div className="meta"><span className="author pf-clickable" onClick={showProfile}>{name}</span><span className="time">{timeOf(m.timestamp)}</span></div>
               {body}
             </div>
           </>
