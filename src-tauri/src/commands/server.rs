@@ -5,7 +5,7 @@ use contract::{
     AccountId, Snowflake,
     server::{
         AuditEntry, AutomodRule, Ban, ChannelDetail, ChannelEdit, GuildDetail, GuildEdit,
-        GuildEmoji, Integration, Invite, MemberSummary, NewChannelKind, Role, RoleEdit,
+        Integration, Invite, MemberSummary, NewChannelKind, Role, RoleEdit, ServerEmoji,
     },
 };
 
@@ -187,7 +187,7 @@ pub async fn guild_emojis_manage(
     account_id: AccountId,
     guild_id: Snowflake,
     remove: Option<Snowflake>,
-) -> Res<Vec<GuildEmoji>> {
+) -> Res<Vec<ServerEmoji>> {
     engine
         .emojis_manage(&account_id, &guild_id, remove.as_ref())
         .await

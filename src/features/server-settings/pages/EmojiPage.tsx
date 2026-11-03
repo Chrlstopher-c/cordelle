@@ -1,7 +1,7 @@
 // Emoji du serveur : liste, filtre, suppression (Gérer les emoji). Pas d'envoi : l'upload n'est pas branché.
 import { useMemo, useState } from "react";
 import { srv } from "../api";
-import type { GuildEmoji } from "../server-contract";
+import type { ServerEmoji } from "../server-contract";
 import { useConfirm } from "../../../shared/ui/confirm";
 import { attempt, can, PERM, type PageProps } from "../api";
 import { Empty, Flash, Section, useFlash } from "../kit";
@@ -27,7 +27,7 @@ export function EmojiPage({ acc, guildId, perms }: PageProps): React.JSX.Element
   const statics = data.filter((e) => !e.animated).length;
   const animated = data.length - statics;
 
-  const remove = (emoji: GuildEmoji): void => askRemove({
+  const remove = (emoji: ServerEmoji): void => askRemove({
     title: `Supprimer :${emoji.name}:`, body: "L'emoji disparaît pour tous les membres.", action: "Supprimer",
     run: () => void attempt(srv.guildEmojisManage(acc, guildId, emoji.id)).then((r) => {
       if (r.ok) { flash("Emoji supprimé"); reload(); } else flash(r.message);

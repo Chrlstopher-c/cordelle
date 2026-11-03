@@ -5,7 +5,7 @@ use contract::{
     AccountId, EngineError, Snowflake,
     server::{
         AuditChange, AuditEntry, AutomodRule, Ban, ChannelDetail, ChannelEdit, GuildDetail,
-        GuildEdit, GuildEmoji, Integration, Invite, MemberSummary, NewChannelKind, Role, RoleEdit,
+        GuildEdit, Integration, Invite, MemberSummary, NewChannelKind, Role, RoleEdit, ServerEmoji,
     },
     user::User,
 };
@@ -112,11 +112,11 @@ fn invite_of(v: &Value) -> Option<Invite> {
     })
 }
 
-fn emoji_of(v: &Value) -> Option<GuildEmoji> {
+fn emoji_of(v: &Value) -> Option<ServerEmoji> {
     let id = text(v, "id")?;
     let animated = flag(v, "animated");
     let ext = if animated { "gif" } else { "png" };
-    Some(GuildEmoji {
+    Some(ServerEmoji {
         name: text(v, "name")?,
         animated,
         creator: v
@@ -471,7 +471,7 @@ impl Engine {
         account_id: &AccountId,
         guild_id: &Snowflake,
         remove: Option<&Snowflake>,
-    ) -> Result<Vec<GuildEmoji>, EngineError> {
+    ) -> Result<Vec<ServerEmoji>, EngineError> {
         let session = self.session(account_id)?;
         if let Some(id) = remove {
             session

@@ -23,7 +23,7 @@ export interface Invite {
   code: string; inviter: User | null; channel_id: Snowflake; channel_name: string | null; uses: number;
   max_uses: number; created_at: string | null; expires_at: string | null;
 }
-export interface GuildEmoji { id: Snowflake; name: string; animated: boolean; creator: string | null; image_url: string }
+export interface ServerEmoji { id: Snowflake; name: string; animated: boolean; creator: string | null; image_url: string }
 export interface AutomodRule {
   id: Snowflake; name: string; enabled: boolean; trigger_type: number; keywords: string[]; actions: number[];
   exempt_roles: Snowflake[]; exempt_channels: Snowflake[];

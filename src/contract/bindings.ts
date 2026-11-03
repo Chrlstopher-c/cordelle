@@ -44,6 +44,67 @@ export const commands = {
 	messagePin: (accountId: string, channelId: string, messageId: string, pinned: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("message_pin", { accountId, channelId, messageId, pinned })),
 	guildLeave: (accountId: string, guildId: string) => typedError<null, EngineError>(__TAURI_INVOKE("guild_leave", { accountId, guildId })),
 	dmClose: (accountId: string, channelId: string) => typedError<null, EngineError>(__TAURI_INVOKE("dm_close", { accountId, channelId })),
+	sessionsList: (accountId: string) => typedError<DeviceSession_Serialize[], EngineError>(__TAURI_INVOKE("sessions_list", { accountId })),
+	/**  Déconnecte les sessions données (empreintes issues de `sessions_list`). */
+	sessionsLogout: (accountId: string, sessionIdHashes: string[]) => typedError<null, EngineError>(__TAURI_INVOKE("sessions_logout", { accountId, sessionIdHashes })),
+	connectionsList: (accountId: string) => typedError<LinkedService[], EngineError>(__TAURI_INVOKE("connections_list", { accountId })),
+	connectionRemove: (accountId: string, kind: string, id: string) => typedError<null, EngineError>(__TAURI_INVOKE("connection_remove", { accountId, kind, id })),
+	subscriptionsList: (accountId: string) => typedError<Subscription_Serialize[], EngineError>(__TAURI_INVOKE("subscriptions_list", { accountId })),
+	/**  Aperçu d'une invitation (`code` sans préfixe `discord.gg/`). */
+	inviteResolve: (accountId: string, code: string) => typedError<InvitePreview_Serialize, EngineError>(__TAURI_INVOKE("invite_resolve", { accountId, code })),
+	/**  Rejoint un serveur par invitation ; renvoie son id. */
+	inviteAccept: (accountId: string, code: string) => typedError<string, EngineError>(__TAURI_INVOKE("invite_accept", { accountId, code })),
+	/**  Crée un serveur vide et renvoie son id. */
+	guildCreate: (accountId: string, name: string) => typedError<string, EngineError>(__TAURI_INVOKE("guild_create", { accountId, name })),
+	/**  Événements à venir ou en cours d'un serveur. */
+	scheduledEvents: (accountId: string, guildId: string) => typedError<ScheduledEvent_Serialize[], EngineError>(__TAURI_INVOKE("scheduled_events", { accountId, guildId })),
+	/**  Serveurs publics ; `query` vide = tous, `offset` pour la page suivante. */
+	discoverableGuilds: (accountId: string, query: string, offset: number) => typedError<DiscoverableGuild_Serialize[], EngineError>(__TAURI_INVOKE("discoverable_guilds", { accountId, query, offset })),
+	/**  Envoie un message avec des fichiers joints (contenu encodé en base64) ; la réponse est le message créé. */
+	messageSendFiles: (accountId: string, channelId: string, content: string, replyTo: string | null, files: OutgoingFile[]) => typedError<Message_Serialize, EngineError>(__TAURI_INVOKE("message_send_files", { accountId, channelId, content, replyTo, files })),
+	/**  Emojis personnalisés d'un serveur, pour le sélecteur et la saisie assistée. */
+	guildEmojis: (accountId: string, guildId: string) => typedError<GuildEmoji[], EngineError>(__TAURI_INVOKE("guild_emojis", { accountId, guildId })),
+	guildInfo: (accountId: string, guildId: string) => typedError<GuildDetail_Serialize, EngineError>(__TAURI_INVOKE("guild_info", { accountId, guildId })),
+	guildUpdate: (accountId: string, guildId: string, edit: GuildEdit_Deserialize) => typedError<null, EngineError>(__TAURI_INVOKE("guild_update", { accountId, guildId, edit })),
+	rolesList: (accountId: string, guildId: string) => typedError<Role[], EngineError>(__TAURI_INVOKE("roles_list", { accountId, guildId })),
+	roleCreate: (accountId: string, guildId: string, name: string) => typedError<Role, EngineError>(__TAURI_INVOKE("role_create", { accountId, guildId, name })),
+	roleUpdate: (accountId: string, guildId: string, roleId: string, edit: RoleEdit_Deserialize) => typedError<null, EngineError>(__TAURI_INVOKE("role_update", { accountId, guildId, roleId, edit })),
+	roleDelete: (accountId: string, guildId: string, roleId: string) => typedError<null, EngineError>(__TAURI_INVOKE("role_delete", { accountId, guildId, roleId })),
+	/**  Rôles du plus haut au plus bas ; l'ordre devient les positions. */
+	roleReorder: (accountId: string, guildId: string, order: string[]) => typedError<null, EngineError>(__TAURI_INVOKE("role_reorder", { accountId, guildId, order })),
+	guildMembersSearch: (accountId: string, guildId: string, query: string, limit: number) => typedError<MemberSummary_Serialize[], EngineError>(__TAURI_INVOKE("guild_members_search", { accountId, guildId, query, limit })),
+	memberKick: (accountId: string, guildId: string, userId: string) => typedError<null, EngineError>(__TAURI_INVOKE("member_kick", { accountId, guildId, userId })),
+	memberBan: (accountId: string, guildId: string, userId: string, deleteDays: number) => typedError<null, EngineError>(__TAURI_INVOKE("member_ban", { accountId, guildId, userId, deleteDays })),
+	bansList: (accountId: string, guildId: string) => typedError<Ban_Serialize[], EngineError>(__TAURI_INVOKE("bans_list", { accountId, guildId })),
+	banRemove: (accountId: string, guildId: string, userId: string) => typedError<null, EngineError>(__TAURI_INVOKE("ban_remove", { accountId, guildId, userId })),
+	invitesList: (accountId: string, guildId: string) => typedError<Invite_Serialize[], EngineError>(__TAURI_INVOKE("invites_list", { accountId, guildId })),
+	/**  `max_age` en secondes (0 = jamais), `max_uses` 0 = illimité. */
+	inviteCreate: (accountId: string, channelId: string, maxAge: number, maxUses: number) => typedError<Invite_Serialize, EngineError>(__TAURI_INVOKE("invite_create", { accountId, channelId, maxAge, maxUses })),
+	inviteDelete: (accountId: string, code: string) => typedError<null, EngineError>(__TAURI_INVOKE("invite_delete", { accountId, code })),
+	/**  Supprime l'emoji `remove` si fourni, puis renvoie la liste à jour. */
+	guildEmojisManage: (accountId: string, guildId: string, remove: string | null) => typedError<ServerEmoji_Serialize[], EngineError>(__TAURI_INVOKE("guild_emojis_manage", { accountId, guildId, remove })),
+	auditLog: (accountId: string, guildId: string) => typedError<AuditEntry_Serialize[], EngineError>(__TAURI_INVOKE("audit_log", { accountId, guildId })),
+	automodRules: (accountId: string, guildId: string) => typedError<AutomodRule[], EngineError>(__TAURI_INVOKE("automod_rules", { accountId, guildId })),
+	integrationsList: (accountId: string, guildId: string) => typedError<Integration_Serialize[], EngineError>(__TAURI_INVOKE("integrations_list", { accountId, guildId })),
+	channelInfo: (accountId: string, channelId: string) => typedError<ChannelDetail_Serialize, EngineError>(__TAURI_INVOKE("channel_info", { accountId, channelId })),
+	channelUpdate: (accountId: string, channelId: string, edit: ChannelEdit_Deserialize) => typedError<null, EngineError>(__TAURI_INVOKE("channel_update", { accountId, channelId, edit })),
+	channelCreate: (accountId: string, guildId: string, name: string, kind: NewChannelKind) => typedError<null, EngineError>(__TAURI_INVOKE("channel_create", { accountId, guildId, name, kind })),
+	/**  Recherche dans un serveur (`guild_id`) ou dans un salon / MP (`channel_id`). */
+	messagesSearch: (accountId: string, guildId: string | null, channelId: string | null, query: SearchQuery_Deserialize) => typedError<SearchPage_Serialize, EngineError>(__TAURI_INVOKE("messages_search", { accountId, guildId, channelId, query })),
+	pinsList: (accountId: string, channelId: string) => typedError<Message_Serialize[], EngineError>(__TAURI_INVOKE("pins_list", { accountId, channelId })),
+	/**  Fils actifs (`archived` faux) ou archivés, les plus récemment actifs d'abord. */
+	threadsList: (accountId: string, channelId: string, archived: boolean) => typedError<ThreadSummary_Serialize[], EngineError>(__TAURI_INVOKE("threads_list", { accountId, channelId, archived })),
+	/**  Crée un fil ; `content` renseigné = publication de forum. */
+	threadCreate: (accountId: string, channelId: string, name: string, content: string | null) => typedError<ThreadSummary_Serialize, EngineError>(__TAURI_INVOKE("thread_create", { accountId, channelId, name, content })),
+	/**  Rejoint un salon vocal ; `guild_id` nul pour un appel MP. */
+	voiceJoin: (accountId: string, guildId: string | null, channelId: string) => typedError<null, EngineError>(__TAURI_INVOKE("voice_join", { accountId, guildId, channelId })),
+	voiceLeave: (accountId: string) => typedError<null, EngineError>(__TAURI_INVOKE("voice_leave", { accountId })),
+	voiceSetMute: (accountId: string, mute: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("voice_set_mute", { accountId, mute })),
+	voiceSetDeaf: (accountId: string, deaf: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("voice_set_deaf", { accountId, deaf })),
+	voiceDevices: () => typedError<AudioDevices, EngineError>(__TAURI_INVOKE("voice_devices")),
+	voiceSetDevices: (inputId: string | null, outputId: string | null) => typedError<null, EngineError>(__TAURI_INVOKE("voice_set_devices", { inputId, outputId })),
+	streamStart: (accountId: string, quality: StreamQuality) => typedError<StreamState_Serialize, EngineError>(__TAURI_INVOKE("stream_start", { accountId, quality })),
+	streamStop: (accountId: string) => typedError<StreamState_Serialize, EngineError>(__TAURI_INVOKE("stream_stop", { accountId })),
 };
 
 /** Events */
@@ -91,11 +152,75 @@ export type Attachment_Serialize = {
 	height: number | null,
 };
 
+export type AudioDevice = {
+	id: string,
+	name: string,
+	is_default: boolean,
+};
+
+export type AudioDevices = {
+	inputs: AudioDevice[],
+	outputs: AudioDevice[],
+};
+
+export type AuditChange = AuditChange_Serialize | AuditChange_Deserialize;
+
+export type AuditChange_Deserialize = {
+	key: string,
+	old?: string | null,
+	new?: string | null,
+};
+
+export type AuditChange_Serialize = {
+	key: string,
+	old: string | null,
+	new: string | null,
+};
+
+export type AuditEntry = AuditEntry_Serialize | AuditEntry_Deserialize;
+
+export type AuditEntry_Deserialize = {
+	id: string,
+	/**  Code d'action Discord (ex. 22 = bannissement, 20 = expulsion), traduit côté interface. */
+	action_type: number,
+	actor?: User_Deserialize | null,
+	target_id?: string | null,
+	reason?: string | null,
+	changes: AuditChange_Deserialize[],
+	/**  Date de l'entrée, en millisecondes depuis l'epoch (déduite de l'identifiant). */
+	created_ms: number | null,
+};
+
+export type AuditEntry_Serialize = {
+	id: string,
+	/**  Code d'action Discord (ex. 22 = bannissement, 20 = expulsion), traduit côté interface. */
+	action_type: number,
+	actor: User_Serialize | null,
+	target_id: string | null,
+	reason: string | null,
+	changes: AuditChange_Serialize[],
+	/**  Date de l'entrée, en millisecondes depuis l'epoch (déduite de l'identifiant). */
+	created_ms: number | null,
+};
+
 export type AuthQr = AuthQr_Serialize | AuthQr_Deserialize;
 
 export type AuthQr_Deserialize = QrAuthEvent_Deserialize;
 
 export type AuthQr_Serialize = QrAuthEvent_Serialize;
+
+export type AutomodRule = {
+	id: string,
+	name: string,
+	enabled: boolean,
+	/**  Type de déclencheur Discord (1 mots-clés, 3 spam, 4 listes prédéfinies, 5 mentions massives). */
+	trigger_type: number,
+	keywords: string[],
+	/**  Types d'action Discord (1 bloquer, 2 alerter, 3 exclure temporairement). */
+	actions: number[],
+	exempt_roles: string[],
+	exempt_channels: string[],
+};
 
 export type Badge = Badge_Serialize | Badge_Deserialize;
 
@@ -113,6 +238,18 @@ export type Badge_Serialize = {
 	link: string | null,
 };
 
+export type Ban = Ban_Serialize | Ban_Deserialize;
+
+export type Ban_Deserialize = {
+	user: User_Deserialize,
+	reason?: string | null,
+};
+
+export type Ban_Serialize = {
+	user: User_Serialize,
+	reason: string | null,
+};
+
 export type CaptchaChallenge = CaptchaChallenge_Serialize | CaptchaChallenge_Deserialize;
 
 export type CaptchaChallenge_Deserialize = {
@@ -127,6 +264,44 @@ export type CaptchaChallenge_Serialize = {
 	sitekey: string,
 	rqdata: string | null,
 	rqtoken: string | null,
+};
+
+export type ChannelDetail = ChannelDetail_Serialize | ChannelDetail_Deserialize;
+
+export type ChannelDetail_Deserialize = {
+	id: string,
+	guild_id?: string | null,
+	name: string,
+	topic?: string | null,
+	nsfw: boolean,
+	/**  Mode lent, en secondes (0 = désactivé). */
+	rate_limit_per_user: number,
+};
+
+export type ChannelDetail_Serialize = {
+	id: string,
+	guild_id: string | null,
+	name: string,
+	topic: string | null,
+	nsfw: boolean,
+	/**  Mode lent, en secondes (0 = désactivé). */
+	rate_limit_per_user: number,
+};
+
+export type ChannelEdit = ChannelEdit_Serialize | ChannelEdit_Deserialize;
+
+export type ChannelEdit_Deserialize = {
+	name?: string | null,
+	topic?: string | null,
+	nsfw?: boolean | null,
+	rate_limit_per_user?: number | null,
+};
+
+export type ChannelEdit_Serialize = {
+	name?: string,
+	topic?: string,
+	nsfw?: boolean,
+	rate_limit_per_user?: number,
 };
 
 export type ChannelKind = "text" | "voice" | "category" | "announcement" | "stage" | "forum" | "media" | "thread" | "dm" | "group_dm";
@@ -191,6 +366,56 @@ export type ConnectedAccount_Serialize = {
 
 export type ConnectionState = "disconnected" | "connecting" | "ready" | "resuming" | "failed";
 
+/**  Session ouverte sur un appareil (`GET /auth/sessions`). */
+export type DeviceSession = DeviceSession_Serialize | DeviceSession_Deserialize;
+
+/**  Session ouverte sur un appareil (`GET /auth/sessions`). */
+export type DeviceSession_Deserialize = {
+	/**  Empreinte de la session ; sert à la déconnecter. */
+	id_hash: string,
+	client: string,
+	os: string,
+	/**  Lieu approximatif, si Discord le fournit. */
+	location?: string | null,
+	/**  Dernière activité, ISO 8601. */
+	last_active?: string | null,
+};
+
+/**  Session ouverte sur un appareil (`GET /auth/sessions`). */
+export type DeviceSession_Serialize = {
+	/**  Empreinte de la session ; sert à la déconnecter. */
+	id_hash: string,
+	client: string,
+	os: string,
+	/**  Lieu approximatif, si Discord le fournit. */
+	location: string | null,
+	/**  Dernière activité, ISO 8601. */
+	last_active: string | null,
+};
+
+/**  Serveur public listé dans l'exploration. */
+export type DiscoverableGuild = DiscoverableGuild_Serialize | DiscoverableGuild_Deserialize;
+
+/**  Serveur public listé dans l'exploration. */
+export type DiscoverableGuild_Deserialize = {
+	id: string,
+	name: string,
+	description?: string | null,
+	icon_url?: string | null,
+	member_count: number,
+	online_count: number,
+};
+
+/**  Serveur public listé dans l'exploration. */
+export type DiscoverableGuild_Serialize = {
+	id: string,
+	name: string,
+	description: string | null,
+	icon_url: string | null,
+	member_count: number,
+	online_count: number,
+};
+
 export type Engine = Engine_Serialize | Engine_Deserialize;
 
 export type EngineError = { kind: "not_found"; what: string } | { kind: "unauthorized" } | { kind: "rate_limited"; retry_after_ms: number } | { kind: "network"; message: string } | { kind: "discord"; code: number; message: string } | { kind: "internal"; message: string } | { kind: "not_implemented"; command: string };
@@ -224,6 +449,52 @@ export type Engine_Deserialize = EngineEvent_Deserialize;
 
 export type Engine_Serialize = EngineEvent_Serialize;
 
+export type GuildDetail = GuildDetail_Serialize | GuildDetail_Deserialize;
+
+export type GuildDetail_Deserialize = {
+	id: string,
+	name: string,
+	description?: string | null,
+	icon_url?: string | null,
+	banner_url?: string | null,
+	owner_id: string,
+	member_count?: number | null,
+	online_count?: number | null,
+	/**  Permissions de l'utilisateur sur le serveur (bits Discord en décimal, calculés depuis les rôles). */
+	permissions: string,
+};
+
+export type GuildDetail_Serialize = {
+	id: string,
+	name: string,
+	description: string | null,
+	icon_url: string | null,
+	banner_url: string | null,
+	owner_id: string,
+	member_count: number | null,
+	online_count: number | null,
+	/**  Permissions de l'utilisateur sur le serveur (bits Discord en décimal, calculés depuis les rôles). */
+	permissions: string,
+};
+
+export type GuildEdit = GuildEdit_Serialize | GuildEdit_Deserialize;
+
+export type GuildEdit_Deserialize = {
+	name?: string | null,
+	description?: string | null,
+};
+
+export type GuildEdit_Serialize = {
+	name?: string,
+	description?: string,
+};
+
+export type GuildEmoji = {
+	id: string,
+	name: string,
+	animated: boolean,
+};
+
 export type GuildSummary = GuildSummary_Serialize | GuildSummary_Deserialize;
 
 export type GuildSummary_Deserialize = {
@@ -246,6 +517,89 @@ export type GuildSummary_Serialize = {
 	folder_id: string | null,
 	unread: boolean,
 	mention_count: number,
+};
+
+export type Integration = Integration_Serialize | Integration_Deserialize;
+
+export type Integration_Deserialize = {
+	id: string,
+	name: string,
+	kind: string,
+	enabled: boolean,
+	account_name?: string | null,
+};
+
+export type Integration_Serialize = {
+	id: string,
+	name: string,
+	kind: string,
+	enabled: boolean,
+	account_name: string | null,
+};
+
+export type Invite = Invite_Serialize | Invite_Deserialize;
+
+/**  Aperçu d'une invitation, affiché avant d'accepter. */
+export type InvitePreview = InvitePreview_Serialize | InvitePreview_Deserialize;
+
+/**  Aperçu d'une invitation, affiché avant d'accepter. */
+export type InvitePreview_Deserialize = {
+	/**  Code seul (sans le préfixe `discord.gg/`). */
+	code: string,
+	guild_id: string,
+	guild_name: string,
+	icon_url?: string | null,
+	member_count: number,
+	online_count: number,
+	/**  Salon visé par l'invitation, s'il y en a un. */
+	channel_name?: string | null,
+};
+
+/**  Aperçu d'une invitation, affiché avant d'accepter. */
+export type InvitePreview_Serialize = {
+	/**  Code seul (sans le préfixe `discord.gg/`). */
+	code: string,
+	guild_id: string,
+	guild_name: string,
+	icon_url: string | null,
+	member_count: number,
+	online_count: number,
+	/**  Salon visé par l'invitation, s'il y en a un. */
+	channel_name: string | null,
+};
+
+export type Invite_Deserialize = {
+	code: string,
+	inviter?: User_Deserialize | null,
+	channel_id: string,
+	channel_name?: string | null,
+	uses: number,
+	/**  0 = illimité. */
+	max_uses: number,
+	created_at?: string | null,
+	expires_at?: string | null,
+};
+
+export type Invite_Serialize = {
+	code: string,
+	inviter: User_Serialize | null,
+	channel_id: string,
+	channel_name: string | null,
+	uses: number,
+	/**  0 = illimité. */
+	max_uses: number,
+	created_at: string | null,
+	expires_at: string | null,
+};
+
+/**  Compte externe lié au profil (Twitch, GitHub…). */
+export type LinkedService = {
+	/**  Type du service, ex. `github` : fait partie de l'URL de retrait. */
+	kind: string,
+	id: string,
+	name: string,
+	verified: boolean,
+	visible: boolean,
 };
 
 export type LoginOutcome = LoginOutcome_Serialize | LoginOutcome_Deserialize;
@@ -296,6 +650,24 @@ export type MemberGroup_Serialize = {
 	name: string,
 	count: number,
 	members: MemberEntry_Serialize[],
+};
+
+export type MemberSummary = MemberSummary_Serialize | MemberSummary_Deserialize;
+
+export type MemberSummary_Deserialize = {
+	user: User_Deserialize,
+	nick?: string | null,
+	roles: string[],
+	joined_at?: string | null,
+	timed_out_until?: string | null,
+};
+
+export type MemberSummary_Serialize = {
+	user: User_Serialize,
+	nick: string | null,
+	roles: string[],
+	joined_at: string | null,
+	timed_out_until: string | null,
 };
 
 /**  Mention récente (onglet Activité), avec où elle a eu lieu. */
@@ -379,6 +751,14 @@ export type MutualGuild_Serialize = {
 	name: string,
 	icon_url: string | null,
 	nick: string | null,
+};
+
+export type NewChannelKind = "text" | "voice";
+
+export type OutgoingFile = {
+	filename: string,
+	/**  Contenu du fichier, encodé en base64 standard. */
+	bytes_b64: string,
 };
 
 export type OutgoingMessage = OutgoingMessage_Serialize | OutgoingMessage_Deserialize;
@@ -474,6 +854,202 @@ export type Relationship_Serialize = {
 	user: User_Serialize,
 	kind: RelationshipKind,
 	nickname: string | null,
+};
+
+export type Role = {
+	id: string,
+	name: string,
+	color: number,
+	hoist: boolean,
+	mentionable: boolean,
+	position: number,
+	permissions: string,
+	managed: boolean,
+};
+
+export type RoleEdit = RoleEdit_Serialize | RoleEdit_Deserialize;
+
+export type RoleEdit_Deserialize = {
+	name?: string | null,
+	color?: number | null,
+	hoist?: boolean | null,
+	mentionable?: boolean | null,
+	permissions?: string | null,
+};
+
+export type RoleEdit_Serialize = {
+	name?: string,
+	color?: number,
+	hoist?: boolean,
+	mentionable?: boolean,
+	permissions?: string,
+};
+
+/**  Événement programmé d'un serveur, à venir ou en cours. */
+export type ScheduledEvent = ScheduledEvent_Serialize | ScheduledEvent_Deserialize;
+
+/**  Événement programmé d'un serveur, à venir ou en cours. */
+export type ScheduledEvent_Deserialize = {
+	id: string,
+	name: string,
+	description?: string | null,
+	/**  Début, ISO 8601. */
+	start: string,
+	/**  Fin, ISO 8601. */
+	end?: string | null,
+	/**  Salon vocal ou scène qui héberge l'événement. */
+	channel_id?: string | null,
+	/**  Lieu libre, pour un événement externe. */
+	location?: string | null,
+	/**  Nombre de personnes intéressées. */
+	interested: number,
+	/**  Vrai si l'événement a commencé. */
+	live: boolean,
+};
+
+/**  Événement programmé d'un serveur, à venir ou en cours. */
+export type ScheduledEvent_Serialize = {
+	id: string,
+	name: string,
+	description: string | null,
+	/**  Début, ISO 8601. */
+	start: string,
+	/**  Fin, ISO 8601. */
+	end: string | null,
+	/**  Salon vocal ou scène qui héberge l'événement. */
+	channel_id: string | null,
+	/**  Lieu libre, pour un événement externe. */
+	location: string | null,
+	/**  Nombre de personnes intéressées. */
+	interested: number,
+	/**  Vrai si l'événement a commencé. */
+	live: boolean,
+};
+
+/**  Filtre `has:` de la recherche de messages. */
+export type SearchHas = "link" | "embed" | "file" | "video" | "image" | "sound" | "sticker";
+
+export type SearchPage = SearchPage_Serialize | SearchPage_Deserialize;
+
+export type SearchPage_Deserialize = {
+	total: number,
+	/**  Un message par résultat (le message trouvé, sans son contexte). */
+	messages: Message_Deserialize[],
+};
+
+export type SearchPage_Serialize = {
+	total: number,
+	/**  Un message par résultat (le message trouvé, sans son contexte). */
+	messages: Message_Serialize[],
+};
+
+export type SearchQuery = SearchQuery_Serialize | SearchQuery_Deserialize;
+
+export type SearchQuery_Deserialize = {
+	/**  Texte recherché ; vide pour ne filtrer que par `has` ou par auteur. */
+	content: string,
+	author_id?: string | null,
+	has: SearchHas[],
+	/**  Décalage en messages, pour la pagination (25 résultats par page côté Discord). */
+	offset: number,
+};
+
+export type SearchQuery_Serialize = {
+	/**  Texte recherché ; vide pour ne filtrer que par `has` ou par auteur. */
+	content: string,
+	author_id: string | null,
+	has: SearchHas[],
+	/**  Décalage en messages, pour la pagination (25 résultats par page côté Discord). */
+	offset: number,
+};
+
+export type ServerEmoji = ServerEmoji_Serialize | ServerEmoji_Deserialize;
+
+export type ServerEmoji_Deserialize = {
+	id: string,
+	name: string,
+	animated: boolean,
+	creator?: string | null,
+	image_url: string,
+};
+
+export type ServerEmoji_Serialize = {
+	id: string,
+	name: string,
+	animated: boolean,
+	creator: string | null,
+	image_url: string,
+};
+
+/**  Définition du partage : largeur × hauteur en pixels et images par seconde. */
+export type StreamQuality = {
+	width: number,
+	height: number,
+	fps: number,
+};
+
+/**  Partage en cours pour un compte. `quality` est absente quand rien n'est partagé. */
+export type StreamState = StreamState_Serialize | StreamState_Deserialize;
+
+/**  Partage en cours pour un compte. `quality` est absente quand rien n'est partagé. */
+export type StreamState_Deserialize = {
+	account_id: string,
+	streaming: boolean,
+	quality?: StreamQuality | null,
+};
+
+/**  Partage en cours pour un compte. `quality` est absente quand rien n'est partagé. */
+export type StreamState_Serialize = {
+	account_id: string,
+	streaming: boolean,
+	quality: StreamQuality | null,
+};
+
+/**  Abonnement Discord (lecture seule). */
+export type Subscription = Subscription_Serialize | Subscription_Deserialize;
+
+/**  Abonnement Discord (lecture seule). */
+export type Subscription_Deserialize = {
+	id: string,
+	status: string,
+	/**  Fin de la période en cours, ISO 8601. */
+	period_end?: string | null,
+	/**  Résiliation demandée (la période se termine sans renouvellement). */
+	canceled: boolean,
+};
+
+/**  Abonnement Discord (lecture seule). */
+export type Subscription_Serialize = {
+	id: string,
+	status: string,
+	/**  Fin de la période en cours, ISO 8601. */
+	period_end: string | null,
+	/**  Résiliation demandée (la période se termine sans renouvellement). */
+	canceled: boolean,
+};
+
+export type ThreadSummary = ThreadSummary_Serialize | ThreadSummary_Deserialize;
+
+export type ThreadSummary_Deserialize = {
+	/**  Un fil est un salon : son id s'ouvre comme un salon. */
+	id: string,
+	name: string,
+	message_count: number,
+	member_count: number,
+	last_message_id?: string | null,
+	archived: boolean,
+	owner_id?: string | null,
+};
+
+export type ThreadSummary_Serialize = {
+	/**  Un fil est un salon : son id s'ouvre comme un salon. */
+	id: string,
+	name: string,
+	message_count: number,
+	member_count: number,
+	last_message_id: string | null,
+	archived: boolean,
+	owner_id: string | null,
 };
 
 export type User = User_Serialize | User_Deserialize;

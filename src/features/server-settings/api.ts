@@ -2,7 +2,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { EngineError, ChannelSummary } from "../../contract/bindings";
 import type {
-  AuditEntry, AutomodRule, Ban, ChannelDetail, ChannelEdit, GuildDetail, GuildEdit, GuildEmoji, Integration,
+  AuditEntry, AutomodRule, Ban, ChannelDetail, ChannelEdit, GuildDetail, GuildEdit, ServerEmoji, Integration,
   Invite, MemberSummary, NewChannelKind, Role, RoleEdit,
 } from "./server-contract";
 
@@ -129,7 +129,7 @@ export const srv = {
     call<Invite>("invite_create", { accountId, channelId, maxAge, maxUses }),
   inviteDelete: (accountId: string, code: string) => call<null>("invite_delete", { accountId, code }),
   guildEmojisManage: (accountId: string, guildId: string, remove: string | null) =>
-    call<GuildEmoji[]>("guild_emojis_manage", { accountId, guildId, remove }),
+    call<ServerEmoji[]>("guild_emojis_manage", { accountId, guildId, remove }),
   auditLog: (accountId: string, guildId: string) => call<AuditEntry[]>("audit_log", { accountId, guildId }),
   automodRules: (accountId: string, guildId: string) => call<AutomodRule[]>("automod_rules", { accountId, guildId }),
   integrationsList: (accountId: string, guildId: string) => call<Integration[]>("integrations_list", { accountId, guildId }),

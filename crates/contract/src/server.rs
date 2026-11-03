@@ -80,7 +80,7 @@ pub struct Invite {
 }
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type)]
-pub struct GuildEmoji {
+pub struct ServerEmoji {
     pub id: Snowflake,
     pub name: String,
     pub animated: bool,
