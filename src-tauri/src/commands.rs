@@ -64,7 +64,7 @@ pub async fn auth_qr_cancel(engine: Eng<'_>) -> Res<()> {
 #[tauri::command]
 #[specta::specta]
 pub async fn auth_password(engine: Eng<'_>, login: PasswordLogin) -> Res<LoginOutcome> {
-    engine.login_password(&login).await
+    (*engine).login_password(&login).await
 }
 
 #[tauri::command]
@@ -75,7 +75,7 @@ pub async fn auth_mfa(
     method: MfaMethod,
     code: String,
 ) -> Res<LoginOutcome> {
-    engine.login_mfa(&ticket, method, &code).await
+    (*engine).login_mfa(&ticket, method, &code).await
 }
 
 #[tauri::command]

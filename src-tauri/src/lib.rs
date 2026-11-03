@@ -6,7 +6,7 @@ mod gpu;
 
 use tauri_specta::{Builder, collect_commands, collect_events};
 
-pub const BINDINGS_PATH: &str = "../src/contract/bindings.ts";
+pub const BINDINGS_PATH: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../src/contract/bindings.ts");
 
 pub fn specta_builder() -> Builder<tauri::Wry> {
     Builder::<tauri::Wry>::new()
@@ -61,7 +61,10 @@ pub fn run() {
                 engine::Engine::open(emit).map_err(|e| format!("moteur : {e:?}"))?,
             ));
             tauri::Manager::manage(app, engine);
-            tauri::async_runtime::spawn(engine.connect_all());
+            tauri::async_runtime::spawn(async move {
+                let _ = engine.identity().await;
+                engine.connect_all().await;
+            });
             gpu::enable_acceleration(app);
             Ok(())
         })

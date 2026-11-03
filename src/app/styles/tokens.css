@@ -1,0 +1,73 @@
+/* Cordelle — tokens de l'interface v1 (thème sombre). Source : maquettes du canvas Design. */
+:root {
+  /* Surfaces, de la plus profonde à la plus haute */
+  --surface-frame: #111214;      /* barre de titre, rail des serveurs */
+  --surface-sidebar: #161719;    /* liste des salons, panneau membres, nav des réglages */
+  --surface-chat: #1b1c1f;       /* zone de conversation, contenu des réglages */
+  --surface-call: #0f1012;       /* scène d'appel */
+  --surface-raised: #202125;     /* cartes de réglages, survol d'un message */
+  --surface-input: #26272c;      /* zone de saisie, boutons de la barre d'appel */
+  --surface-hover: #26272c;
+  --surface-selected: #2a2b30;   /* salon actif, bouton actif */
+  --surface-menu: #232428;       /* menus déroulants, popovers */
+  --border: #2a2b30;
+  --border-subtle: #26272b;
+
+  /* Texte */
+  --text-strong: #ffffff;        /* salon non lu, élément sélectionné */
+  --text: #e8e9eb;
+  --text-body: #dcdde0;          /* corps des messages */
+  --text-secondary: #c9cbd0;
+  --text-muted: #a3a6ad;
+  --text-faint: #8b8e96;         /* méta, catégories, horodatage (≥ 4.5:1 sur surface-chat) */
+
+  /* Sens */
+  --accent: #5a66e8;             /* bouton principal, interrupteur actif */
+  --accent-text: #8c96f5;        /* liens, « Fil », « Modifier », point « modifié » */
+  --mention-pill-bg: #3a3f6e;
+  --mention-pill-text: #c9cef8;
+  --mention-row-bg: #2a2718;     /* message qui te mentionne */
+  --danger: #d93f45;             /* pastille mention, LIVE, raccrocher */
+  --danger-text: #e5737a;        /* micro coupé, séparateur « Nouveaux messages » */
+  --success: #3fb97a;            /* parle, vocal connecté, liseré du partage */
+  --success-text: #7fd9a8;
+  --voice-strip-bg: #1c2620;     /* ligne « vocal connecté » */
+  --share-active-bg: #1f3a2b;    /* bouton partage actif */
+
+  /* Typo : police système dans l'app, Inter dans les maquettes */
+  --font-ui: system-ui, "Inter", "Segoe UI", sans-serif;
+  --fs-caps: 11.5px;   /* catégories en capitales, letter-spacing .03em, 600 */
+  --fs-meta: 12.5px;   /* heures, sous-titres */
+  --fs-small: 13.5px;
+  --fs-ui: 14px;
+  --fs-message: 15px;  /* line-height 1.45 */
+  --fs-title: 26px;    /* titre de page de réglages, 700 */
+
+  /* Rayons */
+  --r-xs: 4px; --r-sm: 6px; --r-md: 8px; --r-lg: 10px; --r-xl: 12px;
+
+  /* Dimensions de structure */
+  --titlebar-h: 34px;
+  --rail-w: 64px;
+  --server-icon: 40px;
+  --sidebar-w: 252px;
+  --members-w: 248px;
+  --call-chat-w: 320px;
+  --settings-nav-w: 280px;
+  --settings-content-max: 820px;
+  --header-h: 52px;
+  --channel-row-h: 32px;
+  --composer-min-h: 48px;
+  --call-button: 48px;
+
+  /* Mouvement */
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --t-hover: 120ms;
+  --t-popover: 160ms;
+  --t-panel: 180ms;
+  --t-swap: 220ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --t-hover: 0ms; --t-popover: 0ms; --t-panel: 0ms; --t-swap: 0ms; }
+}

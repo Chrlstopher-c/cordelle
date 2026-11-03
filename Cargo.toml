@@ -28,3 +28,7 @@ lto = true
 opt-level = 3
 panic = "abort"
 strip = true
+
+# Dépendances optimisées même en dev : la génération RSA du QR passe de ~8 s à moins d'une seconde.
+[profile.dev.package."*"]
+opt-level = 2

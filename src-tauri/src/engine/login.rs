@@ -47,7 +47,7 @@ impl Engine {
     }
 
     pub async fn login_password(
-        &self,
+        &'static self,
         request: &PasswordLogin,
     ) -> Result<LoginOutcome, EngineError> {
         let identity = self.identity().await?;
@@ -56,7 +56,7 @@ impl Engine {
     }
 
     pub async fn login_mfa(
-        &self,
+        &'static self,
         ticket: &str,
         method: MfaMethod,
         code: &str,
@@ -66,7 +66,7 @@ impl Engine {
         self.finish_step(step).await
     }
 
-    async fn finish_step(&self, step: Step) -> Result<LoginOutcome, EngineError> {
+    async fn finish_step(&'static self, step: Step) -> Result<LoginOutcome, EngineError> {
         Ok(match step {
             Step::Token(token) => {
                 let user = self.fetch_user(&token).await?;
@@ -80,7 +80,7 @@ impl Engine {
         })
     }
 
-    async fn fetch_user(&self, token: &str) -> Result<User, EngineError> {
+    async fn fetch_user(&'static self, token: &str) -> Result<User, EngineError> {
         let identity = self.identity().await?.clone();
         let me = rest::RestClient::new(identity, identity::API_BASE.into())?
             .with_token(token)
@@ -98,7 +98,11 @@ impl Engine {
         })
     }
 
-    async fn save_account(&self, user: User, token: &str) -> Result<AccountId, EngineError> {
+    async fn save_account(
+        &'static self,
+        user: User,
+        token: &str,
+    ) -> Result<AccountId, EngineError> {
         let id = user.id.clone();
         self.accounts().add(user, token)?;
         tracing::info!(account = %id, "compte ajouté");

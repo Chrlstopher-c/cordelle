@@ -13,11 +13,14 @@
     "tauri": "tauri"
   },
   "dependencies": {
+    "@tanstack/react-virtual": "^3.14.25",
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-opener": "^2",
+    "motion": "^14.9.0",
     "qrcode": "^1.5.4",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zustand": "^5.0.16"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2",

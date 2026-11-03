@@ -1,5 +1,6 @@
 //! Moteur de l'app : comptes, connexion, sessions. Tenu dans l'état Tauri, appelé par `commands.rs`.
 
+mod build_cache;
 mod data;
 mod login;
 mod session;
@@ -15,6 +16,7 @@ use contract::{AccountId, EngineError, account::AccountSummary, account::Connect
 use identity::ClientIdentity;
 use tokio::sync::{Mutex, OnceCell};
 
+use build_cache::BuildCache;
 pub use login::QrSlot;
 pub use session::Emitter;
 use session::Session;
@@ -25,6 +27,7 @@ pub struct Engine {
     qr: QrSlot,
     locale: String,
     cache_dir: PathBuf,
+    build_cache: BuildCache,
     sessions: SyncMutex<HashMap<AccountId, Arc<Session>>>,
     emit: Emitter,
 }
@@ -40,26 +43,36 @@ impl Engine {
             internal("création du cache impossible")
         })?;
         Ok(Self {
-            accounts: Accounts::open(&dir, Arc::new(KeyringStore))?,
+            accounts: {
+                accounts::ensure_secret_service();
+                Accounts::open(&dir, Arc::new(KeyringStore))?
+            },
             identity: OnceCell::new(),
             qr: Mutex::new(None),
             locale: "fr".into(),
+            build_cache: BuildCache::new(&dir),
             cache_dir,
             sessions: SyncMutex::new(HashMap::new()),
             emit,
         })
     }
 
-    /// Identité du client, avec le numéro de build du client web récupéré une seule fois.
-    pub async fn identity(&self) -> Result<&ClientIdentity, EngineError> {
+    /// Identité du client. Numéro de build pris dans le cache disque s'il existe (rafraîchi en fond si
+    /// périmé, effet au prochain lancement), sinon récupéré sur le client web.
+    pub async fn identity(&'static self) -> Result<&'static ClientIdentity, EngineError> {
         self.identity
             .get_or_try_init(|| async {
-                let http = reqwest_client()?;
-                let build = rest::fetch_build_number(&http).await.map_err(|e| {
-                    tracing::error!("numéro de build introuvable : {e}");
-                    EngineError::from(e)
-                })?;
-                tracing::info!(build, "numéro de build du client web");
+                let build = match self.build_cache.read() {
+                    Some((build, stale)) => {
+                        if stale {
+                            tauri::async_runtime::spawn(async move {
+                                let _ = self.build_cache.fetch().await;
+                            });
+                        }
+                        build
+                    }
+                    None => self.build_cache.fetch().await?,
+                };
                 Ok(ClientIdentity::new(build, &self.locale))
             })
             .await
@@ -74,7 +87,7 @@ impl Engine {
     }
 
     /// Connecte tous les comptes enregistrés (chacun reçoit ses notifications en parallèle).
-    pub async fn connect_all(&self) {
+    pub async fn connect_all(&'static self) {
         for (user, _) in self.accounts.list() {
             if let Err(e) = self.connect(&user.id).await {
                 tracing::error!(account = %user.id, "connexion impossible : {e:?}");
@@ -82,7 +95,7 @@ impl Engine {
         }
     }
 
-    pub async fn connect(&self, account_id: &AccountId) -> Result<(), EngineError> {
+    pub async fn connect(&'static self, account_id: &AccountId) -> Result<(), EngineError> {
         if self.session(account_id).is_ok() {
             return Ok(());
         }
@@ -140,13 +153,6 @@ impl Engine {
             })
             .collect()
     }
-}
-
-fn reqwest_client() -> Result<reqwest::Client, EngineError> {
-    reqwest::Client::builder().build().map_err(|e| {
-        tracing::error!("client HTTP impossible : {e}");
-        internal("client HTTP impossible")
-    })
 }
 
 pub fn internal(message: &str) -> EngineError {

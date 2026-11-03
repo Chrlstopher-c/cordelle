@@ -1,7 +1,7 @@
 // Connexion QR de l'écran de travail : suit l'événement authQr et rend le QR en data URL.
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { commands, events, type QrAuthEvent } from "../contract/bindings";
+import { commands, events, type QrAuthEvent } from "../../contract/bindings";
 
 export interface QrLogin {
   image: string | null;
