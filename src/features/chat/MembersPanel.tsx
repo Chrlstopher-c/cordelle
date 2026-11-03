@@ -1,15 +1,12 @@
 // Panneau Membres 248 px (maquette Ecran-principal) : groupes par rôle / en ligne / hors ligne, avatar 32 + statut,
 // nom coloré par rôle, activité. Abonnement au salon à l'ouverture.
 import { useEffect } from "react";
-import { commands, type MemberEntry, type MemberGroup, type PresenceStatus } from "../../contract/bindings";
+import { commands, type MemberEntry, type MemberGroup } from "../../contract/bindings";
 import { useEngine } from "../../shared/data/engine-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
-import { Avatar } from "../../shared/ui/Avatar";
+import { StatusAvatar } from "../../shared/ui/StatusAvatar";
 import { useProfiles } from "../profile";
 
-const DOT: Record<PresenceStatus, string> = {
-  online: "var(--success)", idle: "#e0a63a", dnd: "var(--danger)", invisible: "var(--text-faint)", offline: "var(--text-faint)",
-};
 const EMPTY: MemberGroup[] = [];
 const hex = (c: number): string => `#${c.toString(16).padStart(6, "0")}`;
 
@@ -20,10 +17,7 @@ function Row({ m, guildId }: { m: MemberEntry; guildId: string }): React.JSX.Ele
   return (
     <button className="mem-row" style={offline ? { opacity: 0.45 } : undefined}
       onClick={(e) => openPopout(m.user.id, guildId, { x: e.clientX - 360, y: e.clientY })}>
-      <span style={{ position: "relative" }}>
-        <Avatar id={m.user.id} name={name} url={m.user.avatar_url} size={32} />
-        {!offline && <span className="ub-dot" style={{ background: DOT[m.status] }} />}
-      </span>
+      <StatusAvatar id={m.user.id} name={name} url={m.user.avatar_url} size={32} status={m.status} />
       <span style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
         <span className="mem-name" style={m.color ? { color: hex(m.color) } : undefined}>{name}</span>
         {m.activity && <span className="mem-act">{m.activity}</span>}

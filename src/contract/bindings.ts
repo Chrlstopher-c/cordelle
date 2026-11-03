@@ -35,6 +35,7 @@ export const commands = {
 	mentionsRecent: (accountId: string) => typedError<Mention_Serialize[], EngineError>(__TAURI_INVOKE("mentions_recent", { accountId })),
 	/**  Abonne au panneau Membres d'un salon ; la liste arrive par l'événement `member_list`. */
 	membersSubscribe: (accountId: string, guildId: string, channelId: string) => typedError<null, EngineError>(__TAURI_INVOKE("members_subscribe", { accountId, guildId, channelId })),
+	statusSet: (accountId: string, status: PresenceStatus) => typedError<null, EngineError>(__TAURI_INVOKE("status_set", { accountId, status })),
 };
 
 /** Events */

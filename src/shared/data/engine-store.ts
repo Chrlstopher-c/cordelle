@@ -9,6 +9,7 @@ import {
   type GuildSummary,
   type MemberGroup,
   type Message,
+  type PresenceStatus,
 } from "../../contract/bindings";
 
 export interface EngineState {
@@ -24,6 +25,9 @@ export interface EngineState {
   typing: Record<string, { userId: string; at: number }[]>;
   /** Panneau Membres par serveur (dernier salon abonné). */
   memberLists: Record<string, MemberGroup[]>;
+  /** Statut choisi pour soi dans la barre de profil. */
+  myStatus: PresenceStatus;
+  setMyStatus: (s: PresenceStatus) => void;
   refreshAccounts: () => Promise<void>;
   loadGuilds: (accountId: string) => Promise<void>;
   loadChannels: (accountId: string, guildId: string) => Promise<void>;
@@ -52,6 +56,12 @@ export const useEngine = create<EngineState>((set, get) => ({
   hasMore: {},
   typing: {},
   memberLists: {},
+  myStatus: "online",
+  setMyStatus: (myStatus) => {
+    set({ myStatus });
+    const me = get().accounts.find((a) => a.active);
+    if (me) void commands.statusSet(me.id, myStatus);
+  },
 
   refreshAccounts: async () => {
     const r = await commands.accountsList();

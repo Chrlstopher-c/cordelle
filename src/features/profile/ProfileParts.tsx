@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { commands, type UserProfile } from "../../contract/bindings";
 import { useEngine } from "../../shared/data/engine-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
-import { Avatar } from "../../shared/ui/Avatar";
+import { usePresence } from "../../shared/data/use-presence";
+import { StatusAvatar } from "../../shared/ui/StatusAvatar";
 
 const hex = (c: number): string => `#${c.toString(16).padStart(6, "0")}`;
 const fmtDate = (ms: number): string =>
@@ -23,9 +24,10 @@ export function Banner({ p }: { p: UserProfile }): React.JSX.Element {
 }
 
 export function ProfileAvatar({ p, big, onOpen }: { p: UserProfile; big?: boolean; onOpen?: () => void }): React.JSX.Element {
+  const status = usePresence(p.user.id);
   const inner = (
     <>
-      <Avatar id={p.user.id} name={displayName(p)} url={p.user.avatar_url} size={big ? 112 : 80} />
+      <StatusAvatar id={p.user.id} name={displayName(p)} url={p.user.avatar_url} size={big ? 112 : 80} status={status} />
       {p.avatar_decoration_url && <img className="deco" src={p.avatar_decoration_url} alt="" />}
     </>
   );

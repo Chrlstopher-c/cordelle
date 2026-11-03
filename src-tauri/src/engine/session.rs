@@ -69,6 +69,15 @@ impl Session {
         self.gateway.shutdown();
     }
 
+    /// Change son statut (op 3), visible par les autres.
+    pub async fn set_status(&self, status: &str) -> Result<(), EngineError> {
+        let d = serde_json::json!({ "status": status, "since": 0, "activities": [], "afk": false });
+        self.gateway
+            .send(3, d)
+            .await
+            .map_err(|e| super::internal(&format!("changement de statut impossible : {e}")))
+    }
+
     /// Abonne la session à la liste des membres d'un salon (100 premières lignes) : op 37.
     pub async fn subscribe_members(
         &self,

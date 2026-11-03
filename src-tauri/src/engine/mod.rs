@@ -132,6 +132,21 @@ impl Engine {
             .await
     }
 
+    pub async fn set_status(
+        &self,
+        account_id: &AccountId,
+        status: contract::user::PresenceStatus,
+    ) -> Result<(), EngineError> {
+        use contract::user::PresenceStatus as P;
+        let code = match status {
+            P::Online => "online",
+            P::Idle => "idle",
+            P::Dnd => "dnd",
+            P::Invisible | P::Offline => "invisible",
+        };
+        self.session(account_id)?.set_status(code).await
+    }
+
     fn session(&self, account_id: &AccountId) -> Result<Arc<Session>, EngineError> {
         self.lock_sessions()?
             .get(account_id)

@@ -251,3 +251,13 @@ pub async fn members_subscribe(
         .subscribe_members(&account_id, &guild_id, &channel_id)
         .await
 }
+
+#[tauri::command]
+#[specta::specta]
+pub async fn status_set(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    status: contract::user::PresenceStatus,
+) -> Res<()> {
+    engine.set_status(&account_id, status).await
+}

@@ -3,6 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { useNav } from "../../shared/data/nav-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
 import { Avatar } from "../../shared/ui/Avatar";
+import { StatusAvatar } from "../../shared/ui/StatusAvatar";
+import { useEngine } from "../../shared/data/engine-store";
+import type { PresenceStatus } from "../../contract/bindings";
 
 const STATUSES = [
   { id: "online", label: "En ligne", hint: "", color: "var(--success)" },
@@ -15,7 +18,8 @@ export function UserBar(): React.JSX.Element | null {
   const account = useActiveAccount();
   const openOverlay = useNav((s) => s.openOverlay);
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState("online");
+  const status = useEngine((s) => s.myStatus);
+  const setStatus = useEngine((s) => s.setMyStatus);
   const [mic, setMic] = useState(true);
   const [sound, setSound] = useState(true);
   const ref = useRef<HTMLDivElement>(null);
@@ -38,10 +42,7 @@ export function UserBar(): React.JSX.Element | null {
   return (
     <div className="ub" ref={ref}>
       <button className="ub-me" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
-        <span style={{ position: "relative" }}>
-          <Avatar id={u.id} name={name} url={u.avatar_url} size={32} />
-          <span className="ub-dot" style={{ background: current.color }} />
-        </span>
+        <StatusAvatar id={u.id} name={name} url={u.avatar_url} size={32} status={status} />
         <span style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
           <span style={{ fontWeight: 600, fontSize: "var(--fs-small)" }}>{name}</span>
           <span style={{ fontSize: 12, color: "var(--text-faint)" }}>{current.label}</span>
@@ -68,7 +69,7 @@ export function UserBar(): React.JSX.Element | null {
           <div className="menu-sep" />
           {STATUSES.map((s) => (
             <button key={s.id} className="menu-item" role="menuitemradio" aria-checked={s.id === status}
-              onClick={() => { setStatus(s.id); setOpen(false); }}>
+              onClick={() => { setStatus(s.id as PresenceStatus); setOpen(false); }}>
               <span style={{ width: 10, height: 10, borderRadius: "50%", background: s.color, flexShrink: 0 }} />
               <span style={{ flex: 1, display: "flex", flexDirection: "column" }}>
                 <span style={{ fontWeight: 500 }}>{s.label}</span>
