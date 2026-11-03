@@ -6,8 +6,7 @@ version.workspace = true
 
 [dependencies]
 contract.workspace = true
-serde.workspace = true
 serde_json.workspace = true
-tokio.workspace = true
-tracing.workspace = true
 thiserror.workspace = true
+tracing.workspace = true
+rusqlite = { version = "0.40", features = ["bundled"] }
