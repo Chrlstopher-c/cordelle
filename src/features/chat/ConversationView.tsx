@@ -1,3 +1,89 @@
-export function ConversationView({ channelId }: { guildId: string | null; channelId: string }): React.JSX.Element {
-  return <div style={{ padding: 24, color: "var(--text-faint)" }}>Conversation {channelId} (à venir)</div>;
+// Conversation : en-tête (nom, sujet, outils), liste virtualisée, saisie. Changement de salon instantané depuis le cache.
+import { useEffect, useMemo, useState } from "react";
+import type { Message } from "../../contract/bindings";
+import { useEngine } from "../../shared/data/engine-store";
+import { useNav } from "../../shared/data/nav-store";
+import { useActiveAccount } from "../../shared/data/use-active-account";
+import { ChannelIcon } from "../shell/ChannelIcon";
+import { Composer } from "./Composer";
+import { setMentionNames } from "./markdown";
+import { MessageItem } from "./MessageItem";
+import { useMessageList } from "./use-message-list";
+import "./chat.css";
+
+const TYPING_TTL_MS = 9000;
+const EMPTY: Message[] = [];
+
+function useChannel(guildId: string | null, channelId: string) {
+  return useEngine((s) => (guildId ? s.channelsByGuild[guildId] : s.dms)?.find((c) => c.id === channelId));
+}
+
+function useTypingNames(channelId: string, messages: Message[]): string[] {
+  const typing = useEngine((s) => s.typing[channelId]);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 2000); return () => clearInterval(t); }, []);
+  const names = new Map(messages.map((m) => [m.author.id, m.author.global_name ?? m.author.username]));
+  return (typing ?? []).filter((t) => now - t.at < TYPING_TTL_MS).map((t) => names.get(t.userId) ?? "Quelqu'un");
+}
+
+export function ConversationView({ guildId, channelId }: { guildId: string | null; channelId: string }): React.JSX.Element {
+  const account = useActiveAccount();
+  const channel = useChannel(guildId, channelId);
+  const messages = useEngine((s) => s.messages[channelId] ?? EMPTY);
+  const membersOpen = useNav((s) => !!s.membersOpen[channelId]);
+  const toggleMembers = useNav((s) => s.toggleMembers);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [image, setImage] = useState<string | null>(null);
+  const list = useMessageList(account?.id ?? "", channelId);
+  const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
+  const typingNames = useTypingNames(channelId, messages);
+
+  useEffect(() => {
+    setMentionNames(Object.fromEntries(messages.map((m) => [m.author.id, m.author.global_name ?? m.author.username])));
+  }, [messages]);
+  useEffect(() => setReplyTo(null), [channelId]);
+
+  const title = channel?.name || channel?.recipients.map((r) => r.global_name ?? r.username).join(", ") || "";
+  const isDm = !guildId;
+
+  return (
+    <div className="cv">
+      <header className="cv-head">
+        <span className="title">{isDm ? "@" : channel && <ChannelIcon kind={channel.kind} />}{title}</span>
+        {channel?.topic && <span className="topic">{channel.topic}</span>}
+        <span style={{ flex: channel?.topic ? 0 : 1 }} />
+        {!isDm && (
+          <button className="cv-tool" aria-pressed={membersOpen} onClick={() => toggleMembers(channelId)}>Membres</button>
+        )}
+      </header>
+      <div className="cv-scroll" ref={list.scrollRef} onScroll={list.onScroll}>
+        <div style={{ height: list.virtualizer.getTotalSize(), position: "relative" }}>
+          {list.virtualizer.getVirtualItems().map((v) => {
+            const row = list.rows[v.index];
+            return (
+              <div key={v.key} data-index={v.index} ref={list.virtualizer.measureElement}
+                style={{ position: "absolute", top: 0, left: 0, right: 0, transform: `translateY(${v.start}px)` }}>
+                {row.kind === "date" ? <div className="cv-date">{row.label}</div> : (
+                  <MessageItem message={row.message} grouped={row.grouped} meId={account?.user.id ?? null}
+                    replyText={row.message.reply_to ? replySnippet(byId.get(row.message.reply_to)) : null}
+                    onReply={setReplyTo} onImage={setImage} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {account && (
+        <Composer accountId={account.id} channelId={channelId} replyTo={replyTo} onCancelReply={() => setReplyTo(null)}
+          placeholder={isDm ? `Envoyer un message à @${title}` : `Envoyer un message dans #${title}`} typingNames={typingNames} />
+      )}
+      {image && <div className="viewer" onClick={() => setImage(null)}><img src={image} alt="" /></div>}
+    </div>
+  );
+}
+
+function replySnippet(m: Message | undefined): string {
+  if (!m) return "Message d'origine indisponible";
+  const text = m.content.replace(/\s+/g, " ").slice(0, 120) || "Pièce jointe";
+  return `${m.author.global_name ?? m.author.username} : ${text}`;
 }
