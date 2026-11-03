@@ -849,6 +849,7 @@ dependencies = [
  "identity",
  "reqwest 0.13.5",
  "rest",
+ "rustls 0.23.46",
  "serde",
  "serde_json",
  "specta",

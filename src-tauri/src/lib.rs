@@ -103,6 +103,13 @@ pub fn export_bindings() -> Result<(), String> {
 pub fn run() {
     gpu::configure_env();
     logging::init();
+    // Plusieurs fournisseurs crypto sont compilés (aws-lc-rs via reqwest, ring via le vocal) : rustls exige un choix.
+    if rustls::crypto::aws_lc_rs::default_provider()
+        .install_default()
+        .is_err()
+    {
+        tracing::warn!("fournisseur crypto rustls déjà installé");
+    }
 
     let builder = specta_builder();
     #[cfg(debug_assertions)]
