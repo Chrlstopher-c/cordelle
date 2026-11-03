@@ -43,6 +43,11 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::message_pin,
             commands::guild_leave,
             commands::dm_close,
+            commands::settings::sessions_list,
+            commands::settings::sessions_logout,
+            commands::settings::connections_list,
+            commands::settings::connection_remove,
+            commands::settings::subscriptions_list,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }
@@ -66,6 +71,7 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_notification::init())
         .invoke_handler(builder.invoke_handler())
         .setup(move |app| {
             builder.mount_events(app);

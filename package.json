@@ -16,6 +16,7 @@
   "dependencies": {
     "@tanstack/react-virtual": "^3.14.25",
     "@tauri-apps/api": "^2",
+    "@tauri-apps/plugin-notification": "^2.8.0",
     "@tauri-apps/plugin-opener": "^2",
     "motion": "^14.9.0",
     "qrcode": "^1.5.4",
