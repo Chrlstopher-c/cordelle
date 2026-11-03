@@ -6,7 +6,9 @@ use std::{fs::File, sync::Mutex};
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 pub fn init() {
-    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+        EnvFilter::new("info,songbird::events=warn,songbird::driver::tasks::events=warn")
+    });
     let file = dirs::data_dir()
         .map(|d| d.join("cordelle").join("logs"))
         .and_then(|dir| {

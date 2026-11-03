@@ -76,34 +76,47 @@ impl Engine {
             self_mute,
             self_deaf,
         };
-        let mut generation =
-            voice::begin(&session.voice, &self.emit, &plan).map_err(voice_error)?;
-        let mut handshake = handshake_once(&session, &plan).await;
-        if matches!(handshake, Err(VoiceError::Timeout)) {
-            // Discord nous croit encore dans le salon (départ perdu, plantage) : départ propre puis nouvel essai.
-            tracing::warn!("poignée de main vocale sans réponse, départ puis nouvel essai");
-            let leave = VoiceOp {
-                channel_id: None,
-                ..op_of(&plan)
-            };
-            if let Err(error) = send_voice_state(&session, &leave).await {
-                tracing::error!("opcode 4 de départ impossible : {error:?}");
+        match self.join_attempt(&session, &plan).await {
+            Err(VoiceError::Timeout) => {
+                // Discord nous croit encore dans le salon (départ perdu, plantage) : départ propre puis nouvel essai.
+                tracing::warn!("connexion vocale sans réponse, départ propre puis nouvel essai");
+                let leave = VoiceOp {
+                    channel_id: None,
+                    ..op_of(&plan)
+                };
+                if let Err(error) = send_voice_state(&session, &leave).await {
+                    tracing::error!("opcode 4 de départ impossible : {error:?}");
+                }
+                tokio::time::sleep(REJOIN_PAUSE).await;
+                self.join_attempt(&session, &plan)
+                    .await
+                    .map_err(voice_error)
             }
-            tokio::time::sleep(REJOIN_PAUSE).await;
-            generation = voice::begin(&session.voice, &self.emit, &plan).map_err(voice_error)?;
-            handshake = handshake_once(&session, &plan).await;
+            other => other.map_err(voice_error),
         }
-        let handshake = match handshake {
+    }
+
+    /// Un essai complet : opcode 4, poignée de main gateway, puis connexion du driver.
+    async fn join_attempt(&self, session: &Session, plan: &JoinPlan) -> Result<(), VoiceError> {
+        let generation = voice::begin(&session.voice, &self.emit, plan)?;
+        let handshake = match handshake_once(session, plan).await {
             Ok(handshake) => handshake,
             Err(error) => {
+                tracing::warn!("poignée de main vocale échouée : {error}");
                 voice::fail(&session.voice, &self.emit, generation, &error);
-                return Err(voice_error(error));
+                return Err(error);
             }
         };
-        let request = JoinRequest { plan, handshake };
-        voice::connect(&session.voice, &self.emit, request, generation)
-            .await
-            .map_err(voice_error)
+        tracing::info!(endpoint = %handshake.endpoint, "poignée de main vocale reçue, connexion du driver");
+        let request = JoinRequest {
+            plan: plan.clone(),
+            handshake,
+        };
+        let result = voice::connect(&session.voice, &self.emit, request, generation).await;
+        if result.is_ok() {
+            tracing::info!("connexion vocale établie");
+        }
+        result
     }
 
     /// Quitte le salon vocal courant (opcode 4 avec `channel_id` nul).
