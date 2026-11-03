@@ -33,6 +33,12 @@ function emit(event: string, payload: unknown): void {
 
 const listeners = new Map<string, Map<number, (p: unknown) => void>>();
 
+/** Faux moteurs par zone : chaque fichier `zone-<nom>.ts` exporte `handlers`, chargé automatiquement. */
+const zoneMocks = import.meta.glob<{ handlers: Record<string, Handler> }>("./zone-*.ts", { eager: true });
+for (const mod of Object.values(zoneMocks)) Object.assign(HANDLERS, mod.handlers);
+
+export type { Handler };
+
 async function invoke(cmd: string, args: Record<string, unknown> = {}): Promise<unknown> {
   if (cmd === "plugin:event|listen") {
     const event = str(args, "event");

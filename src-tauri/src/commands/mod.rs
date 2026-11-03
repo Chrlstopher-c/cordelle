@@ -13,8 +13,8 @@ use contract::{
     profile::UserProfile,
 };
 
-type Res<T> = Result<T, EngineError>;
-type Eng<'a> = tauri::State<'a, &'static Core>;
+pub(crate) type Res<T> = Result<T, EngineError>;
+pub(crate) type Eng<'a> = tauri::State<'a, &'static Core>;
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize, specta::Type, tauri_specta::Event)]
 pub struct Engine(pub EngineEvent);
