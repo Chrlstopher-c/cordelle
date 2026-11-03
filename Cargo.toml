@@ -9,6 +9,7 @@ version = "0.1.0"
 
 [workspace.dependencies]
 contract = { path = "crates/contract" }
+identity = { path = "crates/identity" }
 accounts = { path = "crates/accounts" }
 auth = { path = "crates/auth" }
 gateway = { path = "crates/gateway" }
