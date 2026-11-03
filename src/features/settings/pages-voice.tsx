@@ -1,4 +1,5 @@
 // Page « Voix et vidéo » : micro et sortie (enumerateDevices), vumètre en direct, volumes, suppression du bruit.
+import { EngineDevices } from "./EngineDevices";
 import { playBeep } from "./audio-beep";
 import { Card, Row, Slider, Toggle } from "./controls";
 import { usePrefs } from "./local-prefs";
@@ -45,9 +46,10 @@ export function VoicePage(): React.JSX.Element {
   return (
     <>
       <h1>Voix et vidéo</h1>
-      <div className="st-sub">Réglages de ce poste. Le vumètre et le test de sortie les utilisent déjà.</div>
-      <Card title="Micro">
-        <Row title="Périphérique d'entrée" hint="Micro utilisé pour parler en vocal.">
+      <div className="st-sub">« En appel » choisit ce que le vocal utilise ; « Test » sert à vérifier le micro et la sortie.</div>
+      <EngineDevices />
+      <Card title="Test du micro">
+        <Row title="Micro à tester" hint="Vumètre et test de sortie ci-dessous.">
           <DeviceSelect label="Périphérique d'entrée" value={voice.inputId} devices={devices.inputs}
             onChange={(inputId) => setVoice({ inputId })} />
         </Row>
@@ -66,7 +68,7 @@ export function VoicePage(): React.JSX.Element {
             onChange={(noiseSuppression) => setVoice({ noiseSuppression })} />
         </Row>
       </Card>
-      <Card title="Sortie">
+      <Card title="Test de la sortie">
         <Row title="Périphérique de sortie" hint="Haut-parleurs ou casque.">
           <DeviceSelect label="Périphérique de sortie" value={voice.outputId} devices={devices.outputs}
             onChange={(outputId) => setVoice({ outputId })} />

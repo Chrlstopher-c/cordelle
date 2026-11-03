@@ -4,6 +4,9 @@ import type { ReactNode } from "react";
 import { voice } from "./api";
 import { DeviceMenu } from "./DeviceMenu";
 import { ShareControl } from "./ShareControl";
+
+/** Partage d'écran : transport vidéo pas encore écrit côté moteur (voir TODO.md) ; bouton masqué, aucun contrôle mort. */
+const SHARE_READY = false;
 import { ChevronIcon, MicIcon, MicOffIcon, PhoneOffIcon, SpeakerIcon, SpeakerOffIcon } from "./icons";
 import { type DeviceKind, useDeviceMenu } from "./use-device-menu";
 import type { VoiceSession } from "./types";
@@ -21,7 +24,7 @@ export function CallControls({ accountId, session }: { accountId: string; sessio
         icon={deaf ? <SpeakerOffIcon /> : <SpeakerIcon />}
         toggleLabel={deaf ? "Réactiver le son" : "Couper le son"} chevronLabel="Choisir la sortie audio"
         onToggle={() => void voice.setDeaf(accountId, !deaf)} />
-      <ShareControl accountId={accountId} />
+      {SHARE_READY && <ShareControl accountId={accountId} />}
       <button className="cb-leave" aria-label="Quitter l'appel" onClick={() => void voice.leave(accountId)}>
         <PhoneOffIcon />
       </button>
