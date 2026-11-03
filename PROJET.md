@@ -50,7 +50,7 @@ Windows/macOS · design final (instance dédiée) · automatisation / self-bot �
 - [ ] E1.S5 — Bancs de mesure RAM/latence (Cordelle et client officiel) — VERIFY: `scripts/bench.sh` sort un JSON
 
 ### E2 — Comptes et connexion
-- [~] E2.S1 — Connexion QR (remote auth) — VERIFY: test d'intégration sur le compte de test → jeton obtenu
+- [x] E2.S1 — Connexion QR (remote auth) — VERIFY: test d'intégration sur le compte de test → jeton obtenu
 - [~] E2.S2 — Email + mot de passe + 2FA + captcha dans l'app — VERIFY: test manuel guidé sur le compte de test
 - [x] E2.S3 — Trousseau multi-comptes (ajout, retrait, bascule) — VERIFY: `cargo test -p accounts`
 - [x] E2.S4 — Gateway (identify, resume, heartbeat, compression zstd) par compte — VERIFY: `cargo test -p gateway` + 1 h connecté sans coupure

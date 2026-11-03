@@ -1,7 +1,8 @@
 # TODO
 
 ## En cours
-- Test réel sur le compte secondaire : connexion QR, serveurs/salons, historique, envoi, temps réel.
+- Connexion QR validée sur le compte secondaire (03/11). Reste à tester : historique, envoi, temps réel (zone conversation).
+- Interface v1 : coque faite (rail, salons, MP, profil, connexion QR minimale). À faire par moi seul, sans sous-agents : conversation, accès complet, accueil/MP, réglages, réglages serveur, vocal.
 
 ## Ensuite
 - E3.S3+ : édition, suppression, réactions, pièces jointes ; markdown/embeds (côté interface, instance design).

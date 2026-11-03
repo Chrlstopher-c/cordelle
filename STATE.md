@@ -14,3 +14,8 @@
 - Sonde `cargo run -p auth --example qr_probe` : QR atteint `ready` contre le vrai Discord (build 660103 le 03/11).
 - `[~]` dans PROJET.md = codé, en attente du test réel sur le compte secondaire.
 - Disque /mnt/projects plein le 03/11 : `target/` Rust de 7 projets inactifs vidés (48 Go, régénérables).
+- Jetons : trousseau si dispo, sinon `~/.local/share/cordelle/secrets.json` en 0600 (KWallet sans portefeuille refuse).
+  Pas d'activation forcée de KWallet (évite la fenêtre de création de portefeuille).
+- Interface v1 : passation design dans docs/design/ (HANDOFF + tokens versionnés, maquettes locales non versionnées :
+  vrais pseudos). Coque faite. 6 agents Opus lancés puis annulés (coût) : tout le reste se fait en direct, sans agents.
+- Connexion QR validée par Chris sur son compte secondaire le 03/11.
