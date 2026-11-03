@@ -36,21 +36,21 @@
 .reactions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 .reaction { height: 24px; padding: 0 7px; border-radius: var(--r-md); background: var(--surface-input); display: flex;
   align-items: center; gap: 5px; font-size: 13px; border: 1px solid transparent; }
-.reaction.me { border-color: var(--accent); background: #2a2e52; }
+.reaction.me { border-color: var(--accent); background: var(--mention-pill-bg); }
 .reaction img { width: 16px; height: 16px; }
 .embed { border-left: 4px solid var(--border); background: var(--surface-raised); border-radius: var(--r-xs);
   padding: 8px 12px; margin-top: 4px; max-width: 520px; font-size: 13.5px; display: flex; flex-direction: column; gap: 4px; }
 .embed .e-title { font-weight: 600; color: var(--accent-text); }
 .embed img { max-width: 100%; border-radius: var(--r-xs); }
 
-.md-code { background: #2b2d31; padding: 1px 4px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: .88em; }
-.md-pre { background: #1a1b1e; border: 1px solid var(--border); padding: 8px 10px; border-radius: var(--r-sm);
+.md-code { background: var(--surface-code); padding: 1px 4px; border-radius: 4px; font-family: ui-monospace, monospace; font-size: .88em; }
+.md-pre { background: var(--surface-code-block); border: 1px solid var(--border); padding: 8px 10px; border-radius: var(--r-sm);
   font-family: ui-monospace, monospace; font-size: 13px; white-space: pre-wrap; margin: 4px 0; }
-.md-quote { display: block; border-left: 3px solid #4e5058; padding-left: 10px; }
+.md-quote { display: block; border-left: 3px solid var(--quote-bar); padding-left: 10px; }
 .md-mention { padding: 0 3px; border-radius: 4px; background: var(--mention-pill-bg); color: var(--mention-pill-text); font-weight: 500; }
 .md-emoji { width: 22px; height: 22px; vertical-align: -5px; }
-.md-spoiler { background: #1e1f22; color: transparent; border-radius: 4px; cursor: pointer; }
-.md-spoiler.shown { background: #2b2d31; color: inherit; cursor: auto; }
+.md-spoiler { background: var(--spoiler-bg); color: transparent; border-radius: 4px; cursor: pointer; }
+.md-spoiler.shown { background: var(--surface-code); color: inherit; cursor: auto; }
 
 .composer { padding: 0 16px 6px; flex-shrink: 0; }
 .composer-box { min-height: var(--composer-min-h); display: flex; align-items: flex-end; gap: 4px; padding: 6px 8px;

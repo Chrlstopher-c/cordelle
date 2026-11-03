@@ -12,6 +12,13 @@
   --surface-menu: #232428;       /* menus déroulants, popovers */
   --border: #2a2b30;
   --border-subtle: #26272b;
+  --surface-rail-item: #232428; /* boutons du rail sans icône */
+  --surface-search: #1e1f23;    /* recherche de la barre de titre */
+  --surface-code: #2b2d31;      /* code en ligne, spoiler révélé */
+  --surface-code-block: #1a1b1e;
+  --spoiler-bg: #1e1f22;
+  --quote-bar: #4e5058;
+  --menu-hover: #2e2f35;
 
   /* Texte */
   --text-strong: #ffffff;        /* salon non lu, élément sélectionné */
@@ -94,6 +101,13 @@
   --mention-row-bg: #FDF6E3;
   --mention-pill-text: #3A45C2;
   --voice-strip-bg: #E3F4EA;
+  --surface-rail-item: #FFFFFF;
+  --surface-search: #D2D5D9;
+  --surface-code: #EBEDEF;
+  --surface-code-block: #F2F3F5;
+  --spoiler-bg: #C4C7CC;
+  --quote-bar: #C4C7CC;
+  --menu-hover: #E8EAED;
 }
 :root[data-motion="reduce"] { --t-hover: 0ms; --t-popover: 0ms; --t-panel: 0ms; --t-swap: 0ms; }
 :root[data-motion="reduce"] *, :root[data-motion="reduce"] *::before, :root[data-motion="reduce"] *::after {

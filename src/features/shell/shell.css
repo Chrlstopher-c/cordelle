@@ -5,7 +5,7 @@
 
 .tb { display: flex; align-items: center; background: var(--surface-frame); color: var(--text); }
 .tb-drag { flex: 1; display: flex; justify-content: center; padding-left: 64px; height: 100%; align-items: center; }
-.tb-search { width: 420px; height: 24px; border-radius: var(--r-sm); background: #1e1f23; display: flex; align-items: center;
+.tb-search { width: 420px; height: 24px; border-radius: var(--r-sm); background: var(--surface-search); display: flex; align-items: center;
   gap: 8px; padding: 0 10px; color: var(--text-faint); font-size: var(--fs-meta); }
 .tb-search:hover { background: var(--surface-hover); color: var(--text-secondary); }
 .tb-search kbd { font: inherit; font-size: 11px; color: var(--text-muted); }
@@ -20,7 +20,7 @@
 .rail-item { position: relative; display: flex; }
 .rail-sep { width: 28px; height: 1px; background: var(--border); margin: 2px 0; flex-shrink: 0; }
 .sv { width: var(--server-icon); height: var(--server-icon); border-radius: var(--r-xl); display: flex; align-items: center;
-  justify-content: center; font-size: 12px; font-weight: 700; position: relative; overflow: visible; background: #232428;
+  justify-content: center; font-size: 12px; font-weight: 700; position: relative; overflow: visible; background: var(--surface-rail-item);
   color: var(--text); transition: border-radius 150ms var(--ease), background var(--t-hover), transform 80ms ease; }
 .sv:hover, .sv.on { border-radius: var(--r-lg); }
 .sv:active { transform: scale(.94); }
@@ -35,7 +35,7 @@
 
 .side { background: var(--surface-sidebar); display: flex; flex-direction: column; min-height: 0;
   border-top-left-radius: var(--r-lg); color: var(--text); }
-.side-head { height: 84px; flex-shrink: 0; margin: 8px 8px 4px; border-radius: var(--r-md); background: #26324a;
+.side-head { height: 84px; flex-shrink: 0; margin: 8px 8px 4px; border-radius: var(--r-md); background: #26324a; color: #fff;
   padding: 0 12px 10px; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; text-align: left;
   background-size: cover; background-position: center; }
 .side-head .name { display: flex; align-items: center; gap: 6px; font-weight: 700; font-size: 15px; }
@@ -62,9 +62,9 @@
 .dm.unread { color: var(--text-strong); font-weight: 600; }
 
 .ub { height: 52px; flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 0 8px;
-  border-top: 1px solid #1f2023; position: relative; }
+  border-top: 1px solid var(--border-subtle); position: relative; }
 .ub-me { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; padding: 4px; border-radius: var(--r-sm); text-align: left; }
-.ub-me:hover { background: #232428; }
+.ub-me:hover { background: var(--surface-hover); }
 .ub-dot { position: absolute; right: -2px; bottom: -2px; width: 10px; height: 10px; border-radius: 50%; border: 3px solid var(--surface-sidebar);
   box-sizing: content-box; }
 .ib { width: 30px; height: 30px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
@@ -75,8 +75,8 @@
 @keyframes menu-up { from { opacity: 0; transform: translateY(6px) scale(.98); } to { opacity: 1; transform: none; } }
 .menu-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 6px 10px; border-radius: var(--r-sm);
   text-align: left; font-size: var(--fs-small); color: var(--text); }
-.menu-item:hover { background: #2e2f35; }
-.menu-sep { height: 1px; background: #2f3035; margin: 4px; }
+.menu-item:hover { background: var(--menu-hover); }
+.menu-sep { height: 1px; background: var(--border); margin: 4px; }
 /* Info-bulle du rail : nom à droite de l'icône, comme Discord. */
 .rail { overflow-x: visible; }
 .rail-item[data-tip]::after { content: attr(data-tip); position: fixed; margin-left: 52px; margin-top: 6px; white-space: nowrap;

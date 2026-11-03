@@ -27,7 +27,7 @@ button.pf-av:hover::after { content: "Voir le profil"; position: absolute; inset
 .pf-note.boxed { height: 36px; border-radius: var(--r-sm); background: var(--surface-chat); padding: 0 10px; }
 .pf-dm { height: 40px; border-radius: var(--r-md); background: var(--surface-frame); display: flex; align-items: center; padding: 0 12px; }
 .pf-dm input { flex: 1; background: transparent; border: 0; outline: none; color: var(--text); font-size: 13.5px; }
-.pf-full-btn { height: 34px; border-radius: var(--r-sm); background: #2e2f35; font-size: 13.5px; font-weight: 500; }
+.pf-full-btn { height: 34px; border-radius: var(--r-sm); background: var(--menu-hover); font-size: 13.5px; font-weight: 500; }
 .pf-full-btn:hover { background: var(--surface-selected); }
 .pf-veil { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 70; display: flex; align-items: center;
   justify-content: center; animation: veil-in 180ms ease both; }

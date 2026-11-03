@@ -57,11 +57,11 @@ export function Rail(): React.JSX.Element {
         );
       })}
       <div style={{ flex: 1 }} />
-      <button className="sv" aria-label="Ajouter un serveur" onClick={() => useNav.getState().openOverlay({ kind: "add-server" })} style={{ background: "#1e1f23", color: "var(--success)" }}>
+      <button className="sv" aria-label="Ajouter un serveur" onClick={() => useNav.getState().openOverlay({ kind: "add-server" })} style={{ background: "var(--surface-rail-item)", color: "var(--success)" }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M12 5v14M5 12h14" /></svg>
       </button>
       <button className={`sv${view.kind === "explore" ? " on" : ""}`} aria-label="Explorer les serveurs" onClick={() => go({ kind: "explore" })}
-        style={view.kind === "explore" ? { background: "var(--success)", color: "#0f2318" } : { background: "#1e1f23", color: "var(--text-muted)" }}>
+        style={view.kind === "explore" ? { background: "var(--success)", color: "#0f2318" } : { background: "var(--surface-rail-item)", color: "var(--text-muted)" }}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5z" /></svg>
       </button>
     </nav>
