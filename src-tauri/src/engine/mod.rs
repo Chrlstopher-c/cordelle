@@ -3,6 +3,7 @@
 mod build_cache;
 mod data;
 mod login;
+mod member_list;
 mod profile;
 mod session;
 mod social;
@@ -118,6 +119,17 @@ impl Engine {
         {
             session.stop();
         }
+    }
+
+    pub async fn subscribe_members(
+        &self,
+        account_id: &AccountId,
+        guild_id: &str,
+        channel_id: &str,
+    ) -> Result<(), EngineError> {
+        self.session(account_id)?
+            .subscribe_members(guild_id, channel_id)
+            .await
     }
 
     fn session(&self, account_id: &AccountId) -> Result<Arc<Session>, EngineError> {

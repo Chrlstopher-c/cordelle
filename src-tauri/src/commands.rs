@@ -237,3 +237,17 @@ pub async fn mentions_recent(
 ) -> Res<Vec<contract::social::Mention>> {
     engine.mentions(&account_id).await
 }
+
+/// Abonne au panneau Membres d'un salon ; la liste arrive par l'événement `member_list`.
+#[tauri::command]
+#[specta::specta]
+pub async fn members_subscribe(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    guild_id: Snowflake,
+    channel_id: Snowflake,
+) -> Res<()> {
+    engine
+        .subscribe_members(&account_id, &guild_id, &channel_id)
+        .await
+}

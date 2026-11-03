@@ -11,6 +11,7 @@ import { timeOf } from "./rows";
 interface Props {
   message: Message;
   guildId: string | null;
+  color: string | null;
   grouped: boolean;
   meId: string | null;
   replyText: string | null;
@@ -94,7 +95,7 @@ function EditBox({ initial, onSave, onCancel }: { initial: string; onSave: (t: s
 }
 
 function MessageItemInner(props: Props): React.JSX.Element {
-  const { message: m, guildId, grouped, meId, replyText, onReply, onImage, actions, editing, onEditing } = props;
+  const { message: m, guildId, color, grouped, meId, replyText, onReply, onImage, actions, editing, onEditing } = props;
   const openPopout = useProfiles((s) => s.openPopout);
   const showProfile = (e: React.MouseEvent): void => openPopout(m.author.id, guildId, { x: e.clientX, y: e.clientY });
   const name = m.author.global_name ?? m.author.username;
@@ -127,7 +128,7 @@ function MessageItemInner(props: Props): React.JSX.Element {
               <Avatar id={m.author.id} name={name} url={m.author.avatar_url} size={38} />
             </span>
             <div className="body">
-              <div className="meta"><span className="author pf-clickable" onClick={showProfile}>{name}</span><span className="time">{timeOf(m.timestamp)}</span></div>
+              <div className="meta"><span className="author pf-clickable" style={color ? { color } : undefined} onClick={showProfile}>{name}</span><span className="time">{timeOf(m.timestamp)}</span></div>
               {body}
             </div>
           </>

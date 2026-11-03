@@ -7,6 +7,7 @@ import {
   type ConnectionState,
   type EngineEvent,
   type GuildSummary,
+  type MemberGroup,
   type Message,
 } from "../../contract/bindings";
 
@@ -21,6 +22,8 @@ export interface EngineState {
   messages: Record<string, Message[]>;
   hasMore: Record<string, boolean>;
   typing: Record<string, { userId: string; at: number }[]>;
+  /** Panneau Membres par serveur (dernier salon abonné). */
+  memberLists: Record<string, MemberGroup[]>;
   refreshAccounts: () => Promise<void>;
   loadGuilds: (accountId: string) => Promise<void>;
   loadChannels: (accountId: string, guildId: string) => Promise<void>;
@@ -48,6 +51,7 @@ export const useEngine = create<EngineState>((set, get) => ({
   messages: {},
   hasMore: {},
   typing: {},
+  memberLists: {},
 
   refreshAccounts: async () => {
     const r = await commands.accountsList();
@@ -125,6 +129,9 @@ export const useEngine = create<EngineState>((set, get) => ({
           if (!list) return {};
           return { messages: { ...s.messages, [ev.channel_id]: list.filter((m) => m.id !== ev.message_id) } };
         });
+        break;
+      case "member_list":
+        set((s) => ({ memberLists: { ...s.memberLists, [ev.guild_id]: ev.groups } }));
         break;
       case "typing":
         set((s) => ({

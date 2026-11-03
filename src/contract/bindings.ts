@@ -33,6 +33,8 @@ export const commands = {
 	relationshipSet: (accountId: string, userId: string, action: RelationshipAction) => typedError<null, EngineError>(__TAURI_INVOKE("relationship_set", { accountId, userId, action })),
 	friendRequest: (accountId: string, username: string) => typedError<null, EngineError>(__TAURI_INVOKE("friend_request", { accountId, username })),
 	mentionsRecent: (accountId: string) => typedError<Mention_Serialize[], EngineError>(__TAURI_INVOKE("mentions_recent", { accountId })),
+	/**  Abonne au panneau Membres d'un salon ; la liste arrive par l'événement `member_list`. */
+	membersSubscribe: (accountId: string, guildId: string, channelId: string) => typedError<null, EngineError>(__TAURI_INVOKE("members_subscribe", { accountId, guildId, channelId })),
 };
 
 /** Events */
@@ -180,10 +182,14 @@ export type EngineError = { kind: "not_found"; what: string } | { kind: "unautho
 export type EngineEvent = EngineEvent_Serialize | EngineEvent_Deserialize;
 
 /**  Tout ce que le moteur pousse vers l'interface, sur l'événement Tauri `engine`. */
-export type EngineEvent_Deserialize = { type: "connection"; account_id: string; state: ConnectionState } | { type: "guild_upsert"; account_id: string; guild: GuildSummary_Deserialize } | { type: "guild_remove"; account_id: string; guild_id: string } | { type: "channel_upsert"; account_id: string; channel: ChannelSummary_Deserialize } | { type: "channel_remove"; account_id: string; channel_id: string } | { type: "message_create"; account_id: string; message: Message_Deserialize; nonce?: string | null } | { type: "message_update"; account_id: string; message: Message_Deserialize } | { type: "message_delete"; account_id: string; channel_id: string; message_id: string } | { type: "typing"; account_id: string; channel_id: string; user_id: string } | { type: "presence"; account_id: string; user_id: string; status: PresenceStatus } | { type: "unread"; account_id: string; channel_id: string; unread: boolean; mention_count: number };
+export type EngineEvent_Deserialize = { type: "connection"; account_id: string; state: ConnectionState } | { type: "guild_upsert"; account_id: string; guild: GuildSummary_Deserialize } | { type: "guild_remove"; account_id: string; guild_id: string } | { type: "channel_upsert"; account_id: string; channel: ChannelSummary_Deserialize } | { type: "channel_remove"; account_id: string; channel_id: string } | { type: "message_create"; account_id: string; message: Message_Deserialize; nonce?: string | null } | { type: "message_update"; account_id: string; message: Message_Deserialize } | { type: "message_delete"; account_id: string; channel_id: string; message_id: string } | { type: "typing"; account_id: string; channel_id: string; user_id: string } | { type: "presence"; account_id: string; user_id: string; status: PresenceStatus } | { type: "unread"; account_id: string; channel_id: string; unread: boolean; mention_count: number } | 
+/**  Liste des membres d'un salon (100 premiers), remplacée en entier à chaque mise à jour. */
+{ type: "member_list"; account_id: string; guild_id: string; groups: MemberGroup_Deserialize[] };
 
 /**  Tout ce que le moteur pousse vers l'interface, sur l'événement Tauri `engine`. */
-export type EngineEvent_Serialize = { type: "connection"; account_id: string; state: ConnectionState } | { type: "guild_upsert"; account_id: string; guild: GuildSummary_Serialize } | { type: "guild_remove"; account_id: string; guild_id: string } | { type: "channel_upsert"; account_id: string; channel: ChannelSummary_Serialize } | { type: "channel_remove"; account_id: string; channel_id: string } | { type: "message_create"; account_id: string; message: Message_Serialize; nonce: string | null } | { type: "message_update"; account_id: string; message: Message_Serialize } | { type: "message_delete"; account_id: string; channel_id: string; message_id: string } | { type: "typing"; account_id: string; channel_id: string; user_id: string } | { type: "presence"; account_id: string; user_id: string; status: PresenceStatus } | { type: "unread"; account_id: string; channel_id: string; unread: boolean; mention_count: number };
+export type EngineEvent_Serialize = { type: "connection"; account_id: string; state: ConnectionState } | { type: "guild_upsert"; account_id: string; guild: GuildSummary_Serialize } | { type: "guild_remove"; account_id: string; guild_id: string } | { type: "channel_upsert"; account_id: string; channel: ChannelSummary_Serialize } | { type: "channel_remove"; account_id: string; channel_id: string } | { type: "message_create"; account_id: string; message: Message_Serialize; nonce: string | null } | { type: "message_update"; account_id: string; message: Message_Serialize } | { type: "message_delete"; account_id: string; channel_id: string; message_id: string } | { type: "typing"; account_id: string; channel_id: string; user_id: string } | { type: "presence"; account_id: string; user_id: string; status: PresenceStatus } | { type: "unread"; account_id: string; channel_id: string; unread: boolean; mention_count: number } | 
+/**  Liste des membres d'un salon (100 premiers), remplacée en entier à chaque mise à jour. */
+{ type: "member_list"; account_id: string; guild_id: string; groups: MemberGroup_Serialize[] };
 
 export type Engine_Deserialize = EngineEvent_Deserialize;
 
@@ -218,6 +224,50 @@ export type LoginOutcome = LoginOutcome_Serialize | LoginOutcome_Deserialize;
 export type LoginOutcome_Deserialize = { outcome: "success"; account_id: string } | { outcome: "mfa_required"; ticket: string; methods: MfaMethod[] } | { outcome: "captcha_required"; challenge: CaptchaChallenge_Deserialize } | { outcome: "invalid_credentials" };
 
 export type LoginOutcome_Serialize = { outcome: "success"; account_id: string } | { outcome: "mfa_required"; ticket: string; methods: MfaMethod[] } | { outcome: "captcha_required"; challenge: CaptchaChallenge_Serialize } | { outcome: "invalid_credentials" };
+
+/**  Un membre affiché dans le panneau Membres. */
+export type MemberEntry = MemberEntry_Serialize | MemberEntry_Deserialize;
+
+/**  Un membre affiché dans le panneau Membres. */
+export type MemberEntry_Deserialize = {
+	user: User_Deserialize,
+	nick?: string | null,
+	/**  Couleur du rôle le plus haut qui en a une (0xRRGGBB). */
+	color?: number | null,
+	status: PresenceStatus,
+	/**  « Joue à X », statut personnalisé… */
+	activity?: string | null,
+};
+
+/**  Un membre affiché dans le panneau Membres. */
+export type MemberEntry_Serialize = {
+	user: User_Serialize,
+	nick: string | null,
+	/**  Couleur du rôle le plus haut qui en a une (0xRRGGBB). */
+	color: number | null,
+	status: PresenceStatus,
+	/**  « Joue à X », statut personnalisé… */
+	activity: string | null,
+};
+
+/**  Groupe du panneau (rôle affiché à part, « En ligne », « Hors ligne »). */
+export type MemberGroup = MemberGroup_Serialize | MemberGroup_Deserialize;
+
+/**  Groupe du panneau (rôle affiché à part, « En ligne », « Hors ligne »). */
+export type MemberGroup_Deserialize = {
+	id: string,
+	name: string,
+	count: number,
+	members: MemberEntry_Deserialize[],
+};
+
+/**  Groupe du panneau (rôle affiché à part, « En ligne », « Hors ligne »). */
+export type MemberGroup_Serialize = {
+	id: string,
+	name: string,
+	count: number,
+	members: MemberEntry_Serialize[],
+};
 
 /**  Mention récente (onglet Activité), avec où elle a eu lieu. */
 export type Mention = Mention_Serialize | Mention_Deserialize;

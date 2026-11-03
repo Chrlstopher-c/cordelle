@@ -13,6 +13,8 @@ use rest::RestClient;
 use store::Store;
 use tokio::sync::mpsc;
 
+use super::member_list::MemberLists;
+
 pub type Emitter = Arc<dyn Fn(EngineEvent) + Send + Sync>;
 
 pub struct Session {
@@ -44,6 +46,7 @@ impl Session {
             store: store.clone(),
             state: state.clone(),
             emit,
+            members: Mutex::new(MemberLists::default()),
         };
         tauri::async_runtime::spawn(pump.run(events));
         Ok(Self {
@@ -65,6 +68,25 @@ impl Session {
     pub fn stop(&self) {
         self.gateway.shutdown();
     }
+
+    /// Abonne la session à la liste des membres d'un salon (100 premières lignes) : op 37.
+    pub async fn subscribe_members(
+        &self,
+        guild_id: &str,
+        channel_id: &str,
+    ) -> Result<(), EngineError> {
+        let mut channels = serde_json::Map::new();
+        channels.insert(channel_id.to_owned(), serde_json::json!([[0, 99]]));
+        let mut subs = serde_json::Map::new();
+        subs.insert(
+            guild_id.to_owned(),
+            serde_json::json!({ "typing": true, "activities": true, "threads": true, "channels": channels }),
+        );
+        self.gateway
+            .send(37, serde_json::json!({ "subscriptions": subs }))
+            .await
+            .map_err(|e| super::internal(&format!("abonnement aux membres impossible : {e}")))
+    }
 }
 
 struct Pump {
@@ -72,6 +94,7 @@ struct Pump {
     store: Arc<Mutex<Store>>,
     state: Arc<Mutex<ConnectionState>>,
     emit: Emitter,
+    members: Mutex<MemberLists>,
 }
 
 impl Pump {
@@ -96,6 +119,7 @@ impl Pump {
     }
 
     fn on_dispatch(&self, name: &str, data: &serde_json::Value) {
+        self.track_members(name, data);
         let produced = match self.store.lock() {
             Ok(mut store) => store.apply(name, data),
             Err(_) => {
@@ -105,6 +129,37 @@ impl Pump {
         };
         for event in produced {
             (self.emit)(event);
+        }
+    }
+}
+
+impl Pump {
+    fn track_members(&self, name: &str, data: &serde_json::Value) {
+        let Ok(mut lists) = self.members.lock() else {
+            return;
+        };
+        match name {
+            "READY" => {
+                for g in data
+                    .get("guilds")
+                    .and_then(serde_json::Value::as_array)
+                    .into_iter()
+                    .flatten()
+                {
+                    lists.ingest_guild(g);
+                }
+            }
+            "GUILD_CREATE" => lists.ingest_guild(data),
+            "GUILD_MEMBER_LIST_UPDATE" => {
+                if let Some((guild_id, groups)) = lists.apply(data) {
+                    (self.emit)(EngineEvent::MemberList {
+                        account_id: self.account_id.clone(),
+                        guild_id,
+                        groups,
+                    });
+                }
+            }
+            _ => {}
         }
     }
 }

@@ -3,6 +3,7 @@ use crate::{
     account::ConnectionState,
     guild::{ChannelSummary, GuildSummary},
     message::Message,
+    social::MemberGroup,
     user::PresenceStatus,
 };
 
@@ -59,5 +60,11 @@ pub enum EngineEvent {
         channel_id: Snowflake,
         unread: bool,
         mention_count: u32,
+    },
+    /// Liste des membres d'un salon (100 premiers), remplacée en entier à chaque mise à jour.
+    MemberList {
+        account_id: AccountId,
+        guild_id: Snowflake,
+        groups: Vec<MemberGroup>,
     },
 }

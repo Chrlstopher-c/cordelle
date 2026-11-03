@@ -33,6 +33,7 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::relationship_set,
             commands::friend_request,
             commands::mentions_recent,
+            commands::members_subscribe,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }

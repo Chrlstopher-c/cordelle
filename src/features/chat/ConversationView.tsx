@@ -1,6 +1,6 @@
 // Conversation : en-tête (nom, sujet, outils), liste virtualisée, saisie. Changement de salon instantané depuis le cache.
 import { useEffect, useMemo, useState } from "react";
-import type { Message } from "../../contract/bindings";
+import { commands, type Message } from "../../contract/bindings";
 import { useEngine } from "../../shared/data/engine-store";
 import { useNav } from "../../shared/data/nav-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
@@ -8,6 +8,7 @@ import { useProfiles } from "../profile";
 import { ChannelIcon } from "../shell/ChannelIcon";
 import { Composer } from "./Composer";
 import { setMentionNames } from "./markdown";
+import { MembersPanel, useMemberColors } from "./MembersPanel";
 import { MessageItem } from "./MessageItem";
 import { useMessageActions } from "./use-message-actions";
 import { useMessageList } from "./use-message-list";
@@ -50,6 +51,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
   const list = useMessageList(account?.id ?? "", channelId);
   const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
   const typingNames = useTypingNames(channelId, messages);
+  const colors = useMemberColors(guildId);
 
   useEffect(() => {
     const names = Object.fromEntries(messages.map((m) => [m.author.id, m.author.global_name ?? m.author.username]));
@@ -58,11 +60,15 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
     setMentionNames(names);
   }, [messages, channel, account]);
   useEffect(() => setReplyTo(null), [channelId]);
+  useEffect(() => {
+    if (account && guildId) void commands.membersSubscribe(account.id, guildId, channelId);
+  }, [account, guildId, channelId]);
 
   const title = channel?.name || channel?.recipients.map((r) => r.global_name ?? r.username).join(", ") || "";
   const isDm = !guildId;
 
   return (
+    <div className="cv-wrap">
     <div className="cv">
       <header className="cv-head">
         <span className="title">{isDm ? "@" : channel && <ChannelIcon kind={channel.kind} />}{title}</span>
@@ -80,7 +86,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
               <div key={v.key} data-index={v.index} ref={list.virtualizer.measureElement}
                 style={{ position: "absolute", top: 0, left: 0, right: 0, transform: `translateY(${v.start}px)` }}>
                 {row.kind === "date" ? <div className="cv-date">{row.label}</div> : (
-                  <MessageItem message={row.message} guildId={guildId} grouped={row.grouped} meId={account?.user.id ?? null}
+                  <MessageItem message={row.message} guildId={guildId} color={colors.get(row.message.author.id) ?? null} grouped={row.grouped} meId={account?.user.id ?? null}
                     replyText={row.message.reply_to ? replySnippet(byId.get(row.message.reply_to)) : null}
                     onReply={setReplyTo} onImage={setImage} actions={actions}
                     editing={editingId === row.message.id} onEditing={setEditingId} />
@@ -96,6 +102,8 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
           messages={messages} recipients={channel?.recipients ?? []} isGuild={!isDm} />
       )}
       {image && <div className="viewer" onClick={() => setImage(null)}><img src={image} alt="" /></div>}
+    </div>
+    {guildId && membersOpen && <MembersPanel guildId={guildId} channelId={channelId} />}
     </div>
   );
 }
