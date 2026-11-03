@@ -1,7 +1,7 @@
 // Adaptateur des commandes vocales du contrat fixé (noms snake_case côté Rust, arguments camelCase côté JS).
 // Remplacer par `commands.*` dès que `pnpm bindings` les génère.
 import { invoke } from "@tauri-apps/api/core";
-import type { AudioDevices, StreamQuality, StreamState } from "./types";
+import type { AudioDevices, AudioSettings, StreamQuality, StreamState } from "./types";
 
 export type VoiceResult<T> = { ok: true; data: T } | { ok: false; error: string };
 
@@ -37,6 +37,9 @@ export const voice = {
   devices: (): Promise<VoiceResult<AudioDevices>> => call<AudioDevices>("voice_devices"),
   setDevices: (input: string | null, output: string | null): Promise<VoiceResult<void>> =>
     call<void>("voice_set_devices", { input, output }),
+  setAudioSettings: (settings: AudioSettings): Promise<VoiceResult<void>> =>
+    call<void>("voice_set_audio_settings", { settings }),
+  micTest: (on: boolean): Promise<VoiceResult<void>> => call<void>("voice_mic_test", { on }),
 };
 
 export const stream = {

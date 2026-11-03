@@ -7,14 +7,18 @@ const str = (a: Record<string, unknown>, k: string): string => String(a[k] ?? ""
 const nullableStr = (a: Record<string, unknown>, k: string): string | null =>
   a[k] === null || a[k] === undefined ? null : String(a[k]);
 
+let levelTimer: ReturnType<typeof setInterval> | null = null;
+
 const DEVICES: AudioDevices = {
   inputs: [
-    { id: "in-1", name: "Micro fictif (défaut)", is_default: true },
-    { id: "in-2", name: "Micro fictif 2", is_default: false },
+    { id: "in-1", name: "Micro USB fictif Analog Stereo", is_default: true },
+    { id: "in-2", name: "Contrôleur audio fictif Analog Stereo", is_default: false },
+    { id: "in-3", name: "Micro sans écho fictif", is_default: false },
   ],
   outputs: [
-    { id: "out-1", name: "Casque fictif (défaut)", is_default: true },
-    { id: "out-2", name: "Haut-parleurs fictifs", is_default: false },
+    { id: "out-1", name: "Casque fictif Analog Stereo", is_default: true },
+    { id: "out-2", name: "Carte son fictive Analog Stereo", is_default: false },
+    { id: "out-3", name: "Écran fictif HDMI", is_default: false },
   ],
 };
 
@@ -69,4 +73,17 @@ export const handlers: Record<string, Handler> = {
   },
   voice_devices: () => DEVICES,
   voice_set_devices: () => null,
+  voice_set_audio_settings: () => null,
+  voice_mic_test: (a) => {
+    if (levelTimer) clearInterval(levelTimer);
+    levelTimer = null;
+    if (a.on !== true) return null;
+    let t = 0;
+    levelTimer = setInterval(() => {
+      t += 1;
+      const level_db = -62 + 30 * Math.abs(Math.sin(t / 6)) + (Math.random() * 6 - 3);
+      applyVoiceEvent({ type: "voice_level", level_db, threshold_db: -48, gate_open: level_db > -48 }, null);
+    }, 60);
+    return null;
+  },
 };

@@ -2,10 +2,14 @@
 import { useEffect } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { useActiveAccount } from "../../shared/data/use-active-account";
+import { useAudio } from "./audio-settings";
 import { applyVoiceEvent } from "./voice-events";
 
 export function useVoiceBridge(): void {
   const accountId = useActiveAccount()?.id ?? null;
+  useEffect(() => {
+    void useAudio.getState().sync();
+  }, []);
   useEffect(() => {
     const unlisten = listen<unknown>("engine", (e) => applyVoiceEvent(e.payload, accountId));
     return () => {

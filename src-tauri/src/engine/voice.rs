@@ -3,7 +3,10 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use contract::{AccountId, EngineError, Snowflake, voice::AudioDevices};
+use contract::{
+    AccountId, EngineError, Snowflake,
+    voice::{AudioDevices, AudioSettings},
+};
 use serde_json::json;
 use voice::{JoinPlan, JoinRequest, VoiceError, VoiceOp};
 
@@ -112,17 +115,45 @@ impl Engine {
         voice::list_devices().map_err(voice_error)
     }
 
-    /// Choix global des périphériques ; rouvre l'audio des appels en cours.
+    /// Choix des périphériques (raccourci du menu d'appel) ; garde les autres réglages.
     pub fn voice_set_devices(
         &self,
         input: Option<Snowflake>,
         output: Option<Snowflake>,
     ) -> Result<(), EngineError> {
-        voice::select_devices(input, output);
+        let next = AudioSettings {
+            input_device: input,
+            output_device: output,
+            ..voice::audio_settings()
+        };
+        self.voice_set_audio_settings(next)
+    }
+
+    pub fn voice_audio_settings(&self) -> AudioSettings {
+        voice::audio_settings()
+    }
+
+    /// Réglages audio en direct ; rouvre les flux (appels, test) si un périphérique change.
+    pub fn voice_set_audio_settings(&self, next: AudioSettings) -> Result<(), EngineError> {
+        if !voice::replace_audio_settings(next) {
+            return Ok(());
+        }
         let sessions: Vec<Arc<Session>> = self.lock_sessions()?.values().cloned().collect();
         for session in sessions {
-            voice::apply_devices(&session.voice).map_err(voice_error)?;
+            voice::reopen_audio(&session.voice, &self.emit).map_err(voice_error)?;
+        }
+        if voice::mic_test_running() {
+            voice::mic_test_start(&self.emit, true).map_err(voice_error)?;
         }
         Ok(())
+    }
+
+    pub fn voice_mic_test(&self, on: bool) -> Result<(), EngineError> {
+        if on {
+            voice::mic_test_start(&self.emit, true).map_err(voice_error)
+        } else {
+            voice::mic_test_stop();
+            Ok(())
+        }
     }
 }

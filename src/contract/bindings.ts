@@ -103,6 +103,11 @@ export const commands = {
 	voiceSetDeaf: (accountId: string, deaf: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("voice_set_deaf", { accountId, deaf })),
 	voiceDevices: () => typedError<AudioDevices, EngineError>(__TAURI_INVOKE("voice_devices")),
 	voiceSetDevices: (inputId: string | null, outputId: string | null) => typedError<null, EngineError>(__TAURI_INVOKE("voice_set_devices", { inputId, outputId })),
+	voiceAudioSettings: () => typedError<AudioSettings_Serialize, EngineError>(__TAURI_INVOKE("voice_audio_settings")),
+	/**  Réglages audio appliqués en direct (périphériques, volumes, réduction de bruit, seuil de voix). */
+	voiceSetAudioSettings: (settings: AudioSettings_Deserialize) => typedError<null, EngineError>(__TAURI_INVOKE("voice_set_audio_settings", { settings })),
+	/**  Test du micro : on = s'entendre et recevoir le niveau (`voice_level`), off = arrêt. */
+	voiceMicTest: (on: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("voice_mic_test", { on })),
 	streamStart: (accountId: string, quality: StreamQuality) => typedError<StreamState_Serialize, EngineError>(__TAURI_INVOKE("stream_start", { accountId, quality })),
 	streamStop: (accountId: string) => typedError<StreamState_Serialize, EngineError>(__TAURI_INVOKE("stream_stop", { accountId })),
 };
@@ -161,6 +166,43 @@ export type AudioDevice = {
 export type AudioDevices = {
 	inputs: AudioDevice[],
 	outputs: AudioDevice[],
+};
+
+/**  Réglages audio appliqués en direct (micro, sortie, traitement). */
+export type AudioSettings = AudioSettings_Serialize | AudioSettings_Deserialize;
+
+/**  Réglages audio appliqués en direct (micro, sortie, traitement). */
+export type AudioSettings_Deserialize = {
+	/**  Nom PipeWire/PulseAudio de l'entrée ; `None` = défaut du système. */
+	input_device?: string | null,
+	output_device?: string | null,
+	/**  Gain d'entrée, 0.0 à 2.0 (1.0 = inchangé). */
+	input_volume: number | null,
+	/**  Volume de sortie, 0.0 à 2.0. */
+	output_volume: number | null,
+	/**  Réduction de bruit (RNNoise). */
+	noise_suppression: boolean,
+	/**  Sensibilité automatique : le seuil suit le bruit de fond. */
+	vad_auto: boolean,
+	/**  Seuil manuel de détection de la voix, en dBFS (-100 à 0). */
+	vad_threshold_db: number | null,
+};
+
+/**  Réglages audio appliqués en direct (micro, sortie, traitement). */
+export type AudioSettings_Serialize = {
+	/**  Nom PipeWire/PulseAudio de l'entrée ; `None` = défaut du système. */
+	input_device: string | null,
+	output_device: string | null,
+	/**  Gain d'entrée, 0.0 à 2.0 (1.0 = inchangé). */
+	input_volume: number | null,
+	/**  Volume de sortie, 0.0 à 2.0. */
+	output_volume: number | null,
+	/**  Réduction de bruit (RNNoise). */
+	noise_suppression: boolean,
+	/**  Sensibilité automatique : le seuil suit le bruit de fond. */
+	vad_auto: boolean,
+	/**  Seuil manuel de détection de la voix, en dBFS (-100 à 0). */
+	vad_threshold_db: number | null,
 };
 
 export type AuditChange = AuditChange_Serialize | AuditChange_Deserialize;
@@ -432,7 +474,13 @@ export type EngineEvent_Deserialize = { type: "connection"; account_id: string; 
 /**  `None` pour un appel en MP. */
 guild_id?: string | null; states: VoiceMember[] } | 
 /**  Sa propre session vocale (connexion, micro, qui parle). */
-{ type: "voice_session"; session: VoiceSession_Deserialize };
+{ type: "voice_session"; session: VoiceSession_Deserialize } | 
+/**  Niveau du micro après traitement (≈ 15 fois par seconde) : vumètre, test du micro, seuil. */
+{ type: "voice_level"; level_db: number | null; 
+/**  Seuil de détection actuel (manuel, ou calculé en mode automatique). */
+threshold_db: number | null; 
+/**  La voix passe (au-dessus du seuil). */
+gate_open: boolean };
 
 /**  Tout ce que le moteur pousse vers l'interface, sur l'événement Tauri `engine`. */
 export type EngineEvent_Serialize = { type: "connection"; account_id: string; state: ConnectionState } | { type: "guild_upsert"; account_id: string; guild: GuildSummary_Serialize } | { type: "guild_remove"; account_id: string; guild_id: string } | { type: "channel_upsert"; account_id: string; channel: ChannelSummary_Serialize } | { type: "channel_remove"; account_id: string; channel_id: string } | { type: "message_create"; account_id: string; message: Message_Serialize; nonce: string | null } | { type: "message_update"; account_id: string; message: Message_Serialize } | { type: "message_delete"; account_id: string; channel_id: string; message_id: string } | { type: "typing"; account_id: string; channel_id: string; user_id: string } | { type: "presence"; account_id: string; user_id: string; status: PresenceStatus } | { type: "unread"; account_id: string; channel_id: string; unread: boolean; mention_count: number } | 
@@ -443,7 +491,13 @@ export type EngineEvent_Serialize = { type: "connection"; account_id: string; st
 /**  `None` pour un appel en MP. */
 guild_id: string | null; states: VoiceMember[] } | 
 /**  Sa propre session vocale (connexion, micro, qui parle). */
-{ type: "voice_session"; session: VoiceSession_Serialize };
+{ type: "voice_session"; session: VoiceSession_Serialize } | 
+/**  Niveau du micro après traitement (≈ 15 fois par seconde) : vumètre, test du micro, seuil. */
+{ type: "voice_level"; level_db: number | null; 
+/**  Seuil de détection actuel (manuel, ou calculé en mode automatique). */
+threshold_db: number | null; 
+/**  La voix passe (au-dessus du seuil). */
+gate_open: boolean };
 
 export type Engine_Deserialize = EngineEvent_Deserialize;
 

@@ -129,7 +129,7 @@ export const useEngine = create<EngineState>((set, get) => ({
       set((s) => ({ connection: { ...s.connection, [ev.account_id]: ev.state } }));
       return;
     }
-    if (ev.type === "voice_session") return; // géré par la zone vocale
+    if (ev.type === "voice_session" || ev.type === "voice_level") return; // géré par la zone vocale
     if (ev.account_id !== activeAccount) return;
     switch (ev.type) {
       case "guild_upsert":

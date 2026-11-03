@@ -1,7 +1,7 @@
 // Menu de périphérique d'un bouton de la barre d'appel : liste chargée à l'ouverture, fermée par clic dehors ou Échap.
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { voice } from "./api";
-import { useVoiceStore } from "./voice-store";
+import { useAudio } from "./audio-settings";
 import type { AudioDevice, AudioDevices } from "./types";
 
 export type DeviceKind = "input" | "output";
@@ -31,16 +31,6 @@ export function useCloseOnOutside(open: boolean, ref: RefObject<HTMLDivElement |
   }, [open, ref, close]);
 }
 
-/** Enregistre le choix (micro ou sortie) avec l'autre périphérique tel qu'il est actuellement. */
-async function commitPick(kind: DeviceKind, id: string, devs: AudioDevices): Promise<void> {
-  const { chosen, setChosen } = useVoiceStore.getState();
-  const next = kind === "input"
-    ? { input: id, output: chosen.output ?? defaultOf(devs.outputs) }
-    : { input: chosen.input ?? defaultOf(devs.inputs), output: id };
-  const r = await voice.setDevices(next.input, next.output);
-  if (r.ok) setChosen(next);
-}
-
 export interface DeviceMenuState {
   ref: RefObject<HTMLDivElement | null>;
   open: boolean;
@@ -54,7 +44,7 @@ export function useDeviceMenu(kind: DeviceKind): DeviceMenuState {
   const ref = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const [devs, setDevs] = useState<AudioDevices | null>(null);
-  const chosenId = useVoiceStore((s) => (kind === "input" ? s.chosen.input : s.chosen.output));
+  const chosenId = useAudio((s) => (kind === "input" ? s.settings.input_device : s.settings.output_device));
   const list = listOf(devs, kind);
   const close = (): void => setOpen(false);
   useCloseOnOutside(open, ref, close);
@@ -68,7 +58,7 @@ export function useDeviceMenu(kind: DeviceKind): DeviceMenuState {
 
   const pick = async (id: string): Promise<void> => {
     close();
-    if (devs) await commitPick(kind, id, devs);
+    await useAudio.getState().patch(kind === "input" ? { input_device: id } : { output_device: id });
   };
 
   return { ref, open, list, selected: chosenId ?? defaultOf(list), toggle, pick };

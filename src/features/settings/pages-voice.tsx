@@ -1,87 +1,53 @@
-// Page « Voix et vidéo » : micro et sortie (enumerateDevices), vumètre en direct, volumes, suppression du bruit.
-import { EngineDevices } from "./EngineDevices";
-import { playBeep } from "./audio-beep";
+// Page « Voix et vidéo » : périphériques PipeWire du moteur vocal, test du micro (s'écouter, niveau, seuil), traitement.
+import { useAudio } from "../voice/audio-settings";
 import { Card, Row, Slider, Toggle } from "./controls";
-import { usePrefs } from "./local-prefs";
-import { useAudioDevices } from "./use-audio-devices";
-import { useMicMeter } from "./use-mic-meter";
+import { DeviceTiles, useEngineDevices } from "./voice-devices";
+import { MicTest } from "./voice-mic-test";
 
-function DeviceSelect({ label, value, devices, onChange }: {
-  label: string; value: string; devices: MediaDeviceInfo[]; onChange: (id: string) => void;
-}): React.JSX.Element {
-  return (
-    <select className="st-input" aria-label={label} value={value} onChange={(e) => onChange(e.target.value)}>
-      <option value="">Par défaut</option>
-      {devices.map((d, i) => (
-        <option key={d.deviceId} value={d.deviceId}>{d.label || `Périphérique ${i + 1}`}</option>
-      ))}
-    </select>
-  );
-}
-
-function micHint(error: string | null, granted: boolean): string {
-  if (error) return error;
-  return granted ? "Parle pour voir le niveau." : "L'accès au micro est nécessaire.";
-}
-
-function Meter({ level }: { level: number }): React.JSX.Element {
-  return (
-    <div className="st-meter" role="meter" aria-label="Niveau du micro" aria-valuemin={0} aria-valuemax={100}
-      aria-valuenow={Math.round(level * 100)}>
-      <div style={{ width: `${level * 100}%` }} />
-    </div>
-  );
-}
+const pct = (v: number): number => Math.round(v * 100);
 
 export function VoicePage(): React.JSX.Element {
-  const voice = usePrefs((s) => s.voice);
-  const setVoice = usePrefs((s) => s.setVoice);
-  const devices = useAudioDevices();
-  const mic = useMicMeter({
-    enabled: devices.granted,
-    deviceId: voice.inputId,
-    noiseSuppression: voice.noiseSuppression,
-    gainPct: voice.inputVolume,
-  });
+  const settings = useAudio((s) => s.settings);
+  const patch = useAudio((s) => s.patch);
+  const { devices, error, reload } = useEngineDevices();
   return (
     <>
       <h1>Voix et vidéo</h1>
-      <div className="st-sub">« En appel » choisit ce que le vocal utilise ; « Test » sert à vérifier le micro et la sortie.</div>
-      <EngineDevices />
-      <Card title="Test du micro">
-        <Row title="Micro à tester" hint="Vumètre et test de sortie ci-dessous.">
-          <DeviceSelect label="Périphérique d'entrée" value={voice.inputId} devices={devices.inputs}
-            onChange={(inputId) => setVoice({ inputId })} />
-        </Row>
-        <Row title="Niveau du micro" hint={micHint(mic.error, devices.granted)}>
-          {devices.granted
-            ? <Meter level={mic.level} />
-            : <button className="btn-ghost" onClick={() => void devices.requestAccess()}>Autoriser le micro</button>}
-        </Row>
-        <Row title="Volume d'entrée" hint="Gain appliqué au micro.">
-          <Slider label="Volume d'entrée" value={voice.inputVolume} min={0} max={200} step={5} unit=" %"
-            onChange={(inputVolume) => setVoice({ inputVolume })} />
-        </Row>
-        <Row title="Suppression du bruit" hint="Filtre le bruit de fond côté navigateur."
-          changed={!voice.noiseSuppression}>
-          <Toggle label="Suppression du bruit" on={voice.noiseSuppression}
-            onChange={(noiseSuppression) => setVoice({ noiseSuppression })} />
-        </Row>
-      </Card>
-      <Card title="Test de la sortie">
-        <Row title="Périphérique de sortie" hint="Haut-parleurs ou casque.">
-          <DeviceSelect label="Périphérique de sortie" value={voice.outputId} devices={devices.outputs}
-            onChange={(outputId) => setVoice({ outputId })} />
-        </Row>
-        <Row title="Volume de sortie" hint="Volume des voix et des sons.">
-          <Slider label="Volume de sortie" value={voice.outputVolume} min={0} max={200} step={5} unit=" %"
-            onChange={(outputVolume) => setVoice({ outputVolume })} />
-        </Row>
-        <Row title="Tester la sortie" hint="Joue un bip sur le périphérique choisi.">
-          <button className="btn-ghost"
-            onClick={() => playBeep(voice.outputVolume, voice.outputId)}>Jouer un bip</button>
-        </Row>
-      </Card>
+      <div className="st-sub">
+        Appliqué tout de suite, même pendant un appel.
+        <button onClick={reload}>Actualiser les périphériques</button>
+      </div>
+      {error && <div className="vx-error">{error}</div>}
+      <section className="st-sec">
+        <h3>Entrée</h3>
+        {devices && <DeviceTiles kind="input" list={devices.inputs} value={settings.input_device}
+          onPick={(input_device) => void patch({ input_device })} />}
+        <MicTest />
+        <Card>
+          <Row title="Sensibilité automatique" hint="Le seuil suit le bruit de ta pièce. Désactivé, il reste où tu le poses.">
+            <Toggle label="Sensibilité automatique" on={settings.vad_auto} onChange={(vad_auto) => void patch({ vad_auto })} />
+          </Row>
+          <Row title="Réduction de bruit" hint="Retire clavier, ventilateur et souffle avant l'envoi (RNNoise).">
+            <Toggle label="Réduction de bruit" on={settings.noise_suppression}
+              onChange={(noise_suppression) => void patch({ noise_suppression })} />
+          </Row>
+          <Row title="Volume du micro">
+            <Slider label="Volume du micro" value={pct(settings.input_volume)} min={0} max={200} step={5} unit=" %"
+              onChange={(v) => void patch({ input_volume: v / 100 })} />
+          </Row>
+        </Card>
+      </section>
+      <section className="st-sec">
+        <h3>Sortie</h3>
+        {devices && <DeviceTiles kind="output" list={devices.outputs} value={settings.output_device}
+          onPick={(output_device) => void patch({ output_device })} />}
+        <Card>
+          <Row title="Volume des voix">
+            <Slider label="Volume des voix" value={pct(settings.output_volume)} min={0} max={200} step={5} unit=" %"
+              onChange={(v) => void patch({ output_volume: v / 100 })} />
+          </Row>
+        </Card>
+      </section>
     </>
   );
 }

@@ -12,6 +12,10 @@ tokio.workspace = true
 tracing.workspace = true
 thiserror.workspace = true
 async-trait = "0.1"
-cpal = "0.18"
+libpulse-binding = "2.30"
+libpulse-simple-binding = "2.29"
+nnnoiseless = "0.5"
 songbird = { version = "0.6", default-features = false, features = ["driver", "gateway", "rustls", "receive", "tungstenite"] }
 symphonia-core = "0.5"
+# Décodeur PCM requis par la source micro (f32 brut) : absent sans les fonctions par défaut de songbird.
+symphonia = { version = "0.5", default-features = false, features = ["pcm"] }

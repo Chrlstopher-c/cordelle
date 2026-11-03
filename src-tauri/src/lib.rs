@@ -87,6 +87,9 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::voice::voice_set_deaf,
             commands::voice::voice_devices,
             commands::voice::voice_set_devices,
+            commands::voice::voice_audio_settings,
+            commands::voice::voice_set_audio_settings,
+            commands::voice::voice_mic_test,
             commands::stream::stream_start,
             commands::stream::stream_stop,
         ])

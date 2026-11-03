@@ -1,6 +1,9 @@
 //! Commandes vocales (CONTRACT.md, section Vocal). Les événements passent par `Engine`.
 
-use contract::{AccountId, Snowflake, voice::AudioDevices};
+use contract::{
+    AccountId, Snowflake,
+    voice::{AudioDevices, AudioSettings},
+};
 
 use super::{Eng, Res};
 
@@ -48,4 +51,24 @@ pub async fn voice_set_devices(
     output_id: Option<Snowflake>,
 ) -> Res<()> {
     engine.voice_set_devices(input_id, output_id)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn voice_audio_settings(engine: Eng<'_>) -> Res<AudioSettings> {
+    Ok(engine.voice_audio_settings())
+}
+
+/// Réglages audio appliqués en direct (périphériques, volumes, réduction de bruit, seuil de voix).
+#[tauri::command]
+#[specta::specta]
+pub async fn voice_set_audio_settings(engine: Eng<'_>, settings: AudioSettings) -> Res<()> {
+    engine.voice_set_audio_settings(settings)
+}
+
+/// Test du micro : on = s'entendre et recevoir le niveau (`voice_level`), off = arrêt.
+#[tauri::command]
+#[specta::specta]
+pub async fn voice_mic_test(engine: Eng<'_>, on: bool) -> Res<()> {
+    engine.voice_mic_test(on)
 }

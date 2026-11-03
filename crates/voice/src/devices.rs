@@ -1,102 +1,66 @@
-//! Périphériques audio (cpal, ALSA ou PipeWire) : listing et sélection courante, partagée par l'application.
+//! Périphériques audio tels que PipeWire les présente (via `pactl`, serveur PulseAudio de PipeWire) :
+//! mêmes noms que le panneau son du système, sources « .monitor » exclues.
 
-use std::str::FromStr;
-use std::sync::Mutex;
+use std::process::Command;
 
 use contract::voice::{AudioDevice, AudioDevices};
-use cpal::traits::{DeviceTrait, HostTrait};
-use cpal::{Device, DeviceId};
+use serde_json::Value;
 
 use crate::VoiceError;
 
-/// Identifiants choisis (`None` = périphérique par défaut du système).
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-pub struct Selection {
-    pub input: Option<String>,
-    pub output: Option<String>,
-}
-
-static SELECTION: Mutex<Selection> = Mutex::new(Selection {
-    input: None,
-    output: None,
-});
-
-pub fn selection() -> Selection {
-    match SELECTION.lock() {
-        Ok(guard) => guard.clone(),
-        Err(_) => {
-            tracing::error!("sélection audio verrouillée");
-            Selection::default()
-        }
-    }
-}
-
-pub fn set_selection(input: Option<String>, output: Option<String>) {
-    match SELECTION.lock() {
-        Ok(mut guard) => *guard = Selection { input, output },
-        Err(_) => tracing::error!("sélection audio verrouillée, choix ignoré"),
-    }
-}
-
-/// Entrées et sorties disponibles, avec le périphérique par défaut signalé.
 pub fn list() -> Result<AudioDevices, VoiceError> {
-    let host = cpal::default_host();
-    let default_in = host.default_input_device().and_then(|d| d.id().ok());
-    let default_out = host.default_output_device().and_then(|d| d.id().ok());
-    let inputs = host
-        .input_devices()
-        .map_err(|e| VoiceError::Audio(e.to_string()))?;
-    let outputs = host
-        .output_devices()
-        .map_err(|e| VoiceError::Audio(e.to_string()))?;
+    let default_out = pactl(&["get-default-sink"]).unwrap_or_default();
+    let default_in = pactl(&["get-default-source"]).unwrap_or_default();
     Ok(AudioDevices {
-        inputs: inputs
-            .filter_map(|d| describe(&d, default_in.as_ref()))
-            .collect(),
-        outputs: outputs
-            .filter_map(|d| describe(&d, default_out.as_ref()))
-            .collect(),
+        inputs: nodes("sources", default_in.trim())?,
+        outputs: nodes("sinks", default_out.trim())?,
     })
 }
 
-fn describe(device: &Device, default: Option<&DeviceId>) -> Option<AudioDevice> {
-    let id = device.id().ok()?;
-    let name = device
-        .description()
-        .map(|d| d.name().to_owned())
-        .unwrap_or_else(|_| id.to_string());
-    Some(AudioDevice {
-        id: id.to_string(),
-        name,
-        is_default: default == Some(&id),
-    })
+fn nodes(kind: &str, default: &str) -> Result<Vec<AudioDevice>, VoiceError> {
+    let raw = pactl(&["-f", "json", "list", kind])?;
+    let parsed: Vec<Value> = serde_json::from_str(&raw)
+        .map_err(|e| VoiceError::Audio(format!("liste {kind} illisible : {e}")))?;
+    Ok(parsed
+        .iter()
+        .filter_map(|node| {
+            let name = node.get("name")?.as_str()?;
+            if name.ends_with(".monitor") {
+                return None;
+            }
+            Some(AudioDevice {
+                id: name.to_owned(),
+                name: label(node, name),
+                is_default: name == default,
+            })
+        })
+        .collect())
 }
 
-/// Micro choisi, ou par défaut si l'identifiant est absent ou disparu.
-pub fn find_input(id: Option<&str>) -> Result<Device, VoiceError> {
-    let host = cpal::default_host();
-    if let Some(device) = id.and_then(|id| lookup(&host, id)) {
-        return Ok(device);
-    }
-    host.default_input_device()
-        .ok_or(VoiceError::NoDevice("entrée"))
+/// Description lisible ; à défaut le surnom du nœud, puis le nom technique.
+fn label(node: &Value, name: &str) -> String {
+    [
+        node.get("description"),
+        node.pointer("/properties/node.description"),
+        node.pointer("/properties/node.nick"),
+    ]
+    .into_iter()
+    .flatten()
+    .filter_map(Value::as_str)
+    .find(|s| !s.is_empty() && *s != "(null)")
+    .unwrap_or(name)
+    .to_owned()
 }
 
-/// Haut-parleur choisi, ou par défaut si l'identifiant est absent ou disparu.
-pub fn find_output(id: Option<&str>) -> Result<Device, VoiceError> {
-    let host = cpal::default_host();
-    if let Some(device) = id.and_then(|id| lookup(&host, id)) {
-        return Ok(device);
+fn pactl(args: &[&str]) -> Result<String, VoiceError> {
+    let out = Command::new("pactl").args(args).output().map_err(|e| {
+        tracing::error!("pactl introuvable : {e}");
+        VoiceError::Audio(format!("pactl indisponible : {e}"))
+    })?;
+    if !out.status.success() {
+        let err = String::from_utf8_lossy(&out.stderr).into_owned();
+        tracing::error!("pactl {args:?} : {err}");
+        return Err(VoiceError::Audio(err));
     }
-    host.default_output_device()
-        .ok_or(VoiceError::NoDevice("sortie"))
-}
-
-fn lookup(host: &cpal::Host, id: &str) -> Option<Device> {
-    let parsed = DeviceId::from_str(id).ok();
-    let device = parsed.and_then(|d| host.device_by_id(&d));
-    if device.is_none() {
-        tracing::warn!("périphérique audio {id} introuvable, défaut système utilisé");
-    }
-    device
+    Ok(String::from_utf8_lossy(&out.stdout).into_owned())
 }

@@ -12,8 +12,9 @@ use songbird::id::{ChannelId, GuildId, UserId};
 use songbird::input::RawAdapter;
 use songbird::{ConnectionInfo, CoreEvent, Event};
 
-use crate::audio::{AudioHandle, CHANNELS, RATE, new_buffer};
-use crate::devices::{self, selection};
+use contract::events::EngineEvent;
+
+use crate::audio::{AudioHandle, AudioPlan, Buffer, CHANNELS, LevelSink, RATE, new_buffer};
 use crate::receive::{ReceiveHook, Receiver, SpeakingSink};
 use crate::roster::Handshake;
 use crate::shared::{ActiveCall, SharedVoice, blank_session, publish, update};
@@ -57,6 +58,11 @@ fn lock(
 }
 
 /// Démarre une connexion : coupe l'appel précédent, publie « connexion » et renvoie la génération.
+/// Source micro pour songbird : PCM f32 brut tiré du tampon de capture.
+pub fn mic_input(mic: crate::audio::Buffer) -> songbird::input::Input {
+    RawAdapter::new(MicSource::new(mic), RATE, u32::from(CHANNELS)).into()
+}
+
 pub fn begin(shared: &SharedVoice, emit: &Emit, plan: &JoinPlan) -> Result<u64, VoiceError> {
     let (generation, previous) = {
         let mut state = lock(shared)?;
@@ -137,17 +143,10 @@ async fn start_call(
     let mic = new_buffer();
     let speaker = new_buffer();
     let deaf = Arc::new(AtomicBool::new(req.plan.self_deaf));
-    let sel = selection();
-    let audio = AudioHandle::start(
-        mic.clone(),
-        speaker.clone(),
-        sel.input.as_deref(),
-        sel.output.as_deref(),
-    )?;
+    let audio = AudioHandle::start(call_plan(&mic, &speaker, emit))?;
     let mut driver = Driver::new(driver_config());
     attach_receiver(&mut driver, shared, emit, &speaker, &deaf);
-    let raw = RawAdapter::new(MicSource::new(mic.clone()), RATE, u32::from(CHANNELS));
-    driver.play_only_input(raw.into());
+    driver.play_only_input(mic_input(mic.clone()));
     driver.mute(req.plan.self_mute);
     let pending = driver.connect(info);
     store_call(
@@ -327,24 +326,38 @@ fn op_of(session: &VoiceSession) -> VoiceOp {
     }
 }
 
-/// Choix global des périphériques (prochaine connexion). À appliquer aux sessions via `apply_devices`.
-pub fn select_devices(input: Option<String>, output: Option<String>) {
-    devices::set_selection(input, output);
+/// Niveau du micro relayé à l'interface.
+pub fn level_sink(emit: &Emit) -> LevelSink {
+    let emit = emit.clone();
+    Arc::new(move |level_db, threshold_db, gate_open| {
+        emit(EngineEvent::VoiceLevel {
+            level_db,
+            threshold_db,
+            gate_open,
+        });
+    })
 }
 
-/// Rouvre l'audio d'un appel en cours avec la sélection courante ; sans effet sinon.
-pub fn apply_devices(shared: &SharedVoice) -> Result<(), VoiceError> {
-    let sel = selection();
+fn call_plan(mic: &Buffer, speaker: &Buffer, emit: &Emit) -> AudioPlan {
+    AudioPlan {
+        mic: mic.clone(),
+        speaker: speaker.clone(),
+        monitor: false,
+        level: Some(level_sink(emit)),
+    }
+}
+
+/// Rouvre les flux de l'appel en cours avec les réglages courants ; sans effet hors appel.
+pub fn reopen_audio(shared: &SharedVoice, emit: &Emit) -> Result<(), VoiceError> {
     let mut state = lock(shared)?;
     let Some(call) = state.call.as_mut() else {
         return Ok(());
     };
     call.audio = None;
-    call.audio = Some(AudioHandle::start(
-        call.mic.clone(),
-        call.speaker.clone(),
-        sel.input.as_deref(),
-        sel.output.as_deref(),
-    )?);
+    call.audio = Some(AudioHandle::start(call_plan(
+        &call.mic,
+        &call.speaker,
+        emit,
+    ))?);
     Ok(())
 }

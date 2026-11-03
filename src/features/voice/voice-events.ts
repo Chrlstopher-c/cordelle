@@ -1,5 +1,6 @@
-// Décode les événements vocaux reçus sur `engine` (types voice_states / voice_session) et les range dans le store.
+// Décode les événements vocaux reçus sur `engine` (voice_states / voice_session / voice_level) et les range dans le store.
 import type { VoiceConnection, VoiceMember, VoiceSession } from "./types";
+import { useAudio } from "./audio-settings";
 import { useVoiceStore } from "./voice-store";
 
 type Raw = Record<string, unknown>;
@@ -36,6 +37,13 @@ function parseSession(v: unknown): VoiceSession | null {
 /** Applique un événement vocal brut ; ignore ce qui ne concerne pas le compte actif. */
 export function applyVoiceEvent(raw: unknown, activeAccount: string | null): void {
   if (!isRaw(raw)) return;
+  if (raw.type === "voice_level") {
+    const { level_db, threshold_db, gate_open } = raw;
+    if (typeof gate_open !== "boolean") return;
+    const db = (v: unknown): number => (typeof v === "number" ? v : -100);
+    useAudio.getState().setLevel({ level_db: db(level_db), threshold_db: db(threshold_db), gate_open });
+    return;
+  }
   if (raw.type === "voice_states") {
     if (raw.account_id !== activeAccount || !isNullableStr(raw.guild_id) || !Array.isArray(raw.states)) return;
     const states = raw.states.map(parseMember).filter((m): m is VoiceMember => m !== null);

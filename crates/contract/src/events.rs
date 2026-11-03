@@ -76,4 +76,12 @@ pub enum EngineEvent {
     },
     /// Sa propre session vocale (connexion, micro, qui parle).
     VoiceSession { session: crate::voice::VoiceSession },
+    /// Niveau du micro après traitement (≈ 15 fois par seconde) : vumètre, test du micro, seuil.
+    VoiceLevel {
+        level_db: f32,
+        /// Seuil de détection actuel (manuel, ou calculé en mode automatique).
+        threshold_db: f32,
+        /// La voix passe (au-dessus du seuil).
+        gate_open: bool,
+    },
 }
