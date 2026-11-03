@@ -7,6 +7,7 @@ import { useActiveAccount } from "../../shared/data/use-active-account";
 import { usePresence } from "../../shared/data/use-presence";
 import { useProfiles } from "../profile";
 import { ChannelIcon } from "../shell/ChannelIcon";
+import { PinsButton, SearchField, ThreadsButton } from "../search";
 import { Composer } from "./Composer";
 import { setMentionNames } from "./markdown";
 import { DmPanel } from "./DmPanel";
@@ -84,9 +85,12 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
         {channel?.topic && <span className="topic">{channel.topic}</span>}
         <span style={{ flex: channel?.topic ? 0 : 1 }} />
         {dmStatus && <span className="cv-status">{STATUS_TEXT[dmStatus]}</span>}
+        {account && guildId && <ThreadsButton accountId={account.id} guildId={guildId} channelId={channelId} />}
+        {account && <PinsButton accountId={account.id} guildId={guildId} channelId={channelId} />}
         <button className="cv-tool" aria-pressed={membersOpen} onClick={() => toggleMembers(channelId)}>
           {isDm ? (dmUser ? "Profil" : "Participants") : "Membres"}
         </button>
+        {account && <SearchField accountId={account.id} guildId={guildId} channelId={channelId} />}
       </header>
       <div className="cv-scroll" ref={list.scrollRef} onScroll={list.onScroll} onClick={onMentionClick}>
         <div style={{ height: list.virtualizer.getTotalSize(), position: "relative" }}>

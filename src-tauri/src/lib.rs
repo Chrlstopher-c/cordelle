@@ -42,6 +42,10 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::message_pin,
             commands::guild_leave,
             commands::dm_close,
+            commands::search::messages_search,
+            commands::search::pins_list,
+            commands::search::threads_list,
+            commands::search::thread_create,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }
