@@ -7,6 +7,7 @@ mod member_list;
 mod profile;
 mod session;
 mod social;
+mod voice;
 
 use std::{
     collections::HashMap,

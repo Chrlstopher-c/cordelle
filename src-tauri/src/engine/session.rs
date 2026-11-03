@@ -12,6 +12,7 @@ use identity::ClientIdentity;
 use rest::RestClient;
 use store::Store;
 use tokio::sync::mpsc;
+use voice::SharedVoice;
 
 use super::member_list::MemberLists;
 
@@ -25,6 +26,8 @@ pub struct Session {
     pub fetched: Mutex<HashSet<String>>,
     /// Dernier statut connu par utilisateur (amis au démarrage, puis PRESENCE_UPDATE).
     pub presences: Arc<Mutex<std::collections::HashMap<String, contract::user::PresenceStatus>>>,
+    /// État vocal partagé avec la crate `voice` (roster gateway, appel en cours).
+    pub voice: SharedVoice,
     gateway: GatewayHandle,
 }
 
@@ -44,6 +47,7 @@ impl Session {
             Gateway::spawn(token, identity.clone(), identity::GATEWAY_URL.into());
         let state = Arc::new(Mutex::new(ConnectionState::Connecting));
         let presences = Arc::new(Mutex::new(std::collections::HashMap::new()));
+        let voice = voice::new_shared(account_id.clone());
         let pump = Pump {
             account_id: account_id.clone(),
             store: store.clone(),
@@ -51,6 +55,7 @@ impl Session {
             emit,
             members: Mutex::new(MemberLists::default()),
             presences: presences.clone(),
+            voice: voice.clone(),
         };
         tauri::async_runtime::spawn(pump.run(events));
         Ok(Self {
@@ -59,6 +64,7 @@ impl Session {
             state,
             fetched: Mutex::new(HashSet::new()),
             presences,
+            voice,
             gateway,
         })
     }
@@ -81,6 +87,14 @@ impl Session {
             .send(3, d)
             .await
             .map_err(|e| super::internal(&format!("changement de statut impossible : {e}")))
+    }
+
+    /// Envoie un opcode brut au gateway (états vocaux, opcode 4).
+    pub async fn send_op(&self, op: u8, d: serde_json::Value) -> Result<(), EngineError> {
+        self.gateway
+            .send(op, d)
+            .await
+            .map_err(|e| super::internal(&format!("envoi au gateway impossible : {e}")))
     }
 
     /// Abonne la session à la liste des membres d'un salon (100 premières lignes) : op 37.
@@ -110,6 +124,7 @@ struct Pump {
     emit: Emitter,
     members: Mutex<MemberLists>,
     presences: Arc<Mutex<std::collections::HashMap<String, contract::user::PresenceStatus>>>,
+    voice: SharedVoice,
 }
 
 impl Pump {
@@ -135,6 +150,7 @@ impl Pump {
 
     fn on_dispatch(&self, name: &str, data: &serde_json::Value) {
         self.track_members(name, data);
+        self.track_voice(name, data);
         let produced = match self.store.lock() {
             Ok(mut store) => store.apply(name, data),
             Err(_) => {
@@ -150,6 +166,19 @@ impl Pump {
 }
 
 impl Pump {
+    /// États vocaux : READY, GUILD_CREATE, VOICE_STATE_UPDATE, VOICE_SERVER_UPDATE.
+    fn track_voice(&self, name: &str, data: &serde_json::Value) {
+        if !matches!(
+            name,
+            "READY" | "GUILD_CREATE" | "VOICE_STATE_UPDATE" | "VOICE_SERVER_UPDATE"
+        ) {
+            return;
+        }
+        for event in voice::ingest(&self.voice, name, data) {
+            (self.emit)(event);
+        }
+    }
+
     /// Statuts initiaux des amis (READY_SUPPLEMENTAL.merged_presences.friends).
     fn friend_presences(&self, data: &serde_json::Value) {
         use serde_json::Value;

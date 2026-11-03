@@ -43,6 +43,12 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::message_pin,
             commands::guild_leave,
             commands::dm_close,
+            commands::voice::voice_join,
+            commands::voice::voice_leave,
+            commands::voice::voice_set_mute,
+            commands::voice::voice_set_deaf,
+            commands::voice::voice_devices,
+            commands::voice::voice_set_devices,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }
