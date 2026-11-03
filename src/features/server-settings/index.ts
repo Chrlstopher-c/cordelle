@@ -1,2 +1,5 @@
-// Réglages du serveur (9 pages) et réglages de salon. Implémenté par l'agent « server-settings ».
+// Administration du serveur : menu, invitation, réglages du serveur (9 pages), réglages de salon.
+export { ServerMenu } from "./ServerMenu";
+export { InviteDialog } from "./InviteDialog";
 export { ServerSettingsScreen } from "./ServerSettingsScreen";
+export { ChannelSettingsScreen } from "./ChannelSettingsScreen";

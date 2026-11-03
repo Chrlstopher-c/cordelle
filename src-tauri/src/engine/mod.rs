@@ -7,6 +7,7 @@ mod home;
 mod login;
 mod member_list;
 mod profile;
+mod server;
 mod session;
 mod settings;
 mod social;
