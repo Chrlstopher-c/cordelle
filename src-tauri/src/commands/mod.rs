@@ -1,5 +1,8 @@
 //! Commandes exposées à l'interface. Signatures = contrat (CONTRACT.md) ; corps branchés crate par crate.
 
+pub mod compose;
+pub use compose::*;
+
 use tauri_specta::Event as _;
 
 use crate::engine::Engine as Core;

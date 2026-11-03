@@ -1,6 +1,7 @@
 //! Moteur de l'app : comptes, connexion, sessions. Tenu dans l'état Tauri, appelé par `commands.rs`.
 
 mod build_cache;
+mod compose;
 mod data;
 mod login;
 mod member_list;
