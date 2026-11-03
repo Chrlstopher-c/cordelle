@@ -63,7 +63,9 @@ export const MEMBERS: MemberGroup[] = [
 
 export const profileOf = (user: User): UserProfile => ({
   user, banner_url: null, accent_color: 0x3b4a74, theme_colors: null, avatar_decoration_url: null,
-  bio: "Profil de démonstration.", pronouns: null, badges: [], connected_accounts: [],
+  bio: "Profil de démonstration.", pronouns: null,
+  badges: [{ id: "demo", description: "Badge de démonstration", link: null,
+    icon_url: "data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 20 20%27%3E%3Ccircle cx=%2710%27 cy=%2710%27 r=%278%27 fill=%27%235A66E8%27/%3E%3C/svg%3E" }], connected_accounts: [],
   created_at_ms: Date.UTC(2021, 3, 12), joined_guild_at: null, guild_nick: null,
   mutual_guilds: [{ id: "200", name: "Atelier Démo", icon_url: null, nick: null }], mutual_friends: [BOB], note: null,
 });

@@ -49,3 +49,13 @@ button.pf-av:hover::after { content: "Voir le profil"; position: absolute; inset
   color: #fff; display: flex; align-items: center; justify-content: center; z-index: 2; }
 .pf-clickable { cursor: pointer; }
 .pf-clickable:hover { text-decoration: underline; }
+.pf-badge { position: relative; display: inline-flex; }
+.pf-badge a { display: inline-flex; }
+.pf-badge::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translate(-50%, 4px);
+  white-space: nowrap; padding: 6px 10px; border-radius: var(--r-sm); background: #0d0e10; color: #f1f2f4; font-size: 13px;
+  font-weight: 500; box-shadow: 0 6px 18px rgba(0,0,0,.5); opacity: 0; pointer-events: none; z-index: 5;
+  transition: opacity var(--t-hover) var(--ease), transform var(--t-hover) var(--ease); }
+.pf-badge::before { content: ""; position: absolute; bottom: calc(100% + 2px); left: 50%; transform: translateX(-50%);
+  border: 6px solid transparent; border-top-color: #0d0e10; border-bottom: 0; opacity: 0; transition: opacity var(--t-hover); z-index: 5; }
+.pf-badge:hover::after { opacity: 1; transform: translate(-50%, 0); }
+.pf-badge:hover::before { opacity: 1; }

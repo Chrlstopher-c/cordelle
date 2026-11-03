@@ -44,7 +44,14 @@ export function Identity({ p, big }: { p: UserProfile; big?: boolean }): React.J
         {p.user.username}{p.pronouns && <> · {p.pronouns}</>}
         {p.badges.length > 0 && (
           <span className="pf-badges">
-            {p.badges.map((b) => <img key={b.id} src={b.icon_url} alt={b.description} title={b.description} />)}
+            {p.badges.map((b) => {
+              const icon = <img src={b.icon_url} alt={b.description} />;
+              return (
+                <span key={b.id} className="pf-badge" data-tip={b.description}>
+                  {b.link ? <a href={b.link} target="_blank" rel="noreferrer">{icon}</a> : icon}
+                </span>
+              );
+            })}
           </span>
         )}
       </span>
