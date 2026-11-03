@@ -99,6 +99,7 @@ pub fn channel(value: &Value, guild_id: Option<&str>) -> Option<ChannelInput> {
         nsfw: value.get("nsfw").and_then(Value::as_bool).unwrap_or(false),
         unread: false,
         mention_count: 0,
+        last_message_id: None,
         recipients,
     };
     let last_message_id = str_field(value, "last_message_id").map(str::to_owned);

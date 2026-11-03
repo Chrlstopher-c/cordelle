@@ -44,6 +44,7 @@ impl ChannelEntry {
         let mut summary = self.summary.clone();
         summary.unread = self.is_unread();
         summary.mention_count = self.mention_count;
+        summary.last_message_id = self.last_message_id.clone();
         summary
     }
 }

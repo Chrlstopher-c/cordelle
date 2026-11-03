@@ -18,7 +18,7 @@ export const GUILDS: GuildSummary[] = [
 ];
 
 const ch = (id: string, guild_id: string | null, kind: ChannelSummary["kind"], name: string, extra?: Partial<ChannelSummary>): ChannelSummary =>
-  ({ id, guild_id, parent_id: null, kind, name, topic: null, position: 0, nsfw: false, unread: false, mention_count: 0, recipients: [], ...extra });
+  ({ id, guild_id, parent_id: null, kind, name, topic: null, position: 0, nsfw: false, unread: false, mention_count: 0, last_message_id: null, recipients: [], ...extra });
 
 export const CHANNELS: Record<string, ChannelSummary[]> = {
   "200": [

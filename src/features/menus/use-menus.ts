@@ -1,12 +1,13 @@
 // Contenu des menus contextuels par élément (message, personne, salon, serveur, MP). Uniquement des actions réelles.
 import { commands, type ChannelSummary, type GuildSummary, type Message, type User } from "../../contract/bindings";
-import { useEngine } from "../../shared/data/engine-store";
+import { markChannel, useEngine } from "../../shared/data/engine-store";
 import { useNav } from "../../shared/data/nav-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
 import { useConfirm } from "../../shared/ui/confirm";
 import { item, sep, type MenuItem } from "../../shared/ui/context-menu";
 import { useProfiles } from "../profile";
 import { useOpenDm } from "../profile/use-profile-actions";
+import { markRead as readNow } from "../chat/use-auto-read";
 
 const copy = (text: string) => (): void => { void navigator.clipboard.writeText(text); };
 const link = (guildId: string | null, channelId: string, messageId?: string): string =>
@@ -24,10 +25,11 @@ export function useMenus() {
   const openModal = useProfiles((s) => s.openModal);
   const openDm = useOpenDm();
   const nav = useNav.getState;
-  const latest = (channelId: string): string | undefined => useEngine.getState().messages[channelId]?.[0]?.id;
-  const markRead = (channelId: string): MenuItem[] => {
-    const last = latest(channelId);
-    return last ? [item("Marquer comme lu", () => void commands.channelAck(acc, channelId, last))] : [];
+  const latest = (channelId: string, known?: string | null): string | undefined =>
+    useEngine.getState().messages[channelId]?.[0]?.id ?? known ?? undefined;
+  const markRead = (channelId: string, known?: string | null): MenuItem[] => {
+    const last = latest(channelId, known);
+    return last ? [item("Marquer comme lu", () => readNow(acc, channelId, last))] : [];
   };
 
   const message = (m: Message, guildId: string | null, h: MessageMenuHandlers): MenuItem[] => {
@@ -85,7 +87,7 @@ export function useMenus() {
   };
 
   const channel = (c: ChannelSummary): MenuItem[] => [
-    ...markRead(c.id),
+    ...markRead(c.id, c.last_message_id),
     ...(c.guild_id ? [item("Ouvrir", () => nav().openChannel(c.guild_id ?? "", c.id))] : []),
     sep,
     item("Copier le lien du salon", copy(link(c.guild_id ?? null, c.id))),
@@ -93,7 +95,14 @@ export function useMenus() {
   ];
 
   const guild = (g: GuildSummary): MenuItem[] => [
-    item("Marquer comme lu", () => void commands.guildAck(acc, g.id)),
+    item("Marquer comme lu", () => {
+      useEngine.setState((s) => {
+        let next: Partial<typeof s> = {};
+        for (const c of s.channelsByGuild[g.id] ?? []) next = { ...next, ...markChannel({ ...s, ...next }, c.id, false, 0) };
+        return { ...next, guilds: (next.guilds ?? s.guilds).map((x) => (x.id === g.id ? { ...x, unread: false, mention_count: 0 } : x)) };
+      });
+      void commands.guildAck(acc, g.id);
+    }),
     sep,
     item("Copier l'identifiant du serveur", copy(g.id)),
     sep,
@@ -107,7 +116,7 @@ export function useMenus() {
     const other = c.kind === "dm" ? c.recipients[0] : undefined;
     return [
       ...(other ? [item("Profil", () => openPopout(other.id, null, at))] : []),
-      ...markRead(c.id),
+      ...markRead(c.id, c.last_message_id),
       sep,
       item("Copier l'identifiant", copy(c.id)),
       sep,

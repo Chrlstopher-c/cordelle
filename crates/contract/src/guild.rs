@@ -39,6 +39,8 @@ pub struct ChannelSummary {
     pub nsfw: bool,
     pub unread: bool,
     pub mention_count: u32,
+    /// Dernier message connu (pour marquer comme lu sans ouvrir le salon).
+    pub last_message_id: Option<Snowflake>,
     /// Destinataires pour les MP et groupes, vide sinon.
     pub recipients: Vec<User>,
 }

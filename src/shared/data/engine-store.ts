@@ -51,6 +51,24 @@ const upsert = <T extends { id: string }>(list: T[], item: T): T[] => {
   return copy;
 };
 
+/** Met à jour l'état lu/non lu d'un salon, puis le résumé de son serveur (pastille et mentions du rail). */
+export function markChannel(s: EngineState, channelId: string, unread: boolean, mentions: number): Partial<EngineState> {
+  const dms = s.dms.map((c) => (c.id === channelId ? { ...c, unread, mention_count: mentions } : c));
+  const byGuild = { ...s.channelsByGuild };
+  let guildId: string | null = null;
+  for (const [g, list] of Object.entries(byGuild)) {
+    if (!list.some((c) => c.id === channelId)) continue;
+    guildId = g;
+    byGuild[g] = list.map((c) => (c.id === channelId ? { ...c, unread, mention_count: mentions } : c));
+  }
+  const guilds = guildId === null ? s.guilds : s.guilds.map((g) => {
+    if (g.id !== guildId) return g;
+    const list = byGuild[g.id] ?? [];
+    return { ...g, unread: list.some((c) => c.unread), mention_count: list.reduce((n, c) => n + c.mention_count, 0) };
+  });
+  return { dms, channelsByGuild: byGuild, guilds };
+}
+
 export const useEngine = create<EngineState>((set, get) => ({
   accounts: [],
   accountsLoaded: false,
@@ -151,6 +169,9 @@ export const useEngine = create<EngineState>((set, get) => ({
           if (!list) return {};
           return { messages: { ...s.messages, [ev.channel_id]: list.filter((m) => m.id !== ev.message_id) } };
         });
+        break;
+      case "unread":
+        set((s) => markChannel(s, ev.channel_id, ev.unread, ev.mention_count));
         break;
       case "presence":
         set((s) => ({ presences: { ...s.presences, [ev.user_id]: ev.status } }));

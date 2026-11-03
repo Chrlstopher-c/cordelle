@@ -144,6 +144,8 @@ export type ChannelSummary_Deserialize = {
 	nsfw: boolean,
 	unread: boolean,
 	mention_count: number,
+	/**  Dernier message connu (pour marquer comme lu sans ouvrir le salon). */
+	last_message_id?: string | null,
 	/**  Destinataires pour les MP et groupes, vide sinon. */
 	recipients: User_Deserialize[],
 };
@@ -159,6 +161,8 @@ export type ChannelSummary_Serialize = {
 	nsfw: boolean,
 	unread: boolean,
 	mention_count: number,
+	/**  Dernier message connu (pour marquer comme lu sans ouvrir le salon). */
+	last_message_id: string | null,
 	/**  Destinataires pour les MP et groupes, vide sinon. */
 	recipients: User_Serialize[],
 };

@@ -12,6 +12,7 @@ import { setMentionNames } from "./markdown";
 import { DmPanel } from "./DmPanel";
 import { MembersPanel, useMemberColors } from "./MembersPanel";
 import { MessageItem } from "./MessageItem";
+import { useAutoRead } from "./use-auto-read";
 import { useMessageActions } from "./use-message-actions";
 import { useMessageList } from "./use-message-list";
 import "./chat.css";
@@ -57,6 +58,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
   const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
   const typingNames = useTypingNames(channelId, messages);
   const colors = useMemberColors(guildId);
+  useAutoRead(account?.id ?? "", channelId);
 
   useEffect(() => {
     const names = Object.fromEntries(messages.map((m) => [m.author.id, m.author.global_name ?? m.author.username]));
