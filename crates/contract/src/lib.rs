@@ -3,6 +3,7 @@
 
 pub mod account;
 pub mod auth;
+pub mod compose;
 pub mod events;
 pub mod guild;
 pub mod home;

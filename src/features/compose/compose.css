@@ -1,0 +1,55 @@
+/* Zone compose : joindre, aperçus, sélecteur d'emojis, dépôt de fichiers. Couleurs et rayons des tokens uniquement. */
+.compose-card { border-radius: var(--r-lg); background: var(--surface-input); }
+.compose-card > .composer-box { background: none; }
+.compose-btn[aria-pressed="true"] { background: var(--surface-selected); color: var(--text-strong); }
+.compose-btn:disabled { opacity: .45; cursor: default; }
+.compose-error { padding: 2px 6px 0; font-size: 12.5px; color: var(--danger-text); }
+
+.att-list { display: flex; gap: 8px; padding: 10px 10px 0; overflow-x: auto; }
+.att { position: relative; display: flex; align-items: center; gap: 10px; width: 230px; height: 64px; flex-shrink: 0;
+  padding: 6px 30px 6px 6px; box-sizing: border-box; border-radius: var(--r-md); background: var(--surface-raised); }
+.att-thumb { width: 52px; height: 52px; flex-shrink: 0; border-radius: var(--r-sm); object-fit: cover;
+  background: var(--surface-selected); color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+.att-meta { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.att-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.att-size { font-size: 12px; color: var(--text-faint); }
+.att-remove { position: absolute; top: 4px; right: 4px; width: 24px; height: 24px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+.att-remove:hover { background: var(--surface-selected); color: var(--text); }
+
+.compl-glyph { width: 24px; text-align: center; color: var(--text-muted); flex-shrink: 0; font-size: 15px; }
+.compl-label { font-weight: 500; }
+
+.emoji-veil { position: fixed; inset: 0; z-index: 19; background: transparent; cursor: default; }
+.emoji-pop { position: absolute; right: 16px; bottom: calc(100% + 6px); width: 420px; height: 460px; z-index: 20;
+  display: flex; flex-direction: column; border-radius: var(--r-xl); background: var(--surface-menu);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .55); overflow: hidden; animation: menu-up var(--t-popover) var(--ease) both; }
+.emoji-search { padding: 10px 12px; }
+.emoji-search input { width: 100%; height: 34px; box-sizing: border-box; border: 0; border-radius: var(--r-sm);
+  background: var(--surface-input); color: var(--text); padding: 0 12px; font: inherit; font-size: 13.5px; outline: none; }
+.emoji-body { flex: 1; min-height: 0; display: flex; border-top: 1px solid var(--border); }
+.emoji-cats { width: 48px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  padding: 8px 0; overflow-y: auto; background: var(--surface-sidebar); }
+.emoji-cat { width: 36px; height: 36px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+.emoji-cat:hover { background: var(--surface-hover); color: var(--text); }
+.emoji-scroll { flex: 1; min-width: 0; overflow-y: auto; padding: 0 8px 8px; }
+.emoji-sec { font-size: var(--fs-caps); font-weight: 600; letter-spacing: .03em; text-transform: uppercase;
+  color: var(--text-faint); padding: 10px 4px 6px; }
+.emoji-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 2px; }
+.emoji-btn { width: 40px; height: 40px; border-radius: var(--r-sm); font-size: 24px; display: flex; align-items: center; justify-content: center; }
+.emoji-btn:hover, .emoji-btn:focus-visible { background: var(--surface-selected); }
+.emoji-custom { width: 28px; height: 28px; border-radius: var(--r-md); background: var(--surface-selected); color: var(--text);
+  font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.emoji-none { margin: 40px 12px; text-align: center; color: var(--text-faint); font-size: 13.5px; }
+.emoji-foot { height: 48px; flex-shrink: 0; display: flex; align-items: center; gap: 10px; padding: 0 12px;
+  background: var(--surface-sidebar); border-top: 1px solid var(--border); }
+.emoji-foot-glyph { font-size: 26px; min-width: 30px; text-align: center; }
+.emoji-foot-name { font-size: 14px; font-weight: 600; }
+.emoji-hint { font-size: 12px; color: var(--text-faint); }
+
+.drop-veil { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center;
+  background: rgba(15, 16, 18, .82); pointer-events: none; }
+.drop-box { width: 420px; box-sizing: border-box; padding: 36px 28px; border-radius: 16px; border: 2px dashed var(--accent);
+  background: #1e2030; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.drop-title { font-size: 20px; font-weight: 700; }
+.drop-sub { font-size: 14px; color: var(--text-muted); }

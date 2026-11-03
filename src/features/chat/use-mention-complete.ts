@@ -1,82 +1,82 @@
-// Autocomplétion « @ » de la saisie : candidats = auteurs récents du salon + destinataires du MP + @everyone/@here.
-// Le texte affiche « @nom » ; à l'envoi, chaque mention choisie redevient `<@id>`.
+// Saisie assistée : « @ » membres et rôles, « # » salons, « : » + 2 lettres emojis (unicode et du serveur).
+// Le texte affiche le nom choisi ; à l'envoi, chaque choix devient son code (`<@id>`, `<#id>`, `<:nom:id>`).
 import { useMemo, useRef, useState } from "react";
-import type { Message, User } from "../../contract/bindings";
+import {
+  applyChosen, buildPools, findToken, rankCandidates,
+  type Candidate, type CompletionSources, type Token, type TokenKind,
+} from "../compose/candidates";
 
-export interface Candidate { id: string; label: string; user: User | null }
+type Apply = (text: string, caret: number) => void;
 
 export interface MentionComplete {
   open: boolean;
   items: Candidate[];
   index: number;
+  title: string;
   /** À appeler à chaque frappe avec le texte et la position du curseur. */
   update: (text: string, caret: number) => void;
   /** Gère flèches / Entrée / Tab / Échap ; renvoie vrai si la touche est consommée. */
-  onKey: (e: React.KeyboardEvent, text: string, apply: (t: string, caret: number) => void) => boolean;
-  pick: (c: Candidate, text: string, apply: (t: string, caret: number) => void) => void;
-  /** Remplace les « @nom » choisis par `<@id>` avant l'envoi. */
+  onKey: (e: React.KeyboardEvent, text: string, apply: Apply) => boolean;
+  pick: (c: Candidate, text: string, apply: Apply) => void;
+  /** Remplace les choix affichés par leur texte envoyé. */
   encode: (text: string) => string;
   reset: () => void;
 }
 
-const nameOf = (u: User): string => u.global_name ?? u.username;
+const TITLES: Record<TokenKind, string> = { mention: "Membres", channel: "Salons", emoji: "Emoji" };
 
-export function useMentionComplete(messages: Message[], recipients: User[], isGuild: boolean): MentionComplete {
-  const [query, setQuery] = useState<{ q: string; start: number } | null>(null);
+export function useMentionComplete(src: CompletionSources): MentionComplete {
+  const [token, setToken] = useState<Token | null>(null);
   const [index, setIndex] = useState(0);
   const chosen = useRef(new Map<string, string>());
-
-  const pool = useMemo(() => {
-    const seen = new Map<string, User>();
-    for (const u of recipients) seen.set(u.id, u);
-    for (const m of messages) if (!seen.has(m.author.id)) seen.set(m.author.id, m.author);
-    const users: Candidate[] = [...seen.values()].map((u) => ({ id: u.id, label: nameOf(u), user: u }));
-    const special: Candidate[] = isGuild ? [{ id: "everyone", label: "everyone", user: null }, { id: "here", label: "here", user: null }] : [];
-    return [...users, ...special];
-  }, [messages, recipients, isGuild]);
-
-  const items = useMemo(() => {
-    if (!query) return [];
-    const q = query.q.toLowerCase();
-    return pool.filter((c) => c.label.toLowerCase().includes(q) || c.user?.username.toLowerCase().includes(q)).slice(0, 8);
-  }, [pool, query]);
+  const pools = useMemo(() => buildPools(src), [src.messages, src.recipients, src.isGuild, src.channels, src.emojis]);
+  const items = useMemo(() => (token ? rankCandidates(pools, token) : []), [pools, token]);
 
   const update = (text: string, caret: number): void => {
-    const m = /(?:^|\s)@([^\s@]{0,32})$/.exec(text.slice(0, caret));
-    setQuery(m ? { q: m[1], start: caret - m[1].length - 1 } : null);
+    setToken(findToken(text, caret));
     setIndex(0);
   };
 
-  const pick = (c: Candidate, text: string, apply: (t: string, caret: number) => void): void => {
-    if (!query) return;
-    const insert = `@${c.label} `;
-    const end = query.start + 1 + query.q.length;
-    if (c.user) chosen.current.set(c.label, c.id);
-    apply(text.slice(0, query.start) + insert + text.slice(end), query.start + insert.length);
-    setQuery(null);
+  const pick = (c: Candidate, text: string, apply: Apply): void => {
+    if (!token) return;
+    const end = token.start + 1 + token.q.length;
+    if (c.display !== c.final) chosen.current.set(c.display, c.final);
+    apply(text.slice(0, token.start) + c.display + " " + text.slice(end), token.start + c.display.length + 1);
+    setToken(null);
   };
 
-  const onKey = (e: React.KeyboardEvent, text: string, apply: (t: string, caret: number) => void): boolean => {
-    if (!query || items.length === 0) return false;
+  const onKey = (e: React.KeyboardEvent, text: string, apply: Apply): boolean => {
+    if (!token || items.length === 0) return false;
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       setIndex((i) => (i + (e.key === "ArrowDown" ? 1 : items.length - 1)) % items.length);
       return true;
     }
-    if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); pick(items[index], text, apply); return true; }
-    if (e.key === "Escape") { e.preventDefault(); setQuery(null); return true; }
+    if (e.key === "Enter" || e.key === "Tab") {
+      e.preventDefault();
+      pick(items[index], text, apply);
+      return true;
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setToken(null);
+      return true;
+    }
     return false;
   };
 
-  const encode = (text: string): string => {
-    let out = text;
-    const names = [...chosen.current.keys()].sort((a, b) => b.length - a.length);
-    for (const n of names) out = out.split(`@${n}`).join(`<@${chosen.current.get(n)}>`);
-    return out;
-  };
-
   return {
-    open: !!query && items.length > 0, items, index, update, onKey, pick, encode,
-    reset: () => { chosen.current.clear(); setQuery(null); },
+    open: !!token && items.length > 0,
+    items,
+    index,
+    title: TITLES[token?.kind ?? "mention"],
+    update,
+    onKey,
+    pick,
+    encode: (text: string): string => applyChosen(text, chosen.current),
+    reset: () => {
+      chosen.current.clear();
+      setToken(null);
+    },
   };
 }

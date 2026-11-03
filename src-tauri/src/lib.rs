@@ -53,6 +53,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::home::guild_create,
             commands::home::scheduled_events,
             commands::home::discoverable_guilds,
+            commands::message_send_files,
+            commands::guild_emojis,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }
