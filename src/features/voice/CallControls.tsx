@@ -1,8 +1,9 @@
-// Barre de contrôle de l'appel : micro, son (flèche = choix du périphérique), raccrocher.
-// Pas de caméra ni de partage d'écran tant que le moteur ne les gère pas.
+// Barre de contrôle de l'appel : micro, son (flèche = choix du périphérique), partage d'écran, raccrocher.
+// Pas de caméra : le moteur ne la gère pas encore.
 import type { ReactNode } from "react";
 import { voice } from "./api";
 import { DeviceMenu } from "./DeviceMenu";
+import { ShareControl } from "./ShareControl";
 import { ChevronIcon, MicIcon, MicOffIcon, PhoneOffIcon, SpeakerIcon, SpeakerOffIcon } from "./icons";
 import { type DeviceKind, useDeviceMenu } from "./use-device-menu";
 import type { VoiceSession } from "./types";
@@ -20,6 +21,7 @@ export function CallControls({ accountId, session }: { accountId: string; sessio
         icon={deaf ? <SpeakerOffIcon /> : <SpeakerIcon />}
         toggleLabel={deaf ? "Réactiver le son" : "Couper le son"} chevronLabel="Choisir la sortie audio"
         onToggle={() => void voice.setDeaf(accountId, !deaf)} />
+      <ShareControl accountId={accountId} />
       <button className="cb-leave" aria-label="Quitter l'appel" onClick={() => void voice.leave(accountId)}>
         <PhoneOffIcon />
       </button>

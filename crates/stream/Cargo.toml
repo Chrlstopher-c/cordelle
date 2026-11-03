@@ -1,0 +1,12 @@
+[package]
+name = "stream"
+description = "Partage d'écran (Go Live) : qualité, signalisation gateway, paquetisation RTP H264 (RFC 6184)"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+contract.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+tracing.workspace = true

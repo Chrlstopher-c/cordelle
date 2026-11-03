@@ -13,6 +13,7 @@ pub mod search;
 pub mod server;
 pub mod settings;
 pub mod social;
+pub mod stream;
 pub mod user;
 pub mod voice;
 

@@ -87,6 +87,8 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::voice::voice_set_deaf,
             commands::voice::voice_devices,
             commands::voice::voice_set_devices,
+            commands::stream::stream_start,
+            commands::stream::stream_stop,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }

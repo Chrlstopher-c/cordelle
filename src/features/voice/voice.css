@@ -87,3 +87,15 @@
 @media (prefers-reduced-motion: reduce) {
   .call, .call-stage, .vp-avatar.talking, .call-tile.talking { animation: none; }
 }
+
+/* Partage d'écran */
+.call-tile.sharing { box-shadow: inset 0 0 0 2px var(--success); }
+.share-pill { position: absolute; top: 8px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px;
+  height: 26px; padding: 0 4px 0 10px; border-radius: 13px; background: rgba(0, 0, 0, 0.6); font-size: 12.5px; font-weight: 600;
+  color: var(--success-text); white-space: nowrap; }
+.share-pill button { height: 20px; padding: 0 8px; border-radius: 10px; background: var(--danger); color: #fff; font-size: 12px; font-weight: 600; }
+.share-menu { bottom: 60px; left: 0; width: 260px; z-index: 5; }
+.share-sep { height: 1px; margin: 6px 4px; background: #2f3035; }
+.share-stop { color: var(--danger-text); }
+.cb-btn.on { background: #1f3a2b; color: #7fd9a8; }
+.share-error { max-width: 240px; font-size: 12.5px; color: var(--danger-text); }

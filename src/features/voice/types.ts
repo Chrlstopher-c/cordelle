@@ -33,3 +33,17 @@ export interface AudioDevices {
   inputs: AudioDevice[];
   outputs: AudioDevice[];
 }
+
+/** Définition du partage (crates/contract/src/stream.rs). */
+export interface StreamQuality {
+  width: number;
+  height: number;
+  fps: number;
+}
+
+/** Partage en cours de ma personne ; `quality` absente quand rien n'est partagé. */
+export interface StreamState {
+  account_id: string;
+  streaming: boolean;
+  quality: StreamQuality | null;
+}
