@@ -282,7 +282,7 @@ impl Engine {
             .get_json(&format!("/guilds/{guild_id}/roles"))
             .await?;
         let mut roles: Vec<Role> = raw.iter().filter_map(role_of).collect();
-        roles.sort_by(|a, b| b.position.cmp(&a.position));
+        roles.sort_by_key(|r| std::cmp::Reverse(r.position));
         Ok(roles)
     }
 

@@ -1,8 +1,8 @@
 //! Commandes exposées à l'interface. Signatures = contrat (CONTRACT.md) ; corps branchés crate par crate.
 
-pub mod settings;
-pub mod home;
 pub mod compose;
+pub mod home;
+pub mod settings;
 pub use compose::*;
 pub mod search;
 
