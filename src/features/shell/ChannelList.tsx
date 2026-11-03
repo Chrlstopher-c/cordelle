@@ -7,6 +7,7 @@ import { useActiveAccount } from "../../shared/data/use-active-account";
 import { ChannelIcon } from "./ChannelIcon";
 import { useContextMenu } from "../../shared/ui/context-menu";
 import { useMenus } from "../menus";
+import { VoiceParticipants } from "../voice";
 
 interface Group { category: ChannelSummary | null; channels: ChannelSummary[] }
 
@@ -29,13 +30,13 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
   const openOverlay = useNav((s) => s.openOverlay);
   const menus = useMenus();
   const openMenu = useContextMenu((s) => s.open);
-  const counts = useEngine((s) => {
-    const groups = s.memberLists[guildId];
-    if (!groups) return null;
-    const offline = groups.find((g) => g.id === "offline")?.count ?? 0;
-    const total = groups.reduce((n, g) => n + g.count, 0);
+  const memberGroups = useEngine((s) => s.memberLists[guildId]);
+  const counts = useMemo(() => {
+    if (!memberGroups) return null;
+    const offline = memberGroups.find((g) => g.id === "offline")?.count ?? 0;
+    const total = memberGroups.reduce((n, g) => n + g.count, 0);
     return { online: total - offline, total };
-  });
+  }, [memberGroups]);
   const [closed, setClosed] = useState<Record<string, boolean>>({});
   const groups = useMemo(() => group(channels ?? []), [channels]);
 
@@ -84,12 +85,15 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
               {g.channels
                 .filter((c) => !isClosed || c.id === channelId || c.mention_count > 0)
                 .map((c) => (
-                  <button key={c.id} onClick={() => open(c)} onContextMenu={(e) => openMenu(e, menus.channel(c))}
+                  <div key={c.id} style={{ display: "contents" }}>
+                  <button onClick={() => open(c)} onContextMenu={(e) => openMenu(e, menus.channel(c))}
                     className={`ch${c.id === channelId ? " on" : c.unread ? " unread" : ""}`}>
                     <ChannelIcon kind={c.kind} />
                     <span className="label">{c.name}</span>
                     {c.mention_count > 0 && <span className="mention">{c.mention_count}</span>}
                   </button>
+                  {(c.kind === "voice" || c.kind === "stage") && <VoiceParticipants guildId={guildId} channelId={c.id} />}
+                  </div>
                 ))}
             </div>
           );

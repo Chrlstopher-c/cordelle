@@ -2,6 +2,7 @@
 import { useEffect } from "react";
 import { AccessScreen } from "../features/access";
 import { useApplySettings } from "../features/settings/use-apply-settings";
+import { useVoiceBridge } from "../features/voice";
 import { Shell } from "../features/shell/Shell";
 import { useEngine } from "../shared/data/engine-store";
 import { useEngineBridge } from "../shared/data/use-engine-bridge";
@@ -17,6 +18,7 @@ export function App(): React.JSX.Element | null {
     void refreshAccounts();
   }, [refreshAccounts]);
   useEngineBridge();
+  useVoiceBridge();
   useApplySettings();
 
   if (!loaded) return null;

@@ -6,7 +6,7 @@ import { ActivityView, CommandPalette, ExploreView, FriendsView, usePaletteShort
 import { ProfileLayer } from "../profile";
 import { ConfirmLayer } from "../../shared/ui/confirm";
 import { ContextMenuLayer } from "../../shared/ui/context-menu";
-import { CallView } from "../voice";
+import { CallView, VoiceStrip } from "../voice";
 import { ChannelList } from "./ChannelList";
 import { DmList } from "./DmList";
 import { Rail } from "./Rail";
@@ -24,6 +24,7 @@ function Sidebar({ view }: { view: MainView }): React.JSX.Element {
   return (
     <aside className="side">
       {guildId ? <ChannelList guildId={guildId} channelId={channelId} /> : <DmList channelId={channelId} />}
+      <VoiceStrip />
       <UserBar />
     </aside>
   );
