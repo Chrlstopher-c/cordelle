@@ -2,6 +2,7 @@
 
 mod build_cache;
 mod data;
+mod home;
 mod login;
 mod member_list;
 mod profile;
