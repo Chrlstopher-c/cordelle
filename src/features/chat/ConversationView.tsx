@@ -4,10 +4,12 @@ import type { Message } from "../../contract/bindings";
 import { useEngine } from "../../shared/data/engine-store";
 import { useNav } from "../../shared/data/nav-store";
 import { useActiveAccount } from "../../shared/data/use-active-account";
+import { useProfiles } from "../profile";
 import { ChannelIcon } from "../shell/ChannelIcon";
 import { Composer } from "./Composer";
 import { setMentionNames } from "./markdown";
 import { MessageItem } from "./MessageItem";
+import { useMessageActions } from "./use-message-actions";
 import { useMessageList } from "./use-message-list";
 import "./chat.css";
 
@@ -34,6 +36,17 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
   const toggleMembers = useNav((s) => s.toggleMembers);
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [image, setImage] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const actions = useMessageActions(account?.id ?? "", channelId);
+  const openPopout = useProfiles((s) => s.openPopout);
+  const onMentionClick = (e: React.MouseEvent): void => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>("[data-user-id]");
+    if (el?.dataset.userId) openPopout(el.dataset.userId, guildId, { x: e.clientX, y: e.clientY });
+  };
+  const editLast = (): void => {
+    const mine = messages.find((m) => m.author.id === account?.user.id);
+    if (mine) setEditingId(mine.id);
+  };
   const list = useMessageList(account?.id ?? "", channelId);
   const byId = useMemo(() => new Map(messages.map((m) => [m.id, m])), [messages]);
   const typingNames = useTypingNames(channelId, messages);
@@ -56,7 +69,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
           <button className="cv-tool" aria-pressed={membersOpen} onClick={() => toggleMembers(channelId)}>Membres</button>
         )}
       </header>
-      <div className="cv-scroll" ref={list.scrollRef} onScroll={list.onScroll}>
+      <div className="cv-scroll" ref={list.scrollRef} onScroll={list.onScroll} onClick={onMentionClick}>
         <div style={{ height: list.virtualizer.getTotalSize(), position: "relative" }}>
           {list.virtualizer.getVirtualItems().map((v) => {
             const row = list.rows[v.index];
@@ -66,7 +79,8 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
                 {row.kind === "date" ? <div className="cv-date">{row.label}</div> : (
                   <MessageItem message={row.message} guildId={guildId} grouped={row.grouped} meId={account?.user.id ?? null}
                     replyText={row.message.reply_to ? replySnippet(byId.get(row.message.reply_to)) : null}
-                    onReply={setReplyTo} onImage={setImage} />
+                    onReply={setReplyTo} onImage={setImage} actions={actions}
+                    editing={editingId === row.message.id} onEditing={setEditingId} />
                 )}
               </div>
             );
@@ -75,7 +89,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
       </div>
       {account && (
         <Composer accountId={account.id} channelId={channelId} replyTo={replyTo} onCancelReply={() => setReplyTo(null)}
-          placeholder={isDm ? `Envoyer un message à @${title}` : `Envoyer un message dans #${title}`} typingNames={typingNames} />
+          placeholder={isDm ? `Envoyer un message à @${title}` : `Envoyer un message dans #${title}`} typingNames={typingNames} onEditLast={editLast} />
       )}
       {image && <div className="viewer" onClick={() => setImage(null)}><img src={image} alt="" /></div>}
     </div>

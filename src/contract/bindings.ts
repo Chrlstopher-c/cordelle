@@ -25,6 +25,10 @@ export const commands = {
 	dmOpen: (accountId: string, userId: string) => typedError<ChannelSummary_Serialize, EngineError>(__TAURI_INVOKE("dm_open", { accountId, userId })),
 	/**  Note personnelle sur un utilisateur (visible par soi seul). */
 	noteSet: (accountId: string, userId: string, note: string) => typedError<null, EngineError>(__TAURI_INVOKE("note_set", { accountId, userId, note })),
+	messageEdit: (accountId: string, channelId: string, messageId: string, content: string) => typedError<null, EngineError>(__TAURI_INVOKE("message_edit", { accountId, channelId, messageId, content })),
+	messageDelete: (accountId: string, channelId: string, messageId: string) => typedError<null, EngineError>(__TAURI_INVOKE("message_delete", { accountId, channelId, messageId })),
+	/**  Ajoute (`add`) ou retire sa réaction. `emoji` : caractère unicode, ou `nom:id` pour un emoji personnalisé. */
+	reactionSet: (accountId: string, channelId: string, messageId: string, emoji: string, add: boolean) => typedError<null, EngineError>(__TAURI_INVOKE("reaction_set", { accountId, channelId, messageId, emoji, add })),
 };
 
 /** Events */

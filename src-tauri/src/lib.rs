@@ -26,6 +26,9 @@ pub fn specta_builder() -> Builder<tauri::Wry> {
             commands::user_profile,
             commands::dm_open,
             commands::note_set,
+            commands::message_edit,
+            commands::message_delete,
+            commands::reaction_set,
         ])
         .events(collect_events![commands::Engine, commands::AuthQr])
 }

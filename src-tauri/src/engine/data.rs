@@ -92,3 +92,71 @@ impl Engine {
         Ok(read(&mut store))
     }
 }
+
+/// Emoji pour l'URL des réactions : unicode encodé, ou `nom:id` pour un emoji personnalisé.
+fn emoji_path(emoji: &str) -> String {
+    emoji
+        .bytes()
+        .map(|b| match b {
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' | b':' => {
+                (b as char).to_string()
+            }
+            _ => format!("%{b:02X}"),
+        })
+        .collect()
+}
+
+impl Engine {
+    pub async fn edit(
+        &self,
+        account_id: &AccountId,
+        channel_id: &Snowflake,
+        message_id: &Snowflake,
+        content: &str,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        let _: Value = session
+            .rest
+            .patch_json(
+                &format!("/channels/{channel_id}/messages/{message_id}"),
+                &json!({ "content": content }),
+            )
+            .await?;
+        Ok(())
+    }
+
+    pub async fn delete(
+        &self,
+        account_id: &AccountId,
+        channel_id: &Snowflake,
+        message_id: &Snowflake,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        session
+            .rest
+            .delete(&format!("/channels/{channel_id}/messages/{message_id}"))
+            .await?;
+        Ok(())
+    }
+
+    pub async fn react(
+        &self,
+        account_id: &AccountId,
+        channel_id: &Snowflake,
+        message_id: &Snowflake,
+        emoji: &str,
+        add: bool,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        let path = format!(
+            "/channels/{channel_id}/messages/{message_id}/reactions/{}/@me?location=Message&type=0",
+            emoji_path(emoji)
+        );
+        if add {
+            session.rest.put(&path, &json!({})).await?;
+        } else {
+            session.rest.delete(&path).await?;
+        }
+        Ok(())
+    }
+}

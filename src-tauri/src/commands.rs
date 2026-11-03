@@ -161,3 +161,44 @@ pub async fn note_set(
 ) -> Res<()> {
     engine.set_note(&account_id, &user_id, &note).await
 }
+
+#[tauri::command]
+#[specta::specta]
+pub async fn message_edit(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    channel_id: Snowflake,
+    message_id: Snowflake,
+    content: String,
+) -> Res<()> {
+    engine
+        .edit(&account_id, &channel_id, &message_id, &content)
+        .await
+}
+
+#[tauri::command]
+#[specta::specta]
+pub async fn message_delete(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    channel_id: Snowflake,
+    message_id: Snowflake,
+) -> Res<()> {
+    engine.delete(&account_id, &channel_id, &message_id).await
+}
+
+/// Ajoute (`add`) ou retire sa réaction. `emoji` : caractère unicode, ou `nom:id` pour un emoji personnalisé.
+#[tauri::command]
+#[specta::specta]
+pub async fn reaction_set(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    channel_id: Snowflake,
+    message_id: Snowflake,
+    emoji: String,
+    add: bool,
+) -> Res<()> {
+    engine
+        .react(&account_id, &channel_id, &message_id, &emoji, add)
+        .await
+}

@@ -68,3 +68,19 @@
   z-index: 50; animation: viewer-in 220ms var(--ease); }
 .viewer img { max-width: 92vw; max-height: 88vh; border-radius: var(--r-md); }
 @keyframes viewer-in { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
+.msg-tools.open { display: flex; }
+.msg-tools { align-items: center; }
+.tool-txt { height: 28px; padding: 0 10px; border-radius: var(--r-sm); font-size: 13px; font-weight: 600; }
+.tool-txt:hover { background: var(--surface-selected); }
+.tool-txt.danger { color: #fff; background: var(--danger); }
+.quick-react { position: absolute; right: 0; top: -40px; display: flex; gap: 2px; padding: 4px; border-radius: var(--r-md);
+  background: var(--surface-menu); box-shadow: 0 4px 14px rgba(0,0,0,.4); animation: menu-up var(--t-popover) var(--ease) both; }
+.quick-react button { width: 30px; height: 30px; border-radius: var(--r-sm); font-size: 18px; }
+.quick-react button:hover { background: var(--surface-selected); }
+.reaction { cursor: pointer; }
+.reaction:hover { border-color: var(--border); }
+.edit-box { margin-top: 4px; }
+.edit-box textarea { width: 100%; min-height: 44px; resize: none; border-radius: var(--r-md); background: var(--surface-input); border: 0;
+  outline: none; color: var(--text); font-size: var(--fs-message); line-height: 1.45; padding: 10px 12px; user-select: text; }
+.edit-hint { font-size: 12px; color: var(--text-faint); margin-top: 4px; }
+.edit-hint b { color: var(--accent-text); font-weight: 500; }

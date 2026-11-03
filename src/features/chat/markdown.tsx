@@ -20,7 +20,9 @@ const INLINE: Rule[] = [
     <img key={k} className="md-emoji" alt={`:${m[1]}:`} title={`:${m[1]}:`}
       src={`https://cdn.discordapp.com/emojis/${m[2]}.webp?size=48`} />
   ) },
-  { re: /<@!?(\d+)>/, render: (m, k) => <span key={k} className="md-mention">@{mentionName(m[1])}</span> },
+  { re: /<@!?(\d+)>/, render: (m, k) => (
+    <span key={k} className="md-mention pf-clickable" data-user-id={m[1]}>@{mentionName(m[1])}</span>
+  ) },
   { re: /<@&(\d+)>/, render: (_m, k) => <span key={k} className="md-mention">@rôle</span> },
   { re: /<#(\d+)>/, render: (_m, k) => <span key={k} className="md-mention">#salon</span> },
   { re: /https?:\/\/[^\s<]+[^\s<.,:;"')\]]/, render: (m, k) => (

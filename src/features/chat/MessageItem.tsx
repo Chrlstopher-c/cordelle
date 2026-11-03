@@ -1,9 +1,11 @@
 // Un message en disposition « confortable » : avatar 38, nom, heure, corps markdown, pièces jointes, embeds, réactions.
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { Attachment, Message } from "../../contract/bindings";
 import { Avatar } from "../../shared/ui/Avatar";
 import { useProfiles } from "../profile";
 import { Markdown } from "./markdown";
+import { MessageTools } from "./MessageTools";
+import type { MessageActions } from "./use-message-actions";
 import { timeOf } from "./rows";
 
 interface Props {
@@ -14,6 +16,9 @@ interface Props {
   replyText: string | null;
   onReply: (m: Message) => void;
   onImage: (url: string) => void;
+  actions: MessageActions;
+  editing: boolean;
+  onEditing: (id: string | null) => void;
 }
 
 interface Embed { title?: string; description?: string; url?: string; color?: number; image?: { url: string };
@@ -56,46 +61,64 @@ function Embeds({ json }: { json: string | null }): React.JSX.Element | null {
   );
 }
 
-function Reactions({ message }: { message: Message }): React.JSX.Element | null {
+function Reactions({ message, onToggle }: { message: Message; onToggle: (emoji: string, add: boolean) => void }): React.JSX.Element | null {
   if (message.reactions.length === 0) return null;
   return (
     <div className="reactions">
       {message.reactions.map((r) => {
         const custom = /:(\d+)$/.exec(r.emoji);
         return (
-          <span key={r.emoji} className={`reaction${r.me ? " me" : ""}`}>
+          <button key={r.emoji} className={`reaction${r.me ? " me" : ""}`} onClick={() => onToggle(r.emoji, !r.me)}>
             {custom ? <img src={`https://cdn.discordapp.com/emojis/${custom[1]}.webp?size=32`} alt="" /> : r.emoji}
             {r.count}
-          </span>
+          </button>
         );
       })}
     </div>
   );
 }
 
-function MessageItemInner({ message: m, guildId, grouped, meId, replyText, onReply, onImage }: Props): React.JSX.Element {
+function EditBox({ initial, onSave, onCancel }: { initial: string; onSave: (t: string) => void; onCancel: () => void }): React.JSX.Element {
+  const [text, setText] = useState(initial);
+  const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
+    if (e.key === "Escape") onCancel();
+    else if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); if (text.trim() && text !== initial) onSave(text.trim()); else onCancel(); }
+  };
+  return (
+    <div className="edit-box">
+      <textarea autoFocus value={text} onChange={(e) => setText(e.target.value)} onKeyDown={onKey}
+        onFocus={(e) => e.currentTarget.setSelectionRange(text.length, text.length)} />
+      <div className="edit-hint">Échap pour <b>annuler</b> · Entrée pour <b>enregistrer</b></div>
+    </div>
+  );
+}
+
+function MessageItemInner(props: Props): React.JSX.Element {
+  const { message: m, guildId, grouped, meId, replyText, onReply, onImage, actions, editing, onEditing } = props;
   const openPopout = useProfiles((s) => s.openPopout);
   const showProfile = (e: React.MouseEvent): void => openPopout(m.author.id, guildId, { x: e.clientX, y: e.clientY });
   const name = m.author.global_name ?? m.author.username;
   const mentionsMe = !!meId && m.content.includes(`<@${meId}>`);
   const body = (
     <>
-      {m.content && <div className="text"><Markdown text={m.content} />
+      {editing ? (
+        <EditBox initial={m.content} onCancel={() => onEditing(null)}
+          onSave={(t) => { actions.edit(m.id, t); onEditing(null); }} />
+      ) : m.content && <div className="text"><Markdown text={m.content} />
         {m.edited_timestamp && <span className="edited">(modifié)</span>}</div>}
       {m.attachments.length > 0 && <Attachments items={m.attachments} onImage={onImage} />}
       <Embeds json={m.embeds_json ?? null} />
-      <Reactions message={m} />
+      <Reactions message={m} onToggle={(e, add) => actions.react(m.id, e, add)} />
     </>
   );
   return (
     <>
       {replyText !== null && <div className="msg-reply-wrap"><div className="reply" style={{ paddingTop: 6 }}>↱ {replyText}</div></div>}
       <div className={`msg${grouped ? " grouped" : ""}${mentionsMe ? " mentions-me" : ""}`}>
-        <div className="msg-tools">
-          <button className="ib" aria-label="Répondre" onClick={() => onReply(m)}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M9 14 4 9l5-5" /><path d="M4 9h10a6 6 0 0 1 6 6v4" /></svg>
-          </button>
-        </div>
+        {!editing && (
+          <MessageTools mine={m.author.id === meId} onReact={(e) => actions.react(m.id, e, true)} onReply={() => onReply(m)}
+            onEdit={() => onEditing(m.id)} onDelete={() => actions.remove(m.id)} />
+        )}
         {grouped ? (
           <><span className="gutter-time">{timeOf(m.timestamp)}</span><div className="body">{body}</div></>
         ) : (

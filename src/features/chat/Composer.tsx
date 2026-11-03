@@ -10,9 +10,11 @@ interface Props {
   replyTo: Message | null;
   onCancelReply: () => void;
   typingNames: string[];
+  onEditLast: () => void;
 }
 
-export function Composer({ accountId, channelId, placeholder, replyTo, onCancelReply, typingNames }: Props): React.JSX.Element {
+export function Composer(props: Props): React.JSX.Element {
+  const { accountId, channelId, placeholder, replyTo, onCancelReply, typingNames, onEditLast } = props;
   const send = useEngine((s) => s.send);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const draft = drafts[channelId] ?? "";
@@ -29,6 +31,7 @@ export function Composer({ accountId, channelId, placeholder, replyTo, onCancelR
   const onKey = (e: React.KeyboardEvent<HTMLTextAreaElement>): void => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(); }
     else if (e.key === "Escape") onCancelReply();
+    else if (e.key === "ArrowUp" && draft === "") { e.preventDefault(); onEditLast(); }
   };
 
   return (
