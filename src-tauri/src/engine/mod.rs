@@ -8,6 +8,7 @@ mod login;
 mod member_list;
 mod profile;
 mod server;
+mod search;
 mod session;
 mod settings;
 mod social;

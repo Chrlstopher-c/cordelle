@@ -11,6 +11,7 @@ pub mod message;
 pub mod profile;
 pub mod settings;
 pub mod server;
+pub mod search;
 pub mod social;
 pub mod user;
 pub mod voice;
