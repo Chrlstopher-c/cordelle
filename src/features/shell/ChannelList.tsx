@@ -29,6 +29,13 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
   const openOverlay = useNav((s) => s.openOverlay);
   const menus = useMenus();
   const openMenu = useContextMenu((s) => s.open);
+  const counts = useEngine((s) => {
+    const groups = s.memberLists[guildId];
+    if (!groups) return null;
+    const offline = groups.find((g) => g.id === "offline")?.count ?? 0;
+    const total = groups.reduce((n, g) => n + g.count, 0);
+    return { online: total - offline, total };
+  });
   const [closed, setClosed] = useState<Record<string, boolean>>({});
   const groups = useMemo(() => group(channels ?? []), [channels]);
 
@@ -55,6 +62,11 @@ export function ChannelList({ guildId, channelId }: { guildId: string; channelId
           {guild?.name ?? "…"}
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden style={{ marginLeft: "auto" }}><path d="m6 9 6 6 6-6" /></svg>
         </span>
+        {counts && (
+          <span className="sub">
+            <span className="online-dot" />{counts.online.toLocaleString("fr-FR")} en ligne · {counts.total.toLocaleString("fr-FR")} membres
+          </span>
+        )}
       </button>
       <div className="side-list">
         {groups.map((g) => {

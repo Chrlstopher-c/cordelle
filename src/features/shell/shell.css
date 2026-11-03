@@ -84,3 +84,4 @@
   box-shadow: 0 8px 20px rgba(0,0,0,.5); opacity: 0; transform: translateX(-4px) scale(.98); pointer-events: none; z-index: 90;
   transition: opacity var(--t-hover) var(--ease), transform var(--t-hover) var(--ease); }
 .rail-item[data-tip]:hover::after { opacity: 1; transform: none; }
+.side-head .sub .online-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--success); margin-right: 5px; }

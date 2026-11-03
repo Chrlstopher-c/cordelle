@@ -77,7 +77,10 @@ export function Composer(props: Props): React.JSX.Element {
           style={{ height: Math.min(6, draft.split("\n").length) * 22 + 14 }} />
       </div>
       <div className="typing">
-        {typingNames.length > 0 && `${typingNames.join(", ")} ${typingNames.length > 1 ? "écrivent" : "est en train d'écrire"}…`}
+        {typingNames.length > 0 && (
+          <><span className="typing-dots"><i /><i /><i /></span>
+            <b>{typingNames.join(", ")}</b> {typingNames.length > 1 ? "écrivent…" : "est en train d'écrire…"}</>
+        )}
       </div>
     </div>
   );
