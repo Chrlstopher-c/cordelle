@@ -78,6 +78,13 @@ impl RestClient {
         decode(&bytes)
     }
 
+    /// PUT sans corps de réponse attendu (204 fréquent chez Discord).
+    pub async fn put(&self, path: &str, body: &impl Serialize) -> Result<(), RestError> {
+        self.request(Method::PUT, path, &[], Some(encode(body)?))
+            .await
+            .map(|_| ())
+    }
+
     pub async fn delete(&self, path: &str) -> Result<(), RestError> {
         self.request(Method::DELETE, path, &[], None)
             .await

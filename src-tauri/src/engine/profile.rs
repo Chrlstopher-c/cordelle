@@ -163,3 +163,40 @@ fn str_of(v: &Value, key: &str) -> Option<String> {
 fn ext(hash: &str) -> &'static str {
     if hash.starts_with("a_") { "gif" } else { "png" }
 }
+
+impl Engine {
+    /// Ouvre (ou retrouve) le MP avec un utilisateur.
+    pub async fn open_dm(
+        &self,
+        account_id: &AccountId,
+        user_id: &Snowflake,
+    ) -> Result<contract::guild::ChannelSummary, EngineError> {
+        let session = self.session(account_id)?;
+        let raw: Value = session
+            .rest
+            .post_json(
+                "/users/@me/channels",
+                &serde_json::json!({ "recipients": [user_id] }),
+            )
+            .await?;
+        let input = store::convert::channel(&raw, None).ok_or_else(|| internal("MP illisible"))?;
+        Ok(input.summary)
+    }
+
+    pub async fn set_note(
+        &self,
+        account_id: &AccountId,
+        user_id: &Snowflake,
+        note: &str,
+    ) -> Result<(), EngineError> {
+        let session = self.session(account_id)?;
+        session
+            .rest
+            .put(
+                &format!("/users/@me/notes/{user_id}"),
+                &serde_json::json!({ "note": note }),
+            )
+            .await?;
+        Ok(())
+    }
+}

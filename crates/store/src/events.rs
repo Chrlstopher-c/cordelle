@@ -14,8 +14,9 @@ impl Store {
         for guild in convert::array(data, "guilds") {
             self.ingest_guild(guild);
         }
+        let users = ready_users(data);
         for channel in convert::array(data, "private_channels") {
-            self.ingest_channel(channel, None);
+            self.ingest_channel(&with_recipients(channel, &users), None);
         }
         for entry in read_state_entries(data) {
             let Some(channel_id) = str_field(entry, "id") else {
@@ -201,4 +202,27 @@ fn presence_status(text: &str) -> Option<PresenceStatus> {
         "offline" => Some(PresenceStatus::Offline),
         _ => None,
     }
+}
+
+/// Comptes utilisateur : READY donne `users` à part et `recipient_ids` dans chaque MP.
+fn ready_users(data: &Value) -> std::collections::HashMap<String, Value> {
+    convert::array(data, "users")
+        .iter()
+        .filter_map(|u| Some((str_field(u, "id")?.to_owned(), u.clone())))
+        .collect()
+}
+
+fn with_recipients(channel: &Value, users: &std::collections::HashMap<String, Value>) -> Value {
+    let mut out = channel.clone();
+    if channel.get("recipients").is_none()
+        && let Some(ids) = channel.get("recipient_ids").and_then(Value::as_array)
+    {
+        let list: Vec<Value> = ids
+            .iter()
+            .filter_map(Value::as_str)
+            .filter_map(|id| users.get(id).cloned())
+            .collect();
+        out["recipients"] = Value::Array(list);
+    }
+    out
 }

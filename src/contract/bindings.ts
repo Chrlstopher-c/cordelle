@@ -21,6 +21,10 @@ export const commands = {
 	messageSend: (accountId: string, channelId: string, message: OutgoingMessage_Deserialize) => typedError<Message_Serialize, EngineError>(__TAURI_INVOKE("message_send", { accountId, channelId, message })),
 	/**  Profil complet : bannière, bio, badges, connexions, serveurs et amis en commun, note. */
 	userProfile: (accountId: string, userId: string, guildId: string | null) => typedError<UserProfile_Serialize, EngineError>(__TAURI_INVOKE("user_profile", { accountId, userId, guildId })),
+	/**  Ouvre (ou retrouve) le MP avec un utilisateur. */
+	dmOpen: (accountId: string, userId: string) => typedError<ChannelSummary_Serialize, EngineError>(__TAURI_INVOKE("dm_open", { accountId, userId })),
+	/**  Note personnelle sur un utilisateur (visible par soi seul). */
+	noteSet: (accountId: string, userId: string, note: string) => typedError<null, EngineError>(__TAURI_INVOKE("note_set", { accountId, userId, note })),
 };
 
 /** Events */

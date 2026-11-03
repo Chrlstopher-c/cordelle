@@ -138,3 +138,26 @@ pub async fn user_profile(
 ) -> Res<UserProfile> {
     engine.profile(&account_id, &user_id, guild_id).await
 }
+
+/// Ouvre (ou retrouve) le MP avec un utilisateur.
+#[tauri::command]
+#[specta::specta]
+pub async fn dm_open(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    user_id: Snowflake,
+) -> Res<ChannelSummary> {
+    engine.open_dm(&account_id, &user_id).await
+}
+
+/// Note personnelle sur un utilisateur (visible par soi seul).
+#[tauri::command]
+#[specta::specta]
+pub async fn note_set(
+    engine: Eng<'_>,
+    account_id: AccountId,
+    user_id: Snowflake,
+    note: String,
+) -> Res<()> {
+    engine.set_note(&account_id, &user_id, &note).await
+}
