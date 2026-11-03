@@ -1,8 +1,8 @@
 # TODO
 
 ## En cours
-- Connexion QR validée sur le compte secondaire (03/11). Reste à tester : historique, envoi, temps réel (zone conversation).
-- Interface v1 : coque faite (rail, salons, MP, profil, connexion QR minimale). À faire par moi seul, sans sous-agents : conversation, accès complet, accueil/MP, réglages, réglages serveur, vocal.
+- Validé par Chris le 03/11 : connexion QR, historique, envoi, réception en direct (serveurs et MP).
+- Interface v1 : coque faite (rail, salons, MP, profil, connexion QR minimale). Conversation faite. À faire par moi seul, sans sous-agents : accès complet, accueil/MP, réglages, réglages serveur, vocal.
 
 ## Ensuite
 - E3.S3+ : édition, suppression, réactions, pièces jointes ; markdown/embeds (côté interface, instance design).

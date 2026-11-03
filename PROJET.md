@@ -57,7 +57,7 @@ Windows/macOS · design final (instance dédiée) · automatisation / self-bot �
 
 ### E3 — Messagerie complète
 - [x] E3.S1 — Serveurs, salons, catégories, MP, permissions, non-lus — VERIFY: `cargo test -p state`
-- [~] E3.S2 — Messages virtualisés + cache SQLite (historique instantané) — VERIFY: bench changement de salon < 50 ms
+- [x] E3.S2 — Messages virtualisés + cache SQLite (historique instantané) — VERIFY: bench changement de salon < 50 ms
 - [ ] E3.S3 — Envoi, édition, suppression, réponses, réactions, pièces jointes, emojis/stickers — VERIFY: tests e2e sur serveur de test
 - [ ] E3.S4 — Rendu markdown, embeds, mentions, liens — VERIFY: tests de rendu sur corpus de messages réels
 - [ ] E3.S5 — Fils, forums, annonces, recherche, épingles — VERIFY: tests e2e
