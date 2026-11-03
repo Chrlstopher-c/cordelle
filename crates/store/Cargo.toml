@@ -1,0 +1,13 @@
+[package]
+name = "store"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+contract.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+thiserror.workspace = true
