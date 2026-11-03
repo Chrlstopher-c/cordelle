@@ -4,6 +4,7 @@ import type { Message } from "../../contract/bindings";
 export type Row =
   | { kind: "date"; key: string; label: string }
   | { kind: "new"; key: string }
+  | { kind: "start"; key: string }
   | { kind: "message"; key: string; message: Message; grouped: boolean };
 
 const GROUP_WINDOW_MS = 7 * 60 * 1000;
@@ -14,8 +15,8 @@ const dayLabel = (d: Date): string =>
 const newer = (a: string, b: string): boolean => a.length !== b.length ? a.length > b.length : a > b;
 
 /** `lastReadId` : place le séparateur « Nouveaux messages » avant le premier message plus récent. */
-export function buildRows(newestFirst: Message[], lastReadId: string | null = null): Row[] {
-  const rows: Row[] = [];
+export function buildRows(newestFirst: Message[], lastReadId: string | null = null, atStart = false): Row[] {
+  const rows: Row[] = atStart ? [{ kind: "start", key: "start" }] : [];
   let prev: Message | null = null;
   let newPlaced = !lastReadId || newestFirst.length === 0 || !newer(newestFirst[0].id, lastReadId);
   for (let i = newestFirst.length - 1; i >= 0; i--) {

@@ -25,6 +25,9 @@ interface NavState {
   /** Dernier salon ouvert par serveur, pour y revenir directement. */
   lastChannel: Record<string, string>;
   membersOpen: Record<string, boolean>;
+  /** Tiroir des salons en fenêtre très étroite. */
+  drawerOpen: boolean;
+  setDrawer: (open: boolean) => void;
   go: (view: MainView) => void;
   openGuild: (guildId: string) => void;
   openChannel: (guildId: string, channelId: string) => void;
@@ -38,10 +41,12 @@ export const useNav = create<NavState>((set, get) => ({
   overlay: { kind: "none" },
   lastChannel: {},
   membersOpen: {},
-  go: (view) => set({ view }),
+  drawerOpen: false,
+  setDrawer: (drawerOpen) => set({ drawerOpen }),
+  go: (view) => set({ view, drawerOpen: false }),
   openGuild: (guildId) => set({ view: { kind: "guild", guildId, channelId: get().lastChannel[guildId] ?? null } }),
   openChannel: (guildId, channelId) =>
-    set((s) => ({ view: { kind: "guild", guildId, channelId }, lastChannel: { ...s.lastChannel, [guildId]: channelId } })),
+    set((s) => ({ drawerOpen: false, view: { kind: "guild", guildId, channelId }, lastChannel: { ...s.lastChannel, [guildId]: channelId } })),
   openOverlay: (overlay) => set({ overlay }),
   closeOverlay: () => set({ overlay: { kind: "none" } }),
   toggleMembers: (channelId) => set((s) => {

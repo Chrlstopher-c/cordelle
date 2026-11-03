@@ -10,6 +10,7 @@ const EMPTY: Message[] = [];
 
 export interface MessageList {
   rows: Row[];
+  loaded: boolean;
   virtualizer: Virtualizer<HTMLDivElement, Element>;
   scrollRef: React.RefObject<HTMLDivElement | null>;
   onScroll: () => void;
@@ -19,7 +20,11 @@ export function useMessageList(accountId: string, channelId: string, lastReadId:
   const messages = useEngine((s) => s.messages[channelId] ?? EMPTY);
   const hasMore = useEngine((s) => s.hasMore[channelId] ?? true);
   const loadMessages = useEngine((s) => s.loadMessages);
-  const rows = useMemo(() => buildRows(messages, lastReadId), [messages, lastReadId]);
+  const loaded = useEngine((s) => s.messages[channelId] !== undefined);
+  const rows = useMemo(
+    () => buildRows(messages, lastReadId, loaded && !hasMore),
+    [messages, lastReadId, loaded, hasMore],
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
   const atBottom = useRef(true);
   const loadingOlder = useRef(false);
@@ -28,7 +33,7 @@ export function useMessageList(accountId: string, channelId: string, lastReadId:
   const virtualizer = useVirtualizer({
     count: rows.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: (i) => (rows[i]?.kind === "date" || rows[i]?.kind === "new" ? 40 : rows[i]?.kind === "message" && rows[i].grouped ? 26 : 64),
+    estimateSize: (i) => (rows[i]?.kind === "start" ? 140 : rows[i]?.kind === "date" || rows[i]?.kind === "new" ? 40 : rows[i]?.kind === "message" && rows[i].grouped ? 26 : 64),
     getItemKey: (i) => rows[i]?.key ?? i,
     overscan: 12,
   });
@@ -60,5 +65,5 @@ export function useMessageList(accountId: string, channelId: string, lastReadId:
     }
   };
 
-  return { rows, virtualizer, scrollRef, onScroll };
+  return { rows, loaded, virtualizer, scrollRef, onScroll };
 }

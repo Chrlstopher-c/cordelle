@@ -93,6 +93,7 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
         </button>
         {account && <SearchField accountId={account.id} guildId={guildId} channelId={channelId} />}
       </header>
+      {!list.loaded && <LoadingRows />}
       <div className="cv-scroll" ref={list.scrollRef} onScroll={list.onScroll} onClick={onMentionClick}>
         <div style={{ height: list.virtualizer.getTotalSize(), position: "relative" }}>
           {list.virtualizer.getVirtualItems().map((v) => {
@@ -100,7 +101,8 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
             return (
               <div key={v.key} data-index={v.index} ref={list.virtualizer.measureElement}
                 style={{ position: "absolute", top: 0, left: 0, right: 0, transform: `translateY(${v.start}px)` }}>
-                {row.kind === "date" ? <div className="cv-date">{row.label}</div> : row.kind === "new" ? (
+                {row.kind === "start" ? <ChannelStart title={title} isDm={isDm} topic={channel?.topic ?? null} />
+                  : row.kind === "date" ? <div className="cv-date">{row.label}</div> : row.kind === "new" ? (
                   <div className="cv-new"><span>Nouveaux messages</span></div>
                 ) : (
                   <MessageItem message={row.message} guildId={guildId} color={colors.get(row.message.author.id) ?? null} grouped={row.grouped} meId={account?.user.id ?? null}
@@ -122,6 +124,30 @@ export function ConversationView({ guildId, channelId }: { guildId: string | nul
     </div>
     {guildId && membersOpen && <MembersPanel guildId={guildId} channelId={channelId} />}
     {!guildId && membersOpen && channel && <DmPanel channel={channel} />}
+    </div>
+  );
+}
+
+/** Haut de l'historique : « Bienvenue dans #salon » ou « Début de ta conversation avec @x ». */
+function ChannelStart({ title, isDm, topic }: { title: string; isDm: boolean; topic: string | null }): React.JSX.Element {
+  return (
+    <div className="cv-start">
+      <div className="cv-start-icon">{isDm ? "@" : "#"}</div>
+      <h2>{isDm ? title : `Bienvenue dans #${title}`}</h2>
+      <p>{isDm ? `Début de ta conversation avec ${title}.` : topic ?? `C'est le tout début du salon #${title}.`}</p>
+    </div>
+  );
+}
+
+/** Lignes fantômes pendant le premier chargement d'un salon (rien ne clignote ensuite : le cache répond). */
+function LoadingRows(): React.JSX.Element {
+  return (
+    <div className="cv-loading" aria-label="Chargement des messages">
+      {[0.62, 0.44, 0.7, 0.36].map((w, i) => (
+        <div key={i} className="cv-ghost"><span className="g-av" /><span className="g-lines">
+          <span style={{ width: `${w * 40}%` }} /><span style={{ width: `${w * 100}%` }} />
+        </span></div>
+      ))}
     </div>
   );
 }

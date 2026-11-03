@@ -94,3 +94,28 @@
 .ov-full { position: fixed; inset: var(--titlebar-h) 0 0 0; z-index: 75; background: var(--surface-chat); }
 @keyframes ov-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes ov-box { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+
+/* Petite fenêtre (maquette Petite-fenetre) : ≤ 980 px panneaux latéraux en surimpression, ≤ 700 px tiroir de salons. */
+.drawer-btn, .drawer-veil { display: none; }
+@media (max-width: 980px) {
+  .mem-panel { position: absolute; right: 0; top: var(--header-h); bottom: 0; z-index: 6; box-shadow: -12px 0 28px rgba(0,0,0,.35); }
+  .cv-wrap { position: relative; }
+}
+@media (max-width: 700px) {
+  .app-body { grid-template-columns: var(--rail-w) 1fr; position: relative; }
+  .app-body > .side { position: absolute; left: var(--rail-w); top: 0; bottom: 0; width: var(--sidebar-w); z-index: 20;
+    transform: translateX(calc(-100% - var(--rail-w))); transition: transform var(--t-panel) var(--ease); box-shadow: 12px 0 28px rgba(0,0,0,.4); }
+  .app-body.drawer-open > .side { transform: none; }
+  .drawer-veil { display: block; position: absolute; inset: 0; z-index: 15; background: rgba(0,0,0,.45); opacity: 0;
+    pointer-events: none; transition: opacity var(--t-panel) var(--ease); }
+  .app-body.drawer-open .drawer-veil { opacity: 1; pointer-events: auto; }
+  .app-main { position: relative; }
+  .drawer-btn { display: flex; position: absolute; left: 8px; top: 10px; z-index: 4; width: 32px; height: 32px; border-radius: var(--r-sm);
+    align-items: center; justify-content: center; color: var(--text-muted); }
+  .drawer-btn:hover { background: var(--surface-hover); color: var(--text); }
+  .cv-head, .hv-head { padding-left: 48px; }
+}
+@media (max-width: 700px) {
+  .cv-head { overflow: hidden; }
+  .cv-head .topic, .cv-head .cv-status { display: none; }
+}

@@ -64,6 +64,8 @@ export function Shell(): React.JSX.Element {
   const overlay = useNav((s) => s.overlay);
   const close = useNav((s) => s.closeOverlay);
   usePaletteShortcut();
+  const drawer = useNav((s) => s.drawerOpen);
+  const setDrawer = useNav((s) => s.setDrawer);
 
   if (overlay.kind === "settings" || overlay.kind === "server-settings") {
     return (
@@ -82,10 +84,16 @@ export function Shell(): React.JSX.Element {
     <div className="app">
       <Titlebar />
       <ConnectionBanner />
-      <div className="app-body">
+      <div className={`app-body${drawer ? " drawer-open" : ""}`}>
         <Rail />
         <Sidebar view={view} />
-        <main className="app-main"><Main view={view} /></main>
+        <button className="drawer-veil" aria-label="Fermer la liste des salons" onClick={() => setDrawer(false)} />
+        <main className="app-main">
+          <button className="drawer-btn" aria-label="Ouvrir la liste des salons" onClick={() => setDrawer(true)}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+          </button>
+          <Main view={view} />
+        </main>
       </div>
       {overlay.kind === "accounts" && <Suspense fallback={null}><AccountsOverlay onClose={close} /></Suspense>}
       <ProfileLayer />
