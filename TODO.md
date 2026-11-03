@@ -10,6 +10,6 @@
 - Bancs : RAM PSS au repos et changement de salon, Cordelle vs client officiel.
 
 ## Backlog
-- Vérifier l'accélération GPU sur l'écran réel (ligne « GPU : » de l'écran de travail).
+- (fait 03/11) GPU vérifié : WebKitWebProcess ouvre /dev/nvidia0, EGL NVIDIA → `scripts/gpu-check.sh`.
 - sway headless tué au lancement sur la tour : trouver la cause pour les captures automatiques.
 - Ordre et dossiers des serveurs (user_settings_proto), présences de READY_SUPPLEMENTAL.

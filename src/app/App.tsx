@@ -1,7 +1,6 @@
 // Interface de travail brute : sera remplacée par le design (instance dédiée). Seul src/contract/ est la frontière.
 import { useCallback, useEffect, useState } from "react";
 import { commands, type AccountSummary } from "../contract/bindings";
-import { useGpuRenderer } from "./use-gpu-renderer";
 import { useQrLogin } from "./use-qr-login";
 import { Workbench } from "./Workbench";
 
@@ -21,7 +20,6 @@ export function App(): React.JSX.Element {
   }, []);
 
   useEffect(refresh, [refresh]);
-  const gpu = useGpuRenderer();
   const qr = useQrLogin(refresh);
   const active = accounts.find((a) => a.active);
 
@@ -29,7 +27,6 @@ export function App(): React.JSX.Element {
     <main style={{ fontFamily: "system-ui", padding: 24, color: "#ddd", background: "#111", minHeight: "100vh" }}>
       <h1>Cordelle</h1>
       <p>{status}</p>
-      <p data-testid="gpu">GPU : {gpu}</p>
       <ul>
         {accounts.map((a) => (
           <li key={a.id}>
