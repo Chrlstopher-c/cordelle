@@ -10,7 +10,7 @@ export function Card({ title, children }: { title?: string; children: React.Reac
 }
 
 export function Row({ title, hint, changed, children }: {
-  title: string; hint?: string; changed?: boolean; children: React.ReactNode;
+  title: string; hint?: string; changed?: boolean; children?: React.ReactNode;
 }): React.JSX.Element {
   return (
     <div className="st-row">

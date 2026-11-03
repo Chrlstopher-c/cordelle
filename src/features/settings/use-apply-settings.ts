@@ -1,5 +1,8 @@
-// Applique les réglages locaux à la racine : thème (data-theme), accent, taille du texte, densité, zoom, animations.
+// Applique les réglages locaux à la racine : thème (data-theme), accent, taille du texte,
+// densité, zoom, animations, CSS personnalisé.
 import { useEffect, useState } from "react";
+import { applyCustomCss } from "./custom-css";
+import { usePrefs } from "./local-prefs";
 import { ACCENTS, useSettings } from "./settings-store";
 
 function useSystemDark(): boolean {
@@ -17,6 +20,8 @@ function useSystemDark(): boolean {
 export function useApplySettings(): void {
   const s = useSettings();
   const systemDark = useSystemDark();
+  const custom = usePrefs((p) => p.customCss);
+  useEffect(() => applyCustomCss(custom.enabled ? custom.css : null), [custom]);
   useEffect(() => {
     const root = document.documentElement;
     const light = s.theme === "light" || (s.theme === "system" && !systemDark);
