@@ -1,0 +1,74 @@
+{
+  "v": 10,
+  "user": {
+    "id": "111111111111111111",
+    "username": "chris",
+    "global_name": "Chris",
+    "avatar": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6",
+    "bot": false
+  },
+  "guilds": [
+    {
+      "id": "222222222222222222",
+      "properties": {
+        "name": "Serveur Alpha",
+        "icon": "9f8e7d6c5b4a39281706f5e4d3c2b1a0",
+        "owner_id": "333333333333333333"
+      },
+      "channels": [
+        { "id": "260000000000000003", "type": 4, "name": "Accueil", "position": 0, "parent_id": null },
+        { "id": "260000000000000002", "type": 0, "name": "general", "position": 1, "parent_id": "260000000000000001", "topic": "Discussions", "nsfw": false, "last_message_id": "300000000000000900" },
+        { "id": "260000000000000005", "type": 2, "name": "Vocal", "position": 0, "parent_id": "260000000000000003" },
+        { "id": "260000000000000006", "type": 0, "name": "annonces", "position": 2, "parent_id": null, "last_message_id": "300000000000000100" },
+        { "id": "260000000000000001", "type": 4, "name": "Discussion", "position": 1, "parent_id": null },
+        { "id": "260000000000000004", "type": 0, "name": "bienvenue", "position": 0, "parent_id": "260000000000000001" }
+      ],
+      "threads": [
+        { "id": "270000000000000001", "type": 11, "name": "fil-test", "parent_id": "260000000000000002", "position": 0 }
+      ]
+    },
+    {
+      "id": "222222222222222223",
+      "properties": { "name": "Serveur Beta", "icon": null },
+      "channels": [
+        { "id": "260000000000000010", "type": 15, "name": "forum", "position": 0, "parent_id": null },
+        { "id": "260000000000000011", "type": 5, "name": "news", "position": 1, "parent_id": null }
+      ],
+      "threads": []
+    }
+  ],
+  "private_channels": [
+    {
+      "id": "280000000000000001",
+      "type": 1,
+      "last_message_id": "300000000000000777",
+      "recipients": [
+        { "id": "444444444444444444", "username": "alice", "global_name": "Alice", "avatar": null, "bot": false }
+      ]
+    },
+    {
+      "id": "280000000000000002",
+      "type": 1,
+      "last_message_id": "300000000000000999",
+      "recipients": [
+        { "id": "555555555555555555", "username": "bob", "global_name": null, "avatar": "00ff00ff00ff00ff00ff00ff00ff00ff", "bot": false }
+      ]
+    },
+    {
+      "id": "280000000000000003",
+      "type": 3,
+      "name": "Projet",
+      "last_message_id": null,
+      "recipients": [
+        { "id": "666666666666666666", "username": "carol", "global_name": "Carol", "avatar": null, "bot": false }
+      ]
+    }
+  ],
+  "read_state": {
+    "entries": [
+      { "id": "260000000000000002", "last_message_id": "300000000000000800", "mention_count": 2 },
+      { "id": "260000000000000006", "last_message_id": "300000000000000100", "mention_count": 0 },
+      { "id": "280000000000000001", "last_message_id": "300000000000000777", "mention_count": 0 }
+    ]
+  }
+}

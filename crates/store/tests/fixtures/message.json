@@ -1,0 +1,41 @@
+{
+  "id": "300000000000001000",
+  "channel_id": "260000000000000002",
+  "author": {
+    "id": "444444444444444444",
+    "username": "alice",
+    "global_name": "Alice",
+    "avatar": "abcdefabcdefabcdefabcdefabcdefab",
+    "bot": false
+  },
+  "content": "Salut <@111111111111111111>, regarde **ça** :)",
+  "timestamp": "2026-11-03T10:15:00.000000+00:00",
+  "edited_timestamp": null,
+  "tts": false,
+  "mention_everyone": false,
+  "mentions": [
+    { "id": "111111111111111111", "username": "chris", "global_name": "Chris", "avatar": null, "bot": false }
+  ],
+  "message_reference": { "message_id": "300000000000000990", "channel_id": "260000000000000002", "guild_id": "222222222222222222" },
+  "attachments": [
+    {
+      "id": "350000000000000001",
+      "filename": "capture.png",
+      "url": "https://cdn.discordapp.com/attachments/1/2/capture.png",
+      "content_type": "image/png",
+      "size": 20480,
+      "width": 1280,
+      "height": 720
+    }
+  ],
+  "embeds": [
+    { "type": "link", "url": "https://example.com", "title": "Exemple" }
+  ],
+  "reactions": [
+    { "count": 2, "me": false, "emoji": { "id": null, "name": "🔥" } }
+  ],
+  "pinned": false,
+  "nonce": "local-42",
+  "type": 19,
+  "flags": 0
+}

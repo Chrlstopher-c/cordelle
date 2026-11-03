@@ -1,0 +1,19 @@
+{
+  "v": 10,
+  "user": { "id": "111111111111111111", "username": "chris", "global_name": null, "avatar": null, "bot": false },
+  "guilds": [
+    {
+      "id": "222222222222222224",
+      "name": "Serveur Gamma",
+      "icon": "0123456789abcdef0123456789abcdef",
+      "channels": [
+        { "id": "260000000000000020", "type": 0, "name": "salon", "position": 0, "parent_id": null, "last_message_id": "300000000000000050" }
+      ],
+      "threads": []
+    }
+  ],
+  "private_channels": [],
+  "read_state": [
+    { "id": "260000000000000020", "last_message_id": "300000000000000050", "mention_count": 0 }
+  ]
+}
